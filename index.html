@@ -122,14 +122,14 @@
 
   .mobile-menu{
     display:none;position:fixed;inset:0;z-index:205;
-    background:var(--bg);
+    background:#ffffff;
     flex-direction:column;
     justify-content:space-between;
     padding:100px 28px 40px;
-    opacity:0;visibility:hidden;
-    transition:opacity .35s var(--ease),visibility .35s;
+    visibility:hidden;
+    transition:visibility 0s linear .35s;
   }
-  .mobile-menu.open{opacity:1;visibility:visible;}
+  .mobile-menu.open{visibility:visible;transition-delay:0s;}
   .mobile-menu-links{display:flex;flex-direction:column;}
   .mobile-menu-links a{
     display:flex;align-items:center;justify-content:space-between;
