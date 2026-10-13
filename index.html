@@ -476,62 +476,66 @@
     .stats-grid{grid-template-columns:1fr;}
   }
   /* ===== En accion ===== */
-  .action{overflow:hidden;}
-  .reel-wide{position:relative;margin:0;border-radius:28px;overflow:hidden;aspect-ratio:16/8;background:var(--ink);box-shadow:0 30px 70px rgba(15,46,43,.18);}
-  .reel-wide video{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.04);animation:kenb 14s ease-in-out infinite alternate;}
-  @keyframes kenb{to{transform:scale(1.12)}}
-  .reel-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,14,13,0) 45%,rgba(10,14,13,.78));pointer-events:none;}
-  .reel-wide figcaption{position:absolute;left:28px;bottom:24px;right:28px;color:#fff;display:flex;flex-direction:column;gap:4px;}
-  .reel-wide figcaption b{font-size:clamp(20px,2.6vw,32px);font-weight:800;}
-  .reel-wide figcaption em{font-style:normal;font-size:13.5px;opacity:.8;}
-  .rec{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-bright);}
-  .rec i{width:8px;height:8px;border-radius:50%;background:#ff4d4d;animation:sqPulse 1.4s ease-in-out infinite;}
-  .reel-row{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:22px;}
-  .reel-v{position:relative;margin:0;border-radius:24px;overflow:hidden;aspect-ratio:9/16;background:var(--ink);box-shadow:0 22px 50px rgba(15,46,43,.16);transition:opacity .7s var(--ease),transform .4s var(--ease),box-shadow .4s;animation:floaty 6s ease-in-out infinite;animation-delay:var(--d,0s);}
-  .reel-v:nth-child(even){margin-top:34px;}
-  .reel-v:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 34px 70px rgba(15,46,43,.28);}
-  @keyframes floaty{50%{translate:0 -10px}}
-  .reel-v video{width:100%;height:100%;object-fit:cover;display:block;}
-  .reel-v figcaption{position:absolute;left:16px;right:16px;bottom:16px;color:#fff;display:flex;flex-direction:column;gap:3px;}
-  .reel-v figcaption small{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal-bright);}
-  .reel-v figcaption b{font-size:16px;font-weight:800;}
-  .rubros{margin:70px 0 0;overflow:hidden;border-block:1px solid var(--line);padding:18px 0;background:var(--teal-pale);}
-  .rubros-track{display:flex;gap:44px;width:max-content;animation:rubros 36s linear infinite;}
-  .rubros-track span{font-size:clamp(22px,3vw,34px);font-weight:800;color:var(--ink);white-space:nowrap;display:flex;align-items:center;gap:44px;}
-  .rubros-track span::after{content:"";width:9px;height:9px;border-radius:2px;background:var(--teal);transform:rotate(45deg);}
-  @keyframes rubros{to{transform:translateX(-50%)}}
-  .site-case{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center;margin-top:56px;}
+  .vid{position:relative;margin:0;overflow:hidden;background:var(--ink);border-radius:22px;clip-path:inset(6% 4% 6% 4% round 22px);transition:opacity .8s var(--ease),transform .8s var(--ease),clip-path 1.1s var(--ease);}
+  .vid.is-visible{clip-path:inset(0 round 22px);}
+  .vid video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .vid .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,14,13,0) 50%,rgba(10,14,13,.75));pointer-events:none;}
+  .vid.wide{aspect-ratio:16/8;margin-bottom:18px;}
+  .vgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  .vgrid .vid{aspect-ratio:9/16;}
+  .vid figcaption{position:absolute;left:18px;right:60px;bottom:16px;color:#fff;display:flex;flex-direction:column;gap:2px;}
+  .vid figcaption small{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-bright);}
+  .vid figcaption b{font-size:15px;font-weight:700;}
+  .vid.wide figcaption b{font-size:clamp(20px,2.4vw,28px);font-weight:800;}
+  .vid.wide figcaption{left:26px;bottom:22px;}
+  .snd{position:absolute;right:12px;bottom:12px;display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 13px;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:rgba(10,14,13,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font:600 12px/1 'Inter',sans-serif;cursor:pointer;transition:background .25s,border-color .25s;}
+  .snd:hover{background:rgba(10,14,13,.7);}
+  .snd .w1,.snd .w2{display:none}
+  .snd.on{background:var(--teal);border-color:var(--teal);}
+  .snd.on .w1,.snd.on .w2{display:inline}
+  .snd.on .mx{display:none}
+  .vgrid .snd span{display:none}
+  .vgrid .snd{width:36px;padding:0;justify-content:center;}
+  .sites{background:var(--card);border-radius:48px;margin:0 24px;}
+  .site-case{display:grid;grid-template-columns:1.25fr 1fr;gap:64px;align-items:center;margin-top:60px;}
   .site-case.flip{grid-template-columns:1fr 1.25fr;}
   .site-case.flip .devices{order:2}
-  .devices{position:relative;padding:0 0 40px;}
-  .dev-laptop{border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--line-strong);box-shadow:0 30px 70px rgba(15,46,43,.2);animation:floaty 7s ease-in-out infinite;}
+  .devices{position:relative;padding-bottom:36px;}
+  .dev-laptop{border-radius:12px;overflow:hidden;background:#fff;border:1px solid var(--line-strong);box-shadow:0 30px 70px rgba(15,46,43,.16);transition:transform .6s var(--ease);}
+  .site-case:hover .dev-laptop{transform:translateY(-6px);}
   .dev-bar{display:flex;gap:6px;padding:10px 14px;background:#f1f4f3;}
   .dev-bar i{width:9px;height:9px;border-radius:50%;background:#cfd8d6;}
   .dev-laptop img{display:block;width:100%;height:auto;}
-  .dev-phone{position:absolute;right:-6px;bottom:0;width:27%;border-radius:22px;overflow:hidden;border:5px solid var(--ink);background:var(--ink);box-shadow:0 24px 50px rgba(0,0,0,.35);animation:floaty 5s ease-in-out infinite;animation-delay:.6s;}
-  .dev-phone-2{right:auto;left:-6px;width:23%;animation-delay:1.2s;}
+  .dev-phone{position:absolute;right:-8px;bottom:0;width:26%;border-radius:22px;overflow:hidden;border:5px solid var(--ink);background:var(--ink);box-shadow:0 24px 50px rgba(0,0,0,.3);transition:transform .6s var(--ease);}
+  .site-case:hover .dev-phone{transform:translateY(-12px);}
   .dev-phone img{display:block;width:100%;height:auto;}
+  .case-txt .tag{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
   .case-txt h3{font-size:clamp(26px,3vw,36px);font-weight:800;margin:10px 0 14px;}
-  .case-txt p{color:var(--muted);line-height:1.6;font-size:15px;}
+  .case-txt p{color:var(--muted);line-height:1.65;font-size:15px;}
   .case-link{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-weight:700;color:var(--teal);}
   .case-link .icon{width:16px;height:16px;transition:transform .25s;}
   .case-link:hover .icon{transform:translateX(5px);}
-  .msg-card{margin:70px auto 0;max-width:520px;text-align:center;}
-  .msg-card img{width:100%;height:auto;border-radius:20px;box-shadow:0 20px 50px rgba(15,46,43,.18);animation:floaty 6s ease-in-out infinite;}
-  .msg-card p{margin-top:16px;font-size:13.5px;color:var(--muted);}
+  .work-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-strong);}
+  .work-list li{display:grid;grid-template-columns:48px 1.4fr 1fr 1.4fr;gap:20px;align-items:center;padding:24px 14px;border-bottom:1px solid var(--line-strong);position:relative;transition:padding .35s var(--ease),background .35s;}
+  .work-list li::before{content:"";position:absolute;left:0;top:-1px;height:1px;width:0;background:var(--teal);transition:width .6s var(--ease);}
+  .work-list li:hover{background:var(--teal-pale);padding-left:26px;}
+  .work-list li:hover::before{width:100%;}
+  .work-list .n{font-size:12px;font-weight:700;color:var(--teal);}
+  .work-list b{font-size:clamp(17px,2vw,22px);font-weight:800;}
+  .work-list em{font-style:normal;font-size:13.5px;color:var(--muted);}
+  .work-list .d{font-size:13px;color:var(--ink);opacity:.7;}
   @media(max-width:900px){
-    .reel-wide{aspect-ratio:16/10;border-radius:20px;}
-    .reel-row{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;margin:22px -20px 0;padding:0 20px 30px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-    .reel-row::-webkit-scrollbar{display:none}
-    .reel-v{flex:0 0 62%;scroll-snap-align:center;}
-    .reel-v:nth-child(even){margin-top:0;}
-    .site-case,.site-case.flip{grid-template-columns:1fr;gap:30px;margin-top:44px;}
+    .vid.wide{aspect-ratio:16/10;}
+    .vgrid{grid-template-columns:repeat(2,1fr);gap:12px;}
+    .sites{margin:0 12px;border-radius:32px;}
+    .site-case,.site-case.flip{grid-template-columns:1fr;gap:28px;margin-top:44px;}
     .site-case.flip .devices{order:0}
     .dev-phone{width:30%;right:0}
-    .dev-phone-2{left:0;width:26%}
+    .work-list li{grid-template-columns:34px 1fr;gap:4px 12px;padding:20px 4px;}
+    .work-list li:hover{padding-left:12px;}
+    .work-list em,.work-list .d{grid-column:2;}
   }
-  @media(prefers-reduced-motion:reduce){.reel-wide video,.reel-v,.dev-laptop,.dev-phone,.msg-card img,.rubros-track{animation:none!important}}
-
+  @media(prefers-reduced-motion:reduce){.vid{clip-path:none!important;transition:none!important}.dev-laptop,.dev-phone{transition:none!important}}
 </style>
 <script type="application/ld+json">
 {
@@ -614,7 +618,7 @@
         </div>
         <div class="hero-float hf-1">
           <div class="avatar-cluster">
-            <span class="av av-1">XM</span><span class="av av-2">NX</span><span class="av av-3">CK</span><span class="av av-4">PM</span>
+            <span class="av av-1">MF</span><span class="av av-2">SO</span><span class="av av-3">NE</span><span class="av av-4">NX</span>
           </div>
           <div class="fc-label"><b>Varias marcas</b> en paralelo</div>
         </div>
@@ -629,16 +633,16 @@
     <div class="hero-shelf">
       <div class="hero-shelf-inner">
         <div>
-          <h1 class="hero-headline">Lanzamos tu marca <span class="hl">en el nivel</span> que se merece.</h1>
-          <p class="hero-lead">Lanzamiento de marcas, productos y cursos: identidad, video cinematográfico, tráfico pago y generación de leads para negocios que no se conforman con ser mediocres.</p>
+          <h1 class="hero-headline">El equipo que hace crecer <span class="hl">tu empresa</span>, mes a mes.</h1>
+          <p class="hero-lead">Branding, video, tráfico pago y sitio web en un solo equipo interno, con una sola dirección. Trabajamos por mensualidad con empresas que quieren constancia y resultados. Y cuando nace una marca, un producto o un curso, también lo lanzamos.</p>
           <div class="hero-btn-row">
-            <a href="#trabajos" class="btn btn-primary">Ver trabajos <svg class="icon"><use href="#ic-arrow"/></svg></a>
+            <a href="#en-accion" class="btn btn-primary">Ver trabajos <svg class="icon"><use href="#ic-arrow"/></svg></a>
             <a href="#contacto" class="btn btn-outline">Hablar por WhatsApp</a>
           </div>
         </div>
         <div class="hero-stat-block">
           <div class="hero-stat-num">100%</div>
-          <div class="hero-stat-label">Servicio integrado</div>
+          <div class="hero-stat-label">Mensualidad integrada</div>
           <div class="hero-stat-desc">Un equipo interno maneja todo bajo la misma dirección, sin perder calidad.</div>
         </div>
       </div>
@@ -649,9 +653,9 @@
   <section class="mission-curve" id="lanzamientos">
     <div class="dot-grid"></div>
     <div class="mission-inner" style="max-width:900px;">
-      <span class="badge on-dark"><span class="sq"></span>Nuestro foco</span>
-      <h2>Especialistas en lanzamientos.</h2>
-      <p class="mission-sub">Lanzar algo nuevo en Paraguay no es solo hacer un logo. Es tener la marca lista, el contenido que convierte y el tráfico pago funcionando desde el primer día. Eso es lo que hacemos, ya sea el lanzamiento de una marca, un producto o un curso.</p>
+      <span class="badge on-dark"><span class="sq"></span>Lanzamientos</span>
+      <h2>Y cuando hay algo nuevo,<br>lo lanzamos.</h2>
+      <p class="mission-sub">Además del trabajo mensual, somos especialistas en lanzar. Lanzar algo nuevo en Paraguay no es solo hacer un logo. Es tener la marca lista, el contenido que convierte y el tráfico pago funcionando desde el primer día. Eso es lo que hacemos, ya sea el lanzamiento de una marca, un producto o un curso.</p>
       <div class="launch-grid">
         <div class="launch-item">
           <span class="launch-icon"><svg class="icon"><use href="#ic-brand"/></svg></span>
@@ -678,12 +682,9 @@
   <!-- TRUST -->
   <section class="trust-strip">
     <div class="wrap trust-inner">
-      <span class="trust-label"><span class="sq"></span>Marcas de rubros distintos atendidas de punta a punta: branding, video y performance al mismo tiempo.</span>
+      <span class="trust-label"><span class="sq"></span>Empresas y profesionales de rubros distintos que ya trabajan con Tape, de punta a punta.</span>
       <div class="trust-logos">
-        <span class="trust-chip"><span class="tc-dot"></span>X Mega Farma</span>
-        <span class="trust-chip"><span class="tc-dot"></span>Nexxus Peptides</span>
-        <span class="trust-chip"><span class="tc-dot"></span>Dr. Freddy</span>
-        <span class="trust-chip"><span class="tc-dot"></span>Potenza Motors</span>
+        <span class="trust-chip"><span class="tc-dot"></span>Dra. Gabriela Mafei</span><span class="trust-chip"><span class="tc-dot"></span>S.O.S. Emergencias</span><span class="trust-chip"><span class="tc-dot"></span>La Nueva Era</span><span class="trust-chip"><span class="tc-dot"></span>Dr. Freddy Velázquez</span><span class="trust-chip"><span class="tc-dot"></span>Nexxus Peptides</span><span class="trust-chip"><span class="tc-dot"></span>Potenza Motors</span><span class="trust-chip"><span class="tc-dot"></span>Pharmalabz</span>
       </div>
     </div>
   </section>
@@ -868,44 +869,6 @@
   </section>
 
   <!-- WEB & APPS SHOWCASE -->
-  <section class="web-showcase">
-    <div class="dot-grid"></div>
-    <div class="wrap web-showcase-inner">
-      <div class="web-showcase-text">
-        <span class="badge on-dark"><span class="sq"></span>Nuevo servicio</span>
-        <h2>Tu sitio profesional,<br>listo para vender.</h2>
-        <p>Sitios institucionales, tiendas online y apps, con el mismo estándar visual de tu marca: rápidos y pensados para convertir visitas en clientes.</p>
-        <a href="#contacto" class="btn btn-light">Hablar con Tape <svg class="icon"><use href="#ic-arrow"/></svg></a>
-      </div>
-      <div class="web-showcase-visual">
-        <div class="laptop">
-          <div class="laptop-screen">
-            <div class="laptop-nav"><span></span><span></span><span></span></div>
-            <div class="laptop-hero">
-              <div class="laptop-line l-lg"></div>
-              <div class="laptop-line l-md"></div>
-              <div class="laptop-btn"></div>
-            </div>
-            <div class="laptop-cards">
-              <div class="laptop-card-mini"></div>
-              <div class="laptop-card-mini"></div>
-              <div class="laptop-card-mini"></div>
-            </div>
-          </div>
-          <div class="laptop-base"></div>
-        </div>
-        <div class="ws-float wsf-1">
-          <span class="wsf-icon"><svg class="icon"><use href="#ic-chat"/></svg></span>
-          <div><b>Mensaje nuevo</b><span>Cliente interesado</span></div>
-        </div>
-        <div class="ws-float wsf-2">
-          <span class="wsf-icon wsf-icon-alt"><svg class="icon"><use href="#ic-chart"/></svg></span>
-          <div><b>Tráfico en alza</b><span>Más visitas esta semana</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- WHY -->
   <section class="pad" id="por-que">
     <div class="wrap">
@@ -931,122 +894,92 @@
     <div class="wrap">
       <div class="section-head reveal">
         <span class="badge"><span class="sq"></span>Tape en acción</span>
-        <h2>Esto es lo que producimos.<br>Mirá cómo se mueve.</h2>
-        <p>Material real de clientes reales: filmación con drone, contenido creativo y piezas para lanzamientos. Todo hecho por el equipo de Tape.</p>
+        <h2>Esto es lo que producimos.</h2>
+        <p>Material real de clientes reales. Tocá el botón de sonido en cualquier video para escucharlo.</p>
       </div>
+        <figure class="vid wide reveal">
+          <video class="autov" muted loop playsinline preload="none" poster="media/drone.jpg" data-src="media/drone.mp4" aria-label="Tomas aéreas con drone de Ciudad del Este"></video>
+          <span class="shade"></span><button class="snd" type="button" aria-label="Activar sonido"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path class="w1" d="M15.5 9a4 4 0 0 1 0 6"/><path class="w2" d="M18.5 6.5a8 8 0 0 1 0 11"/><path class="mx" d="m16 9 5 6M21 9l-5 6"/></svg><span>Sonido</span></button>
+          <figcaption><small>Drone · Inmobiliario y comercio</small><b>Ciudad del Este desde arriba</b></figcaption>
+        </figure>
 
-      <figure class="reel-wide reveal">
-        <video class="autov" muted loop playsinline preload="none" poster="media/drone.jpg" data-src="media/drone.mp4" aria-label="Tomas aéreas con drone de Ciudad del Este"></video>
-        <span class="reel-shade"></span>
-        <figcaption><span class="rec"><i></i>Drone</span><b>Ciudad del Este desde arriba</b><em>Tomas aéreas para inmobiliario, comercio y marca</em></figcaption>
-      </figure>
-
-      <div class="reel-row">
-        <figure class="reel-v reveal" style="--d:0s">
+      <div class="vgrid">
+        <figure class="vid  reveal">
           <video class="autov" muted loop playsinline preload="none" poster="media/mafei.jpg" data-src="media/mafei.mp4" aria-label="Contenido para la Dra. Gabriela Mafei"></video>
-          <span class="reel-shade"></span>
+          <span class="shade"></span><button class="snd" type="button" aria-label="Activar sonido"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path class="w1" d="M15.5 9a4 4 0 0 1 0 6"/><path class="w2" d="M18.5 6.5a8 8 0 0 1 0 11"/><path class="mx" d="m16 9 5 6M21 9l-5 6"/></svg><span>Sonido</span></button>
           <figcaption><small>Salud</small><b>Dra. Gabriela Mafei</b></figcaption>
         </figure>
-        <figure class="reel-v reveal" style="--d:.5s">
+        <figure class="vid  reveal">
           <video class="autov" muted loop playsinline preload="none" poster="media/aaron.jpg" data-src="media/aaron.mp4" aria-label="Video de lanzamiento del curso de Aaron Dalla Rosa"></video>
-          <span class="reel-shade"></span>
-          <figcaption><small>Lanzamiento de curso</small><b>Aaron Dalla Rosa</b></figcaption>
+          <span class="shade"></span><button class="snd" type="button" aria-label="Activar sonido"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path class="w1" d="M15.5 9a4 4 0 0 1 0 6"/><path class="w2" d="M18.5 6.5a8 8 0 0 1 0 11"/><path class="mx" d="m16 9 5 6M21 9l-5 6"/></svg><span>Sonido</span></button>
+          <figcaption><small>Lanzamiento de curso</small><b>La Nueva Era</b></figcaption>
         </figure>
-        <figure class="reel-v reveal" style="--d:1s">
+        <figure class="vid  reveal">
           <video class="autov" muted loop playsinline preload="none" poster="media/pharmalabz.jpg" data-src="media/pharmalabz.mp4" aria-label="Video institucional de Pharmalabz"></video>
-          <span class="reel-shade"></span>
+          <span class="shade"></span><button class="snd" type="button" aria-label="Activar sonido"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path class="w1" d="M15.5 9a4 4 0 0 1 0 6"/><path class="w2" d="M18.5 6.5a8 8 0 0 1 0 11"/><path class="mx" d="m16 9 5 6M21 9l-5 6"/></svg><span>Sonido</span></button>
           <figcaption><small>Corporativo</small><b>Pharmalabz</b></figcaption>
         </figure>
-        <figure class="reel-v reveal" style="--d:1.5s">
-          <video class="autov" muted loop playsinline preload="none" poster="media/cde.jpg" data-src="media/cde.mp4" aria-label="Película corta en las calles de Ciudad del Este"></video>
-          <span class="reel-shade"></span>
+        <figure class="vid  reveal">
+          <video class="autov" muted loop playsinline preload="none" poster="media/cde.jpg" data-src="media/cde.mp4" aria-label="Película corta en Ciudad del Este"></video>
+          <span class="shade"></span><button class="snd" type="button" aria-label="Activar sonido"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path class="w1" d="M15.5 9a4 4 0 0 1 0 6"/><path class="w2" d="M18.5 6.5a8 8 0 0 1 0 11"/><path class="mx" d="m16 9 5 6M21 9l-5 6"/></svg><span>Sonido</span></button>
           <figcaption><small>Cine de marca</small><b>Calles de CDE</b></figcaption>
         </figure>
       </div>
     </div>
+  </section>
 
-    <div class="rubros" aria-hidden="true">
-      <div class="rubros-track">
-        <span>Salud</span><span>Farmacia</span><span>Automotriz</span><span>Educación</span><span>Inmobiliario</span><span>Gastronomía</span><span>Barbería</span><span>Comercio</span><span>Tecnología</span><span>Emergencias</span>
-        <span>Salud</span><span>Farmacia</span><span>Automotriz</span><span>Educación</span><span>Inmobiliario</span><span>Gastronomía</span><span>Barbería</span><span>Comercio</span><span>Tecnología</span><span>Emergencias</span>
-      </div>
-    </div>
-
+  <section class="pad sites" id="sitios">
     <div class="wrap">
-      <div class="section-head reveal" style="margin-top:90px">
-        <span class="badge"><span class="sq"></span>Sitios que lanzamos</span>
-        <h2>Páginas hechas para convertir.</h2>
-        <p>Diseñamos y programamos el sitio completo, en computadora y en celular.</p>
+      <div class="section-head reveal">
+        <span class="badge"><span class="sq"></span>Sitios y apps</span>
+        <h2>Tu sitio profesional,<br>listo para vender.</h2>
+        <p>Sitios institucionales, páginas de lanzamiento, tiendas online y apps con el estándar visual de tu marca. Rápidos, pensados para convertir visitas en clientes y listos para computadora y celular.</p>
       </div>
 
       <div class="site-case reveal">
         <div class="devices">
-          <div class="dev-laptop"><div class="dev-bar"><i></i><i></i><i></i></div><img src="media/aron-desk-1.webp" alt="Sitio de Aaron Dalla Rosa en computadora" loading="lazy"></div>
-          <div class="dev-phone"><img src="media/aron-mob-1.webp" alt="Sitio de Aaron Dalla Rosa en celular" loading="lazy"></div>
-          <div class="dev-phone dev-phone-2"><img src="media/aron-mob-3.webp" alt="Sección de precio del sitio en celular" loading="lazy"></div>
+          <div class="dev-laptop"><div class="dev-bar"><i></i><i></i><i></i></div><img src="media/aron-desk-1.webp" alt="Sitio de La Nueva Era en computadora" loading="lazy"></div>
+          <div class="dev-phone"><img src="media/aron-mob-1.webp" alt="Sitio de La Nueva Era en celular" loading="lazy"></div>
         </div>
         <div class="case-txt">
-          <span class="work-tag">Lanzamiento de curso · Educación</span>
-          <h3>Aaron Dalla Rosa</h3>
-          <p>Sitio de lanzamiento del curso presencial de barbería en Ciudad del Este: video de venta, cupos por grupo, precio y botón de reserva siempre a mano en el celular.</p>
-          <div class="deliv"><span>Sitio</span><span>Video</span><span>Estructura de venta</span></div>
+          <span class="tag">Lanzamiento de curso · Educación</span>
+          <h3>La Nueva Era</h3>
+          <p>Sitio de lanzamiento del curso presencial de barbería de Aaron Dalla Rosa: video de venta, cupos por grupo, precio y botón de reserva siempre a mano en el celular.</p>
           <a class="case-link" href="https://www.nuevaeraacademy.site" target="_blank" rel="noopener">Ver el sitio en vivo <svg class="icon"><use href="#ic-arrow"/></svg></a>
         </div>
       </div>
 
       <div class="site-case flip reveal">
         <div class="devices one">
-          <div class="dev-laptop big"><div class="dev-bar"><i></i><i></i><i></i></div><img src="media/sos-desk.webp" alt="Sitio de S.O.S. Emergencias Médicas" loading="lazy"></div>
+          <div class="dev-laptop"><div class="dev-bar"><i></i><i></i><i></i></div><img src="media/sos-desk.webp" alt="Sitio de S.O.S. Emergencias Médicas" loading="lazy"></div>
         </div>
         <div class="case-txt">
-          <span class="work-tag">Salud · Emergencias</span>
+          <span class="tag">Salud · Emergencias</span>
           <h3>S.O.S. Emergencias Médicas</h3>
-          <p>Sitio institucional y página de enlaces para una empresa de ambulancias con 20 años de trayectoria en el Alto Paraná: cobertura, servicios y contacto directo las 24 horas.</p>
-          <div class="deliv"><span>Sitio</span><span>Bio link</span><span>Contenido</span></div>
+          <p>Sitio institucional para una empresa de ambulancias con 20 años de trayectoria en el Alto Paraná: cobertura, servicios y contacto directo las 24 horas.</p>
+          <a class="case-link" href="https://siteoficial-wine.vercel.app/index.html" target="_blank" rel="noopener">Ver el sitio en vivo <svg class="icon"><use href="#ic-arrow"/></svg></a>
         </div>
-      </div>
-
-      <div class="msg-card reveal">
-        <img src="media/freddy-msg.webp" alt="Mensaje real del Dr. Freddy Velázquez al recibir dos piezas de Tape" loading="lazy">
-        <p><b>Mensaje real</b> del Dr. Freddy Velázquez al recibir dos piezas. Sin retoques.</p>
       </div>
     </div>
   </section>
 
-  <section class="pad" id="trabajos" style="background:var(--card);border-radius:48px;margin:0 24px;">
+  <section class="pad" id="trabajos">
     <div class="wrap">
       <div class="section-head reveal">
         <span class="badge"><span class="sq"></span>Dónde ya entregamos</span>
         <h2>Algunos de nuestros trabajos.</h2>
-        <p>Marcas reales, de rubros exigentes, que confiaron en Tape para construir identidad y escalar resultados. Esta es apenas una muestra: hay más marcas trabajando con nosotros ahora mismo.</p>
+        <p>Una selección de las marcas que confían en Tape. Hay más proyectos en curso que todavía no podemos mostrar.</p>
       </div>
-      <div class="work-grid">
-        <div class="work-card reveal" style="--card-accent:#3FAFA3">
-          <div class="work-top"><span class="work-tag">Cirugía Pediátrica</span><span class="work-num mono">W-01</span></div>
-          <h3>Dr. Freddy Velázquez</h3>
-          <p>Identidad completa, sitio institucional y video cinematográfico para el cirujano pediátrico que se convirtió en referente en Ciudad del Este.</p>
-          <div class="deliv"><span>Branding</span><span>Sitio</span><span>Video</span></div>
-        </div>
-        <div class="work-card reveal" style="--card-accent:#5FD1C4">
-          <div class="work-top"><span class="work-tag">Péptidos</span><span class="work-num mono">W-02</span></div>
-          <h3>Nexxus Peptides</h3>
-          <p>Estrategia de contenido, videos para tráfico pago y una app de investigación de mercado usada por el equipo de campo en toda la ciudad.</p>
-          <div class="deliv"><span>Contenido</span><span>Tráfico pago</span><span>Producto digital</span></div>
-        </div>
-        <div class="work-card reveal" style="--card-accent:#123A38">
-          <div class="work-top"><span class="work-tag">Farmacia y Suplementos</span><span class="work-num mono">W-03</span></div>
-          <h3>X Mega Farma Atacado</h3>
-          <p>Contenido, hub de bio y campañas promocionales para una de las mayores redes de farmacia y suplementos de la región.</p>
-          <div class="deliv"><span>Contenido</span><span>Campañas</span><span>Bio hub</span></div>
-        </div>
-        <div class="work-card reveal" style="--card-accent:#0a0e0d">
-          <div class="work-top"><span class="work-tag">Concesionaria</span><span class="work-num mono">W-04</span></div>
-          <h3>Potenza Motors</h3>
-          <p>Sitio completo con simulador de financiación y panel de vendedores para la concesionaria de importados.</p>
-          <div class="deliv"><span>Sitio</span><span>Producto digital</span><span>Leads</span></div>
-        </div>
-      </div>
-      <p style="text-align:center;color:var(--muted);font-size:13.5px;margin-top:32px;">Y varios proyectos más en curso, de salud a educación, que todavía no podemos mostrar públicamente.</p>
+      <ul class="work-list">
+        <li class="reveal"><span class="n">01</span><b>Dra. Gabriela Mafei</b><em>Dermatología</em><span class="d">Contenido · Posicionamiento · Sitio</span></li>
+        <li class="reveal"><span class="n">02</span><b>S.O.S. Emergencias Médicas</b><em>Emergencias médicas</em><span class="d">Sitio · Bio link · Contenido</span></li>
+        <li class="reveal"><span class="n">03</span><b>La Nueva Era · Aaron Dalla Rosa</b><em>Educación</em><span class="d">Lanzamiento de curso · Sitio · Video</span></li>
+        <li class="reveal"><span class="n">04</span><b>Dr. Freddy Velázquez</b><em>Cirugía pediátrica</em><span class="d">Identidad · Sitio · Video</span></li>
+        <li class="reveal"><span class="n">05</span><b>Nexxus Peptides</b><em>Péptidos</em><span class="d">Contenido · Tráfico pago · App</span></li>
+        <li class="reveal"><span class="n">06</span><b>Potenza Motors</b><em>Concesionaria</em><span class="d">Sitio · Contenido · Leads</span></li>
+        <li class="reveal"><span class="n">07</span><b>Pharmalabz</b><em>Laboratorio</em><span class="d">Video corporativo</span></li>
+        <li class="reveal"><span class="n">08</span><b>Evolution Estética Automotriz</b><em>Automotriz</em><span class="d">Tráfico pago · Campaña</span></li>
+      </ul>
     </div>
   </section>
 
@@ -1190,7 +1123,7 @@
   }, {threshold:0.12});
   revealEls.forEach(el => io.observe(el));
 
-  /* videos autoplay al pasar */
+  /* videos: autoplay al pasar, sonido por toque */
   (function(){
     const vids=[...document.querySelectorAll('video.autov')];
     if(!vids.length) return;
@@ -1198,12 +1131,20 @@
     const still=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const mp4=document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"');
     const load=v=>{ if(!v.getAttribute('src') && v.dataset.src){ v.src= mp4 ? v.dataset.src : v.dataset.src.replace('.mp4','.webm'); v.load(); } };
+    const btnOf=v=>v.parentElement.querySelector('.snd');
+    const setSound=(v,on)=>{ v.muted=!on; const b=btnOf(v); if(b){ b.classList.toggle('on',on); b.setAttribute('aria-label',on?'Silenciar':'Activar sonido'); const t=b.querySelector('span'); if(t) t.textContent=on?'Silenciar':'Sonido'; } };
     const near=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting && !save){ load(e.target); near.unobserve(e.target);} }),{rootMargin:'600px 0px'});
     const play=new IntersectionObserver(es=>es.forEach(e=>{
       const v=e.target; if(save||still) return;
-      if(e.isIntersecting){ load(v); const p=v.play(); if(p&&p.catch) p.catch(()=>{}); } else { v.pause(); }
-    }),{threshold:0.45});
+      if(e.isIntersecting){ load(v); const p=v.play(); if(p&&p.catch) p.catch(()=>{}); } else { v.pause(); setSound(v,false); }
+    }),{threshold:0.4});
     vids.forEach(v=>{ near.observe(v); play.observe(v); });
+    document.querySelectorAll('.vid').forEach(f=>{
+      const v=f.querySelector('video'); const b=f.querySelector('.snd');
+      const toggle=e=>{ e.preventDefault(); load(v); const on=v.muted; vids.forEach(o=>{ if(o!==v) setSound(o,false); }); setSound(v,on); const p=v.play(); if(p&&p.catch) p.catch(()=>{}); };
+      b.addEventListener('click',e=>{ e.stopPropagation(); toggle(e); });
+      v.addEventListener('click',toggle);
+    });
   })();
 </script>
 
