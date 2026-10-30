@@ -342,6 +342,23 @@
     .home-split .mc-dow{font-size:11.5px;padding-bottom:9px;}
     .home-split .card{padding:18px;}
   }
+
+  .pc{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;}
+  .pc summary{list-style:none;cursor:pointer;display:flex;gap:12px;align-items:flex-start;padding:13px 14px;}
+  .pc summary::-webkit-details-marker{display:none;}
+  .pc-date{flex:0 0 52px;text-align:center;border-radius:10px;background:var(--teal-lt);color:var(--teal-dk);padding:6px 0;line-height:1.1;}
+  .pc-date b{display:block;font-size:18px;}
+  .pc-date span{font-size:10.5px;font-weight:700;text-transform:uppercase;}
+  .pc-main{flex:1;min-width:0;}
+  .pc-top{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:3px;flex-wrap:wrap;}
+  .pc-cap{font-size:13.5px;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .pc[open] .pc-cap{display:none;}
+  .pc-chev{flex:0 0 auto;color:var(--muted);transition:transform .2s;align-self:center;}
+  .pc[open] .pc-chev{transform:rotate(90deg);}
+  .pc-body{padding:0 14px 14px 78px;}
+  .pc-full{white-space:pre-wrap;font-size:13.5px;line-height:1.55;margin-bottom:10px;}
+  .pc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  @media(max-width:560px){.pc-body{padding-left:14px;}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -427,6 +444,8 @@
         <button class="btn btn-outline btn-sm" id="calToday">Hoje</button>
       </div>
       <div class="cal-grid" id="calGrid"></div>
+      <div class="section-title" id="calListTitle">Postagens do mês</div>
+      <div id="calList"></div>
     </div>
 
     <div class="view" id="view-posts">
@@ -1353,7 +1372,7 @@ window.togglePostStatus = async function(id, iso){
   const p = S.socialPosts.find(x=>x.id===id); if(!p) return;
   const newStatus = p.status==='feito' ? 'pendente' : 'feito';
   p.status = newStatus;
-  if(iso) openDay(iso);
+  if(iso) openDay(iso); else renderCalendar();
   await db.collection('social_posts').doc(id).update({status: newStatus});
 };
 document.getElementById('postForm').addEventListener('submit', async e=>{
@@ -1374,6 +1393,45 @@ document.getElementById('postForm').addEventListener('submit', async e=>{
   else{ data.status='pendente'; data.createdAt = new Date().toISOString(); await db.collection('social_posts').add(data); }
   closeModal('modalPost');
 });
+
+/* ---- Cards resumidos de postagens (equipe e cliente) ---- */
+const openPostCards = new Set();
+const WD = ['dom','seg','ter','qua','qui','sex','sáb'];
+function postCardHtml(p, mode){
+  const d = new Date(p.date+'T00:00:00');
+  const ptk = p.postTaskId ? S.postTasks.find(v=>v.id===p.postTaskId) : null;
+  const done = p.status==='feito';
+  const badge = mode==='client' ? (done?'Publicado':'Programado') : (done?'Postado':'Pendente');
+  const staffActions = mode==='staff' ? `
+      <span class="badge ${done?'badge-ok':'badge-warn'}" style="cursor:pointer;" onclick="togglePostStatus('${p.id}','')"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-check"/></svg>${done?'Postado':'Marcar como postado'}</span>
+      <button class="btn btn-ghost btn-sm" onclick="editPost('${p.id}')"><svg class="icon"><use href="#ic-edit"/></svg></button>
+      <button class="btn btn-ghost btn-sm" onclick="deletePost('${p.id}')"><svg class="icon"><use href="#ic-trash"/></svg></button>` : '';
+  return `<details class="pc" data-id="${p.id}" ${openPostCards.has(p.id)?'open':''} ontoggle="togglePostCard(this)">
+    <summary>
+      <div class="pc-date"><b>${d.getDate()}</b><span>${WD[d.getDay()]}</span></div>
+      <div class="pc-main">
+        <div class="pc-top"><span>${escapeHtml(p.time||'')}</span>${mode==='staff' ? `<span style="display:inline-flex;align-items:center;gap:5px;"><span class="client-dot" style="background:${clientColor(p.clientId)}"></span>${escapeHtml(clientName(p.clientId))}</span>` : ''}<span class="badge ${done?'badge-ok':'badge-warn'}">${badge}</span></div>
+        <div class="pc-cap">${escapeHtml(p.caption||'(sem legenda)')}</div>
+      </div>
+      <svg class="icon pc-chev" style="width:16px;height:16px;"><use href="#ic-chevron-right"/></svg>
+    </summary>
+    <div class="pc-body">
+      ${ptk ? `<div style="font-size:11.5px;color:var(--teal-dk);font-weight:600;margin-bottom:6px;">${escapeHtml(ptk.title||'Post')}</div>` : ''}
+      <div class="pc-full">${escapeHtml(p.caption||'(sem legenda)')}</div>
+      <div class="pc-actions">
+        ${p.driveLink ? `<a href="${escapeHtml(p.driveLink)}" target="_blank" rel="noopener" class="drivebtn"><svg class="icon" style="width:13px;height:13px;"><use href="#ic-link"/></svg>${mode==='client'?'Ver arquivo':'Arquivo'}</a>` : ''}
+        ${staffActions}
+      </div>
+    </div>
+  </details>`;
+}
+window.togglePostCard = function(el){ if(el.open) openPostCards.add(el.dataset.id); else openPostCards.delete(el.dataset.id); };
+function renderMonthCards(posts, ym, boxId, mode, emptyHint){
+  const list = posts.filter(p=>(p.date||'').startsWith(ym)).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));
+  const box = document.getElementById(boxId);
+  box.innerHTML = list.length ? list.map(p=>postCardHtml(p,mode)).join('') : `<div class="card"><div class="empty"><b>Nada programado</b>${emptyHint}</div></div>`;
+}
+
 function renderCalendar(){
   document.getElementById('calTitle').textContent = MONTHS[calMonth.getMonth()] + ' ' + calMonth.getFullYear();
   const filt = document.getElementById('socialClientFilter').value;
@@ -1401,6 +1459,10 @@ function renderCalendar(){
     </div>`;
   }
   document.getElementById('calGrid').innerHTML = html;
+  const ym = calMonth.getFullYear()+'-'+String(calMonth.getMonth()+1).padStart(2,'0');
+  const fn = filt ? clientName(filt) : '';
+  document.getElementById('calListTitle').textContent = fn ? 'Postagens de '+fn+' em '+MONTHS[calMonth.getMonth()] : 'Postagens de '+MONTHS[calMonth.getMonth()];
+  renderMonthCards(posts, ym, 'calList', 'staff', 'Sem postagens neste mês.');
 }
 window.openDay = function(iso){
   const filt = document.getElementById('socialClientFilter').value;
@@ -2270,20 +2332,8 @@ function renderPortal(){
   }
   document.getElementById('pGrid').innerHTML = html;
   const ym = pMonth.getFullYear()+'-'+String(pMonth.getMonth()+1).padStart(2,'0');
-  let list = posts.filter(p=>p.date.startsWith(ym));
-  if(pSelected) list = list.filter(p=>p.date===pSelected);
-  list.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
-  const box = document.getElementById('pList');
-  if(list.length===0){ box.innerHTML = `<div class="card"><div class="empty"><b>Nada programado</b>${pSelected?'Sem postagens neste dia.':'Ainda não há postagens programadas para este mês.'}</div></div>`; return; }
-  box.innerHTML = `<div class="card" style="padding:4px 0;">`+list.map(p=>`<div class="pend-row" style="cursor:default;align-items:flex-start;">
-      <span class="pend-icon" style="background:var(--teal-lt);color:var(--teal-dk);"><svg class="icon" style="width:15px;height:15px;"><use href="#ic-cal"/></svg></span>
-      <div class="pend-body">
-        <div class="pend-title">${fmtDate(p.date)} às ${escapeHtml(p.time||'')}</div>
-        <div class="pend-sub" style="white-space:pre-wrap;margin-top:4px;color:var(--ink);">${escapeHtml(p.caption||'(legenda em preparação)')}</div>
-        ${p.driveLink ? `<a href="${escapeHtml(p.driveLink)}" target="_blank" rel="noopener" class="drivebtn" style="margin-top:8px;display:inline-flex;"><svg class="icon" style="width:13px;height:13px;"><use href="#ic-link"/></svg>Ver arquivo</a>` : ''}
-      </div>
-      <span class="badge ${p.status==='feito'?'badge-ok':'badge-warn'}">${p.status==='feito'?'Publicado':'Programado'}</span>
-    </div>`).join('')+`</div>`;
+  const shown = pSelected ? posts.filter(p=>p.date===pSelected) : posts;
+  renderMonthCards(shown, pSelected ? pSelected : ym, 'pList', 'client', pSelected ? 'Sem postagens neste dia.' : 'Ainda não há postagens programadas para este mês.');
 }
 window.portalPick = function(iso){ pSelected = (pSelected===iso) ? null : iso; renderPortal(); };
 document.getElementById('pPrev').addEventListener('click', ()=>{ pMonth.setMonth(pMonth.getMonth()-1); pSelected=null; renderPortal(); });
