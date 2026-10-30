@@ -560,6 +560,10 @@
     <form id="postForm">
       <input type="hidden" id="pId">
       <div class="field"><label>Cliente</label><select id="pClient" required></select></div>
+      <div class="field" id="pPostField">
+        <label>Post da aba Posts (opcional)</label>
+        <select id="pPostRef"><option value="">Nenhum (preencher manualmente)</option></select>
+      </div>
       <div class="field" id="pVideoField">
         <label>Vídeo/arte de referência (opcional)</label>
         <select id="pVideoRef"><option value="">Nenhum (preencher manualmente)</option></select>
@@ -1279,6 +1283,13 @@ document.getElementById('calPrev').addEventListener('click', ()=>{ calMonth.setM
 document.getElementById('calNext').addEventListener('click', ()=>{ calMonth.setMonth(calMonth.getMonth()+1); renderCalendar(); });
 document.getElementById('calToday').addEventListener('click', ()=>{ calMonth = new Date(); calMonth.setDate(1); renderCalendar(); });
 document.getElementById('socialClientFilter').addEventListener('change', renderCalendar);
+function fillPostRefSelect(clientId, selectedId){
+  const sel = document.getElementById('pPostRef');
+  const order = {entregue:0, aprovacao:1, em_criacao:2, a_fazer:3};
+  const list = S.postTasks.filter(t=>t.clientId===clientId).sort((a,b)=>(order[a.status]??9)-(order[b.status]??9));
+  sel.innerHTML = '<option value="">Nenhum (preencher manualmente)</option>' + list.map(t=>`<option value="${t.id}">${escapeHtml(t.title||'Post')} · ${POST_FORMAT_LABEL[t.format]||'Post'} · ${POST_STATUS_LABEL[t.status]||t.status}</option>`).join('');
+  sel.value = selectedId || '';
+}
 function fillVideoRefSelect(clientId, selectedVideoId){
   const sel = document.getElementById('pVideoRef');
   const vids = S.videoTasks.filter(v=>v.clientId===clientId);
@@ -1288,6 +1299,14 @@ function fillVideoRefSelect(clientId, selectedVideoId){
 }
 document.getElementById('pClient').addEventListener('change', ()=>{
   fillVideoRefSelect(document.getElementById('pClient').value);
+  fillPostRefSelect(document.getElementById('pClient').value);
+});
+document.getElementById('pPostRef').addEventListener('change', ()=>{
+  const t = S.postTasks.find(x=>x.id===document.getElementById('pPostRef').value);
+  if(!t) return;
+  document.getElementById('pLink').value = t.finalLink || t.sourceLink || '';
+  const capField = document.getElementById('pCaption');
+  if(!capField.value.trim()){ capField.value = t.notes || t.title || ''; }
 });
 document.getElementById('pVideoRef').addEventListener('change', ()=>{
   const vid = S.videoTasks.find(v=>v.id===document.getElementById('pVideoRef').value);
@@ -1308,6 +1327,7 @@ function openPostModal(dateStr){
   const filt = document.getElementById('socialClientFilter').value;
   if(filt) document.getElementById('pClient').value = filt;
   fillVideoRefSelect(document.getElementById('pClient').value);
+  fillPostRefSelect(document.getElementById('pClient').value);
   openModal('modalPost');
 }
 window.editPost = function(id){
@@ -1316,6 +1336,7 @@ window.editPost = function(id){
   document.getElementById('pId').value = p.id;
   document.getElementById('pClient').value = p.clientId;
   fillVideoRefSelect(p.clientId, p.videoTaskId);
+  fillPostRefSelect(p.clientId, p.postTaskId);
   document.getElementById('pDate').value = p.date;
   document.getElementById('pTime').value = p.time;
   document.getElementById('pLink').value = p.driveLink||'';
@@ -1346,6 +1367,9 @@ document.getElementById('postForm').addEventListener('submit', async e=>{
     driveLink: document.getElementById('pLink').value.trim(),
     caption: document.getElementById('pCaption').value,
   };
+  const ptRef = document.getElementById('pPostRef').value;
+  const existing = id ? S.socialPosts.find(x=>x.id===id) : null;
+  if(ptRef) data.postTaskId = ptRef; else if(existing && existing.postTaskId) data.postTaskId = null;
   if(id){ await db.collection('social_posts').doc(id).update(data); }
   else{ data.status='pendente'; data.createdAt = new Date().toISOString(); await db.collection('social_posts').add(data); }
   closeModal('modalPost');
@@ -1391,11 +1415,13 @@ window.openDay = function(iso){
   } else {
     body.innerHTML = posts.map(p=>{
       const vid = p.videoTaskId ? S.videoTasks.find(v=>v.id===p.videoTaskId) : null;
+      const ptk = p.postTaskId ? S.postTasks.find(v=>v.id===p.postTaskId) : null;
       return `<div class="daypost-item" style="border-left:3px solid ${clientColor(p.clientId)};">
       <div class="daypost-top">
         <span class="daypost-time">${p.time}</span>
         <span style="font-size:12px;font-weight:700;color:var(--muted);">${escapeHtml(clientName(p.clientId))}</span>
       </div>
+      ${ptk ? `<div style="font-size:11px;color:var(--teal-dk);font-weight:600;margin-bottom:5px;display:flex;align-items:center;gap:4px;"><svg class="icon" style="width:11px;height:11px;"><use href="#ic-image"/></svg>${escapeHtml(ptk.title||'Post')}</div>` : ''}
       ${vid ? `<div style="font-size:11px;color:var(--teal-dk);font-weight:600;margin-bottom:5px;display:flex;align-items:center;gap:4px;"><svg class="icon" style="width:11px;height:11px;"><use href="#ic-film"/></svg>${escapeHtml(vid.title)}</div>` : ''}
       <div class="daypost-caption">${escapeHtml(p.caption||'(sem legenda)')}</div>
       <div class="daypost-meta">
