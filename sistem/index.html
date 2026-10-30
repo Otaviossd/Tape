@@ -135,7 +135,8 @@
   .tag-on{background:var(--teal-lt);color:var(--teal-dk);display:inline-flex;align-items:center;gap:3px;}
 
   .home-hero{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:14px;margin-bottom:22px;}
-  @media (max-width:1000px){.home-hero{grid-template-columns:1fr 1fr;}}
+  .home-hero.no-launch{grid-template-columns:1.3fr 1fr 1fr;}
+  @media (max-width:1000px){.home-hero,.home-hero.no-launch{grid-template-columns:1fr 1fr;}}
   @media (max-width:560px){.home-hero{grid-template-columns:1fr;}}
   .home-split{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:start;}
   .home-greet{background:var(--ink);color:#fff;border-radius:18px;padding:26px;display:flex;flex-direction:column;justify-content:center;gap:12px;}
@@ -323,7 +324,7 @@
     .sidebar-scrim.open{display:block;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:70;}
     th:nth-child(n+4),td:nth-child(n+4){display:none;}
 
-    .home-hero{grid-template-columns:1fr 1fr 1fr;gap:8px;}
+    .home-hero,.home-hero.no-launch{grid-template-columns:1fr 1fr;gap:8px;}
     .home-greet{grid-column:1/-1;padding:16px;}
     .home-greet h2{font-size:16px;}
     .home-greet p{font-size:12px;}
@@ -444,6 +445,21 @@
       <div id="financeGate"></div>
     </div>
 
+    <div class="view" id="view-cronograma">
+      <div class="view-head"><div><h1>Meu cronograma</h1><p id="portalSub">Suas postagens programadas</p></div></div>
+      <div class="cal-toolbar">
+        <div class="cal-nav">
+          <button id="pPrev" aria-label="Mês anterior"><svg class="icon"><use href="#ic-chevron-left"/></svg></button>
+          <div class="cal-title" id="pTitle"></div>
+          <button id="pNext" aria-label="Próximo mês"><svg class="icon"><use href="#ic-chevron-right"/></svg></button>
+        </div>
+        <button class="btn btn-outline btn-sm" id="pToday">Hoje</button>
+      </div>
+      <div class="cal-grid" id="pGrid"></div>
+      <div class="section-title">Postagens do mês</div>
+      <div id="pList"></div>
+    </div>
+
     <div class="view" id="view-equipe">
       <div class="view-head">
         <div><h1>Equipe</h1><p>Quem tem acesso ao Tape Sistema e a quê</p></div>
@@ -465,9 +481,10 @@
       <div class="field"><label>E-mail (só pra login, não é público)</label><input id="mEmail" type="email" required></div>
       <div class="field" id="mPasswordField"><label id="mPasswordLabel">Senha de acesso</label><input id="mPassword" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres"></div>
       <div class="field"><label>Função</label>
-        <select id="mRole"><option value="admin">Admin</option><option value="social">Social media</option><option value="video">Vídeo</option><option value="outro">Outro</option></select>
+        <select id="mRole"><option value="admin">Admin</option><option value="social">Social media</option><option value="video">Vídeo</option><option value="outro">Outro</option><option value="cliente">Cliente (só vê o cronograma)</option></select>
       </div>
-      <div class="field"><label>Acesso liberado</label>
+      <div class="field" id="mClientField" style="display:none;"><label>Cliente vinculado</label><select id="mClient"></select></div>
+      <div class="field" id="mAccessField"><label>Acesso liberado</label>
         <div class="checkrow">
           <label class="checkchip"><input type="checkbox" value="home" checked disabled>Início</label>
           <label class="checkchip"><input type="checkbox" value="clientes">Clientes</label>
@@ -675,7 +692,7 @@ const S = {
 };
 const COLORS = ['#2F8F82','#4C6EF5','#E8590C','#9C36B5','#2F9E44','#E03131','#1098AD'];
 const SERVICE_LABELS = {branding:'Branding',video:'Vídeo',trafego:'Tráfego pago',social:'Social media',web:'Site/App'};
-const ROLE_LABELS = {admin:'Admin',social:'Social media',video:'Vídeo',outro:'Equipe'};
+const ROLE_LABELS = {admin:'Admin',social:'Social media',video:'Vídeo',outro:'Equipe',cliente:'Cliente'};
 const WEEKDAYS_SHORT = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MONTHS_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -732,6 +749,28 @@ document.querySelectorAll('.modal-overlay').forEach(ov=>{
 
 function internalEmailFor(name){ return null; } // não usado mais: e-mail agora é sempre digitado
 
+function renderClientLogin(){
+  const area = document.getElementById('loginArea');
+  area.innerHTML = `
+    <p style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:16px;">Área do cliente: veja seu cronograma de postagens.</p>
+    <div class="field"><label>E-mail</label><input id="cliEmail" type="email" autocomplete="username"></div>
+    <div class="field"><label>Senha</label><input id="cliPass" type="password" autocomplete="current-password"></div>
+    <div id="loginError" style="display:none;color:var(--danger);font-size:12.5px;margin-bottom:10px;"></div>
+    <button class="btn btn-primary btn-block" id="cliSubmit">Entrar</button>
+    <p style="text-align:center;margin-top:12px;"><a href="#" id="cliBack" style="color:var(--muted);font-size:13px;">Voltar</a></p>`;
+  const go = async ()=>{
+    const err = document.getElementById('loginError');
+    const email = document.getElementById('cliEmail').value.trim();
+    const pass = document.getElementById('cliPass').value;
+    if(!email || !pass){ err.textContent='Preencha e-mail e senha.'; err.style.display='block'; return; }
+    const { error: signErr } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(signErr){ err.textContent = signErr.message==='Invalid login credentials' ? 'E-mail ou senha incorretos.' : signErr.message; err.style.display='block'; return; }
+    await loadSessionAndStart();
+  };
+  document.getElementById('cliSubmit').addEventListener('click', go);
+  document.getElementById('cliPass').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  document.getElementById('cliBack').addEventListener('click', e=>{ e.preventDefault(); renderLogin(); });
+}
 async function renderLogin(){
   const area = document.getElementById('loginArea');
   area.innerHTML = `<div class="empty" style="padding:10px 0;"><b>Carregando...</b></div>`;
@@ -765,13 +804,15 @@ async function renderLogin(){
   } else {
     area.innerHTML = `
       <div class="field"><label>Quem é você?</label>
-        <select id="loginSelect">${people.map(m=>`<option value="${m.id}">${escapeHtml(m.name)}</option>`).join('')}</select>
+        <select id="loginSelect">${people.filter(m=>m.role!=='cliente').map(m=>`<option value="${m.id}">${escapeHtml(m.name)}</option>`).join('')}</select>
       </div>
       <div class="field"><label>Senha</label><input id="loginPass" type="password" autocomplete="current-password"></div>
       <div id="loginError" style="display:none;color:var(--danger);font-size:12.5px;margin-bottom:10px;"></div>
       <button class="btn btn-primary btn-block" id="loginSubmit">Entrar</button>
       <p style="text-align:center;color:var(--muted);font-size:11.5px;margin-top:14px;">Esqueceu a senha? Peça pro admin resetar no painel do Supabase.</p>
+      <p style="text-align:center;margin-top:6px;"><a href="#" id="goClientLogin" style="color:var(--teal-dk);font-size:13px;font-weight:600;">Sou cliente</a></p>
     `;
+    document.getElementById('goClientLogin').addEventListener('click', e=>{ e.preventDefault(); renderClientLogin(); });
     const doLogin = async ()=>{
       const id = document.getElementById('loginSelect').value;
       const pass = document.getElementById('loginPass').value;
@@ -803,14 +844,27 @@ const ACCESS_DEFAULTS = {
   social: {clientes:true, social:true, video:false, lancamentos:true, financeiro:false, equipe:false},
   video: {clientes:true, social:false, video:true, lancamentos:true, financeiro:false, equipe:false},
   outro: {clientes:true, social:false, video:false, lancamentos:false, financeiro:false, equipe:false},
+  cliente: {cronograma:true},
 };
+function isClient(){ return !!(currentMember && currentMember.role==='cliente'); }
 function setAccessCheckboxes(access){
   document.querySelectorAll('#personForm .checkchip input:not([disabled])').forEach(chk=>{
     chk.checked = !!(access && access[chk.value]);
   });
 }
+function syncRoleFields(){
+  const isCli = document.getElementById('mRole').value==='cliente';
+  document.getElementById('mClientField').style.display = isCli ? '' : 'none';
+  document.getElementById('mAccessField').style.display = isCli ? 'none' : '';
+  if(isCli){
+    const sel = document.getElementById('mClient'); const cur = sel.value;
+    sel.innerHTML = S.clients.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+    if(cur) sel.value = cur;
+  }
+}
 document.getElementById('mRole').addEventListener('change', e=>{
-  if(!document.getElementById('mId').value){ setAccessCheckboxes(ACCESS_DEFAULTS[e.target.value]); }
+  if(!document.getElementById('mId').value && e.target.value!=='cliente'){ setAccessCheckboxes(ACCESS_DEFAULTS[e.target.value]); }
+  syncRoleFields();
 });
 window.openEditPerson = function(id){
   const m = S.team.find(x=>x.id===id); if(!m) return;
@@ -824,6 +878,8 @@ window.openEditPerson = function(id){
   document.getElementById('mEmail').disabled = true;
   document.getElementById('mRole').value = m.role;
   setAccessCheckboxes(m.access || ACCESS_DEFAULTS[m.role] || ACCESS_DEFAULTS.outro);
+  syncRoleFields();
+  if(m.role==='cliente' && m.clientId) document.getElementById('mClient').value = m.clientId;
   openModal('modalPerson');
 };
 document.getElementById('btnSwitchPerson').addEventListener('click', async ()=>{
@@ -840,29 +896,39 @@ document.getElementById('personForm').addEventListener('submit', async e=>{
   document.querySelectorAll('#personForm .checkchip input').forEach(chk=>{ access[chk.value] = chk.checked || chk.disabled; });
   const name = document.getElementById('mName').value.trim();
   const role = document.getElementById('mRole').value;
+  let clientId = null;
+  let accessFinal = access;
+  if(role==='cliente'){
+    clientId = document.getElementById('mClient').value || null;
+    if(!clientId){ alert('Escolha o cliente vinculado a este login.'); return; }
+    accessFinal = {cronograma:true};
+  }
   if(id){
-    const { error } = await sb.from('profiles').update({ name, role, access }).eq('id', id);
+    const { error } = await sb.from('profiles').update({ name, role, access: accessFinal, clientId }).eq('id', id);
     if(error){ alert(error.message); return; }
     closeModal('modalPerson');
-    if(currentMember && currentMember.id===id){ currentMember = {...currentMember, name, role, access}; applyCurrentMember(); }
+    if(currentMember && currentMember.id===id){ currentMember = {...currentMember, name, role, access: accessFinal, clientId}; applyCurrentMember(); }
   } else {
     const email = document.getElementById('mEmail').value.trim();
     const pass = document.getElementById('mPassword').value;
     if(pass.length<6){ alert('A senha precisa ter pelo menos 6 caracteres.'); return; }
-    const { error } = await sb.auth.signUp({ email, password: pass, options:{ data:{ name, role, access } } });
+    // cliente separado e sem sessão: o admin continua logado
+    const tmp = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession:false, autoRefreshToken:false, detectSessionInUrl:false, broadcast:false } });
+    const { data: created, error } = await tmp.auth.signUp({ email, password: pass, options:{ data:{ name } } });
     if(error){ alert(error.message); return; }
+    const newId = created && created.user && created.user.id;
+    if(!newId){ alert('Não consegui criar o login. Tente de novo.'); return; }
+    const { error: upErr } = await sb.from('profiles').update({ name, role, access: accessFinal, clientId }).eq('id', newId);
+    if(upErr){ alert('Login criado, mas não consegui definir o acesso: '+upErr.message); return; }
     closeModal('modalPerson');
-    await sb.auth.signOut();
-    currentMember = null;
-    document.getElementById('app').style.display='none';
-    document.getElementById('pickerOverlay').style.display='flex';
-    alert(name+' foi cadastrado(a). Como criar uma conta nova troca a sessão, faça login de novo pra continuar.');
-    renderLogin();
+    alert(name+' foi cadastrado(a).'+(role==='cliente' ? ' Passe o e-mail e a senha para o cliente entrar em '+location.origin+location.pathname+' escolhendo "Sou cliente".' : ''));
   }
 });
 function hasAccess(section){
+  if(!currentMember) return section==='home';
+  if(isClient()) return section==='cronograma';
+  if(section==='cronograma') return false;
   if(section==='home') return true;
-  if(!currentMember) return false;
   return !!(currentMember.access && currentMember.access[section]);
 }
 function applyCurrentMember(){
@@ -871,7 +937,7 @@ function applyCurrentMember(){
   document.getElementById('whoName').textContent = currentMember.name;
   document.getElementById('whoRole').textContent = ROLE_LABELS[currentMember.role]||currentMember.role;
   if(!currentTab || !hasAccess(currentTab)){
-    currentTab = 'home';
+    currentTab = isClient() ? 'cronograma' : 'home';
   }
   renderSideNav(); renderView();
 }
@@ -906,6 +972,7 @@ document.getElementById('btnNewPersonAdmin').addEventListener('click', ()=>{
   document.getElementById('mPassword').required = true;
   document.getElementById('mEmail').disabled = false;
   setAccessCheckboxes(ACCESS_DEFAULTS.outro);
+  syncRoleFields();
   openModal('modalPerson');
 });
 
@@ -917,11 +984,12 @@ const ALL_TABS = [
   {id:'lancamentos', label:'Lançamentos', icon:'ic-rocket'},
   {id:'financeiro', label:'Financeiro', icon:'ic-wallet'},
   {id:'equipe', label:'Equipe', icon:'ic-users'},
+  {id:'cronograma', label:'Meu cronograma', icon:'ic-cal'},
 ];
 let currentTab = null;
 function renderSideNav(){
   const nav = document.getElementById('sideNav');
-  nav.innerHTML = ALL_TABS.map(t=>{
+  nav.innerHTML = ALL_TABS.filter(t=> isClient() ? t.id==='cronograma' : t.id!=='cronograma').map(t=>{
     const unlocked = hasAccess(t.id);
     return `<button data-tab="${t.id}" class="${t.id===currentTab?'active':''} ${unlocked?'':'locked'}">
       <svg class="icon"><use href="#${t.icon}"/></svg>${t.label}
@@ -947,7 +1015,7 @@ document.getElementById('sidebarScrim').addEventListener('click', ()=>{
   document.getElementById('sidebarScrim').classList.remove('open');
 });
 function renderView(){
-  if(!hasAccess(currentTab)) currentTab = 'home';
+  if(!hasAccess(currentTab)) currentTab = isClient() ? 'cronograma' : 'home';
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const el = document.getElementById('view-'+currentTab);
   if(el) el.classList.add('active');
@@ -958,6 +1026,7 @@ function renderView(){
   if(currentTab==='lancamentos') renderLaunchesShared();
   if(currentTab==='financeiro') renderFinance();
   if(currentTab==='equipe') renderTeam();
+  if(currentTab==='cronograma') renderPortal();
 }
 
 function renderHome(){
@@ -984,7 +1053,7 @@ function renderHome(){
 
   body.innerHTML = `
     <div class="view-head"><div><h1>Início</h1><p>Um resumo rápido do que está rolando</p></div></div>
-    <div class="home-hero">
+    <div class="home-hero ${currentMember && currentMember.role==='admin' ? '' : 'no-launch'}">
       <div class="home-greet">
         <h2>Olá, ${escapeHtml(name)}!</h2>
         <p>${postsDoneThisWeek>0 ? `Vocês já publicaram ${postsDoneThisWeek} postagem${postsDoneThisWeek===1?'':'ns'} esta semana.` : 'Nenhuma postagem publicada ainda esta semana.'}${pendingVideos>0 ? ` Tem ${pendingVideos} vídeo${pendingVideos===1?'':'s'} pendente${pendingVideos===1?'':'s'}.` : ''}</p>
@@ -999,11 +1068,11 @@ function renderHome(){
         <div><div class="qnum">${pendingVideos}</div><div class="qlabel">Vídeos pendentes</div></div>
         <div class="qbar"><span style="width:${(videosDelivered+pendingVideos)? Math.round(videosDelivered/(videosDelivered+pendingVideos)*100):0}%;background:#b8791f;"></span></div>
       </div>
-      <div class="home-quick" style="background:#eef2b0;">
+      ${ currentMember && currentMember.role==='admin' ? `      <div class="home-quick" style="background:#eef2b0;">
         <svg class="icon" style="width:20px;height:20px;color:#6b7500;"><use href="#ic-rocket"/></svg>
         <div><div class="qnum">${activeLaunches}</div><div class="qlabel">Lançamentos ativos</div></div>
         <div class="qbar"><span style="width:100%;background:#6b7500;"></span></div>
-      </div>
+      </div>` : '' }
     </div>
 
     <div class="grid grid-3" style="margin-bottom:22px;">
@@ -2009,9 +2078,67 @@ function drawEdges(){
   });
 }
 
+
+/* ---- Portal do cliente: só leitura, só o cronograma dele ---- */
+let pMonth = new Date(); pMonth.setDate(1);
+let pSelected = null;
+function portalPosts(){
+  const cid = currentMember && currentMember.clientId;
+  return S.socialPosts.filter(p=>cid && p.clientId===cid);
+}
+function renderPortal(){
+  if(!isClient()) return;
+  document.getElementById('portalSub').textContent = 'Olá, '+currentMember.name+'. Aqui estão as postagens programadas pela equipe da Tape.';
+  document.getElementById('pTitle').textContent = MONTHS[pMonth.getMonth()]+' '+pMonth.getFullYear();
+  const posts = portalPosts();
+  const byDay = {}; posts.forEach(p=>{ (byDay[p.date]=byDay[p.date]||[]).push(p); });
+  const first = new Date(pMonth.getFullYear(), pMonth.getMonth(), 1);
+  const startOffset = (first.getDay()+6)%7;
+  const gridStart = new Date(first); gridStart.setDate(first.getDate()-startOffset);
+  const today = todayISO();
+  let html = WEEKDAYS_SHORT.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<42;i++){
+    const d = new Date(gridStart); d.setDate(gridStart.getDate()+i);
+    const iso = d.toISOString().slice(0,10);
+    const other = d.getMonth()!==pMonth.getMonth();
+    const n = (byDay[iso]||[]).length;
+    const dots = (byDay[iso]||[]).slice(0,4).map(p=>`<span class="cal-dot" style="background:var(--teal)"></span>`).join('');
+    html += `<div class="cal-day ${other?'other-month':''} ${iso===today?'today':''}" onclick="portalPick('${iso}')" style="${pSelected===iso?'outline:2px solid var(--teal);':''}">
+      <span class="daynum">${d.getDate()}</span><div class="cal-dots">${dots}${n>4?`<span class="cal-more">+${n-4}</span>`:''}</div></div>`;
+  }
+  document.getElementById('pGrid').innerHTML = html;
+  const ym = pMonth.getFullYear()+'-'+String(pMonth.getMonth()+1).padStart(2,'0');
+  let list = posts.filter(p=>p.date.startsWith(ym));
+  if(pSelected) list = list.filter(p=>p.date===pSelected);
+  list.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  const box = document.getElementById('pList');
+  if(list.length===0){ box.innerHTML = `<div class="card"><div class="empty"><b>Nada programado</b>${pSelected?'Sem postagens neste dia.':'Ainda não há postagens programadas para este mês.'}</div></div>`; return; }
+  box.innerHTML = `<div class="card" style="padding:4px 0;">`+list.map(p=>`<div class="pend-row" style="cursor:default;align-items:flex-start;">
+      <span class="pend-icon" style="background:var(--teal-lt);color:var(--teal-dk);"><svg class="icon" style="width:15px;height:15px;"><use href="#ic-cal"/></svg></span>
+      <div class="pend-body">
+        <div class="pend-title">${fmtDate(p.date)} às ${escapeHtml(p.time||'')}</div>
+        <div class="pend-sub" style="white-space:pre-wrap;margin-top:4px;color:var(--ink);">${escapeHtml(p.caption||'(legenda em preparação)')}</div>
+        ${p.driveLink ? `<a href="${escapeHtml(p.driveLink)}" target="_blank" rel="noopener" class="drivebtn" style="margin-top:8px;display:inline-flex;"><svg class="icon" style="width:13px;height:13px;"><use href="#ic-link"/></svg>Ver arquivo</a>` : ''}
+      </div>
+      <span class="badge ${p.status==='feito'?'badge-ok':'badge-warn'}">${p.status==='feito'?'Publicado':'Programado'}</span>
+    </div>`).join('')+`</div>`;
+}
+window.portalPick = function(iso){ pSelected = (pSelected===iso) ? null : iso; renderPortal(); };
+document.getElementById('pPrev').addEventListener('click', ()=>{ pMonth.setMonth(pMonth.getMonth()-1); pSelected=null; renderPortal(); });
+document.getElementById('pNext').addEventListener('click', ()=>{ pMonth.setMonth(pMonth.getMonth()+1); pSelected=null; renderPortal(); });
+document.getElementById('pToday').addEventListener('click', ()=>{ pMonth = new Date(); pMonth.setDate(1); pSelected=null; renderPortal(); });
+
 let listenersStarted = false;
 function startDataListeners(){
   if(listenersStarted) return; listenersStarted = true;
+
+  if(isClient()){
+    db.collection('social_posts').onSnapshot(snap=>{
+      S.socialPosts = snap.docs.map(d=>({id:d.id, ...d.data()}));
+      if(currentTab==='cronograma') renderPortal();
+    }, err=>console.error('social_posts', err));
+    return;
+  }
 
   db.collection('profiles').onSnapshot(snap=>{
     S.team = snap.docs.map(d=>{
