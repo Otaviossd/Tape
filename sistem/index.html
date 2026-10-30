@@ -366,6 +366,7 @@
     <symbol id="ic-chevron-right" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
     <symbol id="ic-arrow-left" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
     <symbol id="ic-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+    <symbol id="ic-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></symbol>
     <symbol id="ic-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2Z"/></symbol>
     <symbol id="ic-external" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></symbol>
   </defs>
@@ -426,6 +427,17 @@
         <button class="btn btn-outline btn-sm" id="calToday">Hoje</button>
       </div>
       <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <div class="view" id="view-posts">
+      <div class="view-head">
+        <div><h1>Posts</h1><p>Artes e posts para criar e entregar, com arquivos no Drive</p></div>
+        <div style="display:flex;gap:8px;">
+          <select id="postsClientFilter" style="padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:600;"></select>
+          <button class="btn btn-primary" id="btnNewPostTask"><svg class="icon"><use href="#ic-plus"/></svg>Novo post</button>
+        </div>
+      </div>
+      <div class="kanban" id="postsKanban"></div>
     </div>
 
     <div class="view" id="view-video">
@@ -491,6 +503,7 @@
           <label class="checkchip"><input type="checkbox" value="home" checked disabled>Início</label>
           <label class="checkchip"><input type="checkbox" value="clientes">Clientes</label>
           <label class="checkchip"><input type="checkbox" value="social">Social Media</label>
+          <label class="checkchip"><input type="checkbox" value="posts">Posts</label>
           <label class="checkchip"><input type="checkbox" value="video">Vídeo</label>
           <label class="checkchip"><input type="checkbox" value="lancamentos">Lançamentos</label>
           <label class="checkchip"><input type="checkbox" value="financeiro">Financeiro</label>
@@ -559,6 +572,33 @@
       <div class="field"><label>Legenda</label><textarea id="pCaption" placeholder="Legenda pronta pra copiar e colar"></textarea></div>
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" onclick="closeModal('modalPost')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalPostTask">
+  <div class="modal">
+    <h2 id="postTaskModalTitle">Novo post</h2>
+    <form id="postTaskForm">
+      <input type="hidden" id="ptId">
+      <div class="field"><label>Cliente</label><select id="ptClient" required></select></div>
+      <div class="field"><label>Título / tema do post</label><input id="ptTitle" required placeholder="Ex: Carrossel 5 mitos sobre skincare"></div>
+      <div class="field-row">
+        <div class="field"><label>Formato</label>
+          <select id="ptFormat"><option value="feed">Feed</option><option value="carrossel">Carrossel</option><option value="stories">Stories</option><option value="reels">Capa de Reels</option><option value="outro">Outro</option></select>
+        </div>
+        <div class="field"><label>Prazo de entrega</label><input id="ptDue" type="date"></div>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="ptStatus"><option value="a_fazer">A fazer</option><option value="em_criacao">Em criação</option><option value="aprovacao">Em aprovação</option><option value="entregue">Entregue</option></select>
+      </div>
+      <div class="field"><label>Arquivo editável (Drive)</label><input id="ptSource" type="url" placeholder="https://drive.google.com/..."></div>
+      <div class="field"><label>Arte final (Drive)</label><input id="ptFinal" type="url" placeholder="https://drive.google.com/..."></div>
+      <div class="field"><label>Notas / legenda</label><textarea id="ptNotes"></textarea></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalPostTask')">Cancelar</button>
         <button type="submit" class="btn btn-primary">Salvar</button>
       </div>
     </form>
@@ -688,7 +728,7 @@
 
 <script>
 const S = {
-  team: [], clients: [], socialPosts: [], videoTasks: [],
+  team: [], clients: [], socialPosts: [], videoTasks: [], postTasks: [],
   financeEntries: [], fixedExpenses: [], launches: [], lanzaEntries: [],
   financeReady: false,
 };
@@ -842,8 +882,8 @@ async function loadSessionAndStart(){
   startDataListeners();
 }
 const ACCESS_DEFAULTS = {
-  admin: {clientes:true, social:true, video:true, lancamentos:true, financeiro:true, equipe:true},
-  social: {clientes:true, social:true, video:false, lancamentos:true, financeiro:false, equipe:false},
+  admin: {clientes:true, social:true, posts:true, video:true, lancamentos:true, financeiro:true, equipe:true},
+  social: {clientes:true, social:true, posts:true, video:false, lancamentos:true, financeiro:false, equipe:false},
   video: {clientes:true, social:false, video:true, lancamentos:true, financeiro:false, equipe:false},
   outro: {clientes:true, social:false, video:false, lancamentos:false, financeiro:false, equipe:false},
   cliente: {cronograma:true},
@@ -931,6 +971,7 @@ function hasAccess(section){
   if(isClient()) return section==='cronograma';
   if(section==='cronograma') return false;
   if(section==='home') return true;
+  if(section==='posts' && !(currentMember.access && 'posts' in currentMember.access)) return currentMember.role==='admin' || currentMember.role==='social';
   return !!(currentMember.access && currentMember.access[section]);
 }
 function applyCurrentMember(){
@@ -944,7 +985,7 @@ function applyCurrentMember(){
   renderSideNav(); renderView();
 }
 
-const ACCESS_LABELS = {clientes:'Clientes', social:'Social Media', video:'Vídeo', lancamentos:'Lançamentos', financeiro:'Financeiro', equipe:'Equipe'};
+const ACCESS_LABELS = {clientes:'Clientes', social:'Social Media', posts:'Posts', video:'Vídeo', lancamentos:'Lançamentos', financeiro:'Financeiro', equipe:'Equipe'};
 function renderTeam(){
   const grid = document.getElementById('teamGrid');
   if(S.team.length===0){ grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><b>Ninguém cadastrado</b></div>`; return; }
@@ -982,6 +1023,7 @@ const ALL_TABS = [
   {id:'home', label:'Início', icon:'ic-home'},
   {id:'clientes', label:'Clientes', icon:'ic-users'},
   {id:'social', label:'Social Media', icon:'ic-cal'},
+  {id:'posts', label:'Posts', icon:'ic-image'},
   {id:'video', label:'Vídeo', icon:'ic-film'},
   {id:'lancamentos', label:'Lançamentos', icon:'ic-rocket'},
   {id:'financeiro', label:'Financeiro', icon:'ic-wallet'},
@@ -1025,6 +1067,7 @@ function renderView(){
   if(currentTab==='clientes') renderClients();
   if(currentTab==='social') renderCalendar();
   if(currentTab==='video') renderKanban();
+  if(currentTab==='posts') renderPostsBoard();
   if(currentTab==='lancamentos') renderLaunchesShared();
   if(currentTab==='financeiro') renderFinance();
   if(currentTab==='equipe') renderTeam();
@@ -1149,9 +1192,10 @@ function renderUpcomingCard(posts, videos){
 
 function fillClientSelects(){
   const opts = S.clients.filter(c=>c.status!=='encerrado').map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
-  ['pClient','vClient','fClient'].forEach(id=>{ document.getElementById(id).innerHTML = opts || '<option value="">Nenhum cliente cadastrado</option>'; });
+  ['pClient','vClient','fClient','ptClient'].forEach(id=>{ document.getElementById(id).innerHTML = opts || '<option value="">Nenhum cliente cadastrado</option>'; });
   document.getElementById('socialClientFilter').innerHTML = '<option value="">Todos os clientes</option>' + opts;
   document.getElementById('videoClientFilter').innerHTML = '<option value="">Todos os clientes</option>' + opts;
+  document.getElementById('postsClientFilter').innerHTML = '<option value="">Todos os clientes</option>' + opts;
 }
 function renderClients(){
   const grid = document.getElementById('clientsGrid');
@@ -1449,6 +1493,96 @@ function renderKanban(){
     col.addEventListener('drop', async e=>{
       e.preventDefault(); col.classList.remove('dragover');
       if(draggedVideoId){ await db.collection('video_tasks').doc(draggedVideoId).update({status: col.dataset.status}); draggedVideoId=null; }
+    });
+  });
+}
+
+
+/* ---- Posts (artes): quadro por status, com Drive ---- */
+const POST_STATUSES = ['a_fazer','em_criacao','aprovacao','entregue'];
+const POST_STATUS_LABEL = {a_fazer:'A fazer', em_criacao:'Em criação', aprovacao:'Em aprovação', entregue:'Entregue'};
+const POST_FORMAT_LABEL = {feed:'Feed', carrossel:'Carrossel', stories:'Stories', reels:'Capa de Reels', outro:'Outro'};
+let draggedPostTaskId = null;
+document.getElementById('postsClientFilter').addEventListener('change', renderPostsBoard);
+document.getElementById('btnNewPostTask').addEventListener('click', ()=>{
+  if(S.clients.length===0){ alert('Cadastre um cliente antes de criar um post.'); return; }
+  document.getElementById('postTaskModalTitle').textContent = 'Novo post';
+  document.getElementById('postTaskForm').reset();
+  document.getElementById('ptId').value='';
+  const filt = document.getElementById('postsClientFilter').value;
+  if(filt) document.getElementById('ptClient').value = filt;
+  openModal('modalPostTask');
+});
+window.editPostTask = function(id){
+  const t = S.postTasks.find(x=>x.id===id); if(!t) return;
+  document.getElementById('postTaskModalTitle').textContent = 'Editar post';
+  document.getElementById('ptId').value = t.id;
+  document.getElementById('ptClient').value = t.clientId;
+  document.getElementById('ptTitle').value = t.title||'';
+  document.getElementById('ptFormat').value = t.format||'feed';
+  document.getElementById('ptDue').value = t.dueDate||'';
+  document.getElementById('ptStatus').value = t.status||'a_fazer';
+  document.getElementById('ptSource').value = t.sourceLink||'';
+  document.getElementById('ptFinal').value = t.finalLink||'';
+  document.getElementById('ptNotes').value = t.notes||'';
+  openModal('modalPostTask');
+};
+window.deletePostTask = async function(id){
+  if(!confirm('Remover este post?')) return;
+  await db.collection('post_tasks').doc(id).delete();
+};
+document.getElementById('postTaskForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const id = document.getElementById('ptId').value;
+  const data = {
+    clientId: document.getElementById('ptClient').value,
+    title: document.getElementById('ptTitle').value.trim(),
+    format: document.getElementById('ptFormat').value,
+    dueDate: document.getElementById('ptDue').value || null,
+    status: document.getElementById('ptStatus').value,
+    sourceLink: document.getElementById('ptSource').value.trim(),
+    finalLink: document.getElementById('ptFinal').value.trim(),
+    notes: document.getElementById('ptNotes').value.trim(),
+  };
+  try{
+    if(id){ await db.collection('post_tasks').doc(id).update(data); }
+    else{ data.createdAt = new Date().toISOString(); await db.collection('post_tasks').add(data); }
+    closeModal('modalPostTask');
+  }catch(err){ alert('Não consegui salvar: '+(err.message||err)); }
+});
+function renderPostsBoard(){
+  const filt = document.getElementById('postsClientFilter').value;
+  let tasks = [...S.postTasks];
+  if(filt) tasks = tasks.filter(t=>t.clientId===filt);
+  const kb = document.getElementById('postsKanban');
+  kb.innerHTML = POST_STATUSES.map(st=>{
+    const items = tasks.filter(t=>(t.status||'a_fazer')===st).sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+    return `<div class="kanban-col" data-status="${st}">
+      <div class="kanban-col-head"><b>${POST_STATUS_LABEL[st]}</b><span class="kanban-count">${items.length}</span></div>
+      <div class="kanban-col-body" style="min-height:60px;">
+        ${items.map(t=>`<div class="kb-card" draggable="true" data-id="${t.id}" onclick="editPostTask('${t.id}')">
+          <div class="kb-client"><span class="client-dot" style="background:${clientColor(t.clientId)}"></span>${escapeHtml(clientName(t.clientId))}</div>
+          <div class="kb-title">${escapeHtml(t.title||'')}</div>
+          <div class="kb-due">${POST_FORMAT_LABEL[t.format]||'Post'}${t.dueDate ? ' · Prazo: '+fmtDate(t.dueDate) : ''}</div>
+          <div class="kb-links" onclick="event.stopPropagation()">
+            ${t.sourceLink ? `<a href="${escapeHtml(t.sourceLink)}" target="_blank" rel="noopener" class="drivebtn"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-folder"/></svg>Editável</a>` : ''}
+            ${t.finalLink ? `<a href="${escapeHtml(t.finalLink)}" target="_blank" rel="noopener" class="drivebtn"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-check"/></svg>Final</a>` : ''}
+            <button class="btn btn-ghost btn-sm" onclick="deletePostTask('${t.id}')" style="padding:4px 6px;"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-trash"/></svg></button>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  kb.querySelectorAll('.kb-card').forEach(card=>{
+    card.addEventListener('dragstart', ()=>{ draggedPostTaskId = card.dataset.id; card.classList.add('dragging'); });
+    card.addEventListener('dragend', ()=>{ card.classList.remove('dragging'); });
+  });
+  kb.querySelectorAll('.kanban-col').forEach(col=>{
+    col.addEventListener('dragover', e=>{ e.preventDefault(); col.classList.add('dragover'); });
+    col.addEventListener('dragleave', ()=>col.classList.remove('dragover'));
+    col.addEventListener('drop', async e=>{
+      e.preventDefault(); col.classList.remove('dragover');
+      if(draggedPostTaskId){ const id=draggedPostTaskId; draggedPostTaskId=null; const t=S.postTasks.find(x=>x.id===id); if(t){ t.status=col.dataset.status; renderPostsBoard(); } try{ await db.collection('post_tasks').doc(id).update({status: col.dataset.status}); }catch(err){ alert(err.message||err); } }
     });
   });
 }
@@ -2146,6 +2280,7 @@ function startDataListeners(){
     S.team = snap.docs.map(d=>{
       const data = d.data();
       if(!data.access){ data.access = ACCESS_DEFAULTS[data.role] || ACCESS_DEFAULTS.outro; }
+      else if(data.role!=='cliente' && !('posts' in data.access)){ data.access = {...data.access, posts: data.role==='admin'||data.role==='social'}; }
       return {id:d.id, ...data};
     });
     const fresh = S.team.find(x=>currentMember && x.id===currentMember.id);
@@ -2167,6 +2302,11 @@ function startDataListeners(){
     S.socialPosts = snap.docs.map(d=>({id:d.id, ...d.data()}));
     if(currentTab==='social') renderCalendar();
   }, err=>console.error('social_posts', err));
+
+  db.collection('post_tasks').onSnapshot(snap=>{
+    S.postTasks = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    if(currentTab==='posts') renderPostsBoard();
+  }, err=>console.error('post_tasks', err));
 
   db.collection('video_tasks').onSnapshot(snap=>{
     S.videoTasks = snap.docs.map(d=>({id:d.id, ...d.data()}));
