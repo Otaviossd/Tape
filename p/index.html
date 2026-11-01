@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Cronograma de publicaciones | Tape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0a0e0d;--muted:#6b7170;--teal:#3FAFA3;--teal-dk:#23857a;--teal-lt:#eaf6f4;--line:rgba(10,14,13,.1);--bg:#f5f7f6;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+  .top{background:#fff;border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;gap:10px}
+  .brand{font-weight:800;font-size:18px;display:flex;align-items:center;gap:8px}
+  .brand i{position:relative;width:18px;height:18px;display:inline-block}
+  .brand i:before,.brand i:after{content:"";position:absolute;background:var(--teal)}
+  .brand i:before{left:50%;top:0;width:2.5px;height:100%;transform:translateX(-50%)}
+  .brand i:after{top:50%;left:0;height:2.5px;width:100%;transform:translateY(-50%)}
+  .wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+  h1{font-size:clamp(24px,5vw,32px);font-weight:800;letter-spacing:-.02em}
+  .sub{color:var(--muted);margin-top:6px;font-size:14.5px;line-height:1.5}
+  .bar{display:flex;align-items:center;justify-content:space-between;margin:24px 0 14px;gap:10px}
+  .nav{display:flex;align-items:center;gap:10px}
+  .nav button,.today{border:1px solid var(--line);background:#fff;border-radius:10px;height:38px;min-width:38px;padding:0 12px;font:600 13px 'Inter';cursor:pointer;color:var(--ink)}
+  .title{font-weight:700;font-size:16px;min-width:140px;text-align:center}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .dow{padding:10px 0;text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line)}
+  .day{min-height:78px;padding:8px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;position:relative}
+  .day:nth-child(7n){border-right:0}
+  .day.other{background:#fafbfb;color:#c3c8c6}
+  .day b{font-size:13px}
+  .day.today b{background:var(--ink);color:#fff;border-radius:7px;padding:2px 7px}
+  .day.sel{outline:2px solid var(--teal);outline-offset:-2px}
+  .dots{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap}
+  .dots i{width:7px;height:7px;border-radius:50%;background:var(--teal)}
+  h2{font-size:15px;font-weight:700;margin:28px 0 12px}
+  details{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+  summary{list-style:none;cursor:pointer;display:flex;gap:12px;align-items:flex-start;padding:13px 14px}
+  summary::-webkit-details-marker{display:none}
+  .pd{flex:0 0 52px;text-align:center;border-radius:10px;background:var(--teal-lt);color:var(--teal-dk);padding:6px 0;line-height:1.1}
+  .pd b{display:block;font-size:18px}.pd span{font-size:10.5px;font-weight:700;text-transform:uppercase}
+  .pm{flex:1;min-width:0}
+  .pt{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:3px}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#fbe7cf;color:#a2670f}
+  .badge.ok{background:#dcf3e6;color:#1f7a47}
+  .cap{font-size:13.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  details[open] .cap{display:none}
+  .chev{align-self:center;color:var(--muted);transition:transform .2s}
+  details[open] .chev{transform:rotate(90deg)}
+  .body{padding:0 14px 14px 78px}
+  .full{white-space:pre-wrap;font-size:13.5px;line-height:1.55;margin-bottom:10px}
+  .link{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;font-weight:700;color:var(--teal-dk);text-decoration:none;background:var(--teal-lt);padding:7px 12px;border-radius:9px}
+  .empty{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px 16px;text-align:center;color:var(--muted);font-size:14px}
+  .empty b{display:block;color:var(--ink);margin-bottom:4px}
+  .foot{margin-top:36px;text-align:center;font-size:12px;color:var(--muted)}
+  @media(max-width:560px){.body{padding-left:14px}.day{min-height:56px;padding:6px}.wrap{padding:22px 14px 50px}}
+</style>
+</head>
+<body>
+<div class="top"><div class="brand"><i></i>Tape</div></div>
+<div class="wrap" id="app"><div class="empty">Cargando...</div></div>
+<script>
+const SB='https://dkpoqvggctglfjrhichs.supabase.co';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrcG9xdmdnY3RnbGZqcmhpY2hzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4MjkxMjcsImV4cCI6MjEwMjQwNTEyN30.va9_OpTA-8KjHiTVduReaQtFALhSALu_R9HE_19495M';
+const MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DOW=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const WD=['dom','lun','mar','mié','jue','vie','sáb'];
+const slug=decodeURIComponent(location.pathname.replace(/\/+$/,'').split('/').pop()||'');
+let data=null, month=new Date(), sel=null; month.setDate(1);
+const open=new Set();
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+async function load(){
+  try{
+    const r=await fetch(SB+'/rest/v1/rpc/get_shared_calendar',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_slug:slug})});
+    if(!r.ok) throw new Error(r.status);
+    data=await r.json();
+  }catch(e){ if(!data){ document.getElementById('app').innerHTML='<div class="empty"><b>No pudimos cargar el cronograma</b>Revisa tu conexión e intenta de nuevo.</div>'; return; } }
+  render();
+}
+function card(p){
+  const d=new Date(p.date+'T00:00:00'), done=p.status==='feito', id=p.date+p.time;
+  const cap=p.caption||'(texto en preparación)';
+  return '<details data-id="'+esc(id)+'" '+(open.has(id)?'open':'')+'><summary><div class="pd"><b>'+d.getDate()+'</b><span>'+WD[d.getDay()]+'</span></div><div class="pm"><div class="pt"><span>'+esc((p.time||'').slice(0,5))+'</span><span class="badge '+(done?'ok':'')+'">'+(done?'Publicado':'Programado')+'</span></div><div class="cap">'+esc(cap)+'</div></div><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><div class="body"><div class="full">'+esc(cap)+'</div>'+(p.driveLink?'<a class="link" target="_blank" rel="noopener" href="'+esc(p.driveLink)+'">Ver archivo</a>':'')+'</div></details>';
+}
+function render(){
+  const app=document.getElementById('app');
+  if(!data){ app.innerHTML='<div class="empty"><b>Enlace no disponible</b>Este enlace no existe o fue desactivado. Pide uno nuevo a tu equipo de Tape.</div>'; return; }
+  const posts=data.posts||[];
+  const by={}; posts.forEach(p=>(by[p.date]=by[p.date]||[]).push(p));
+  const first=new Date(month.getFullYear(),month.getMonth(),1), off=(first.getDay()+6)%7;
+  const start=new Date(first); start.setDate(first.getDate()-off);
+  let g=DOW.map(d=>'<div class="dow">'+d+'</div>').join('');
+  for(let i=0;i<42;i++){ const d=new Date(start); d.setDate(start.getDate()+i); const k=iso(d); const n=(by[k]||[]).length;
+    g+='<div class="day '+(d.getMonth()!==month.getMonth()?'other ':'')+(k===todayISO()?'today ':'')+(sel===k?'sel':'')+'" data-d="'+k+'"><b>'+d.getDate()+'</b><div class="dots">'+(by[k]||[]).slice(0,4).map(()=>'<i></i>').join('')+(n>4?'<small>+'+(n-4)+'</small>':'')+'</div></div>'; }
+  const ym=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0');
+  let list=posts.filter(p=>sel?p.date===sel:p.date.startsWith(ym));
+  list.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  app.innerHTML='<h1>'+esc(data.name)+'</h1><p class="sub">Cronograma de publicaciones. Toca una publicación para ver el texto completo.</p>'
+   +'<div class="bar"><div class="nav"><button id="pv" aria-label="Mes anterior">&lt;</button><div class="title">'+MONTHS[month.getMonth()]+' '+month.getFullYear()+'</div><button id="nx" aria-label="Mes siguiente">&gt;</button></div><button class="today" id="td">Hoy</button></div>'
+   +'<div class="grid">'+g+'</div><h2>'+(sel?'Publicaciones del día':'Publicaciones de '+MONTHS[month.getMonth()])+'</h2>'
+   +(list.length?list.map(card).join(''):'<div class="empty"><b>Nada programado</b>'+(sel?'No hay publicaciones este día.':'Aún no hay publicaciones programadas este mes.')+'</div>')
+   +'<div class="foot">Preparado por Tape · tapegrowth.agency</div>';
+  document.getElementById('pv').onclick=()=>{month.setMonth(month.getMonth()-1);sel=null;render()};
+  document.getElementById('nx').onclick=()=>{month.setMonth(month.getMonth()+1);sel=null;render()};
+  document.getElementById('td').onclick=()=>{month=new Date();month.setDate(1);sel=null;render()};
+  app.querySelectorAll('.day').forEach(el=>el.onclick=()=>{sel=(sel===el.dataset.d)?null:el.dataset.d;render()});
+  app.querySelectorAll('details').forEach(el=>el.addEventListener('toggle',()=>{el.open?open.add(el.dataset.id):open.delete(el.dataset.id)}));
+}
+load(); setInterval(load,60000);
+</script>
+</body>
+</html>

@@ -601,6 +601,19 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modalShare">
+  <div class="modal">
+    <h2 id="shareTitle">Link do cronograma</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">Quem tem este link vê só o calendário de postagens deste cliente, sem login e sem acesso a mais nada do sistema.</p>
+    <div class="field"><label>Link</label><input id="shareUrl" readonly onclick="this.select()"></div>
+    <div class="modal-actions" style="flex-wrap:wrap;">
+      <button type="button" class="btn btn-ghost" id="shareOff" style="margin-right:auto;">Desativar link</button>
+      <button type="button" class="btn btn-outline" id="shareNew">Gerar novo link</button>
+      <button type="button" class="btn btn-primary" id="shareCopy">Copiar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modalPostTask">
   <div class="modal">
     <h2 id="postTaskModalTitle">Novo post</h2>
@@ -1220,6 +1233,55 @@ function fillClientSelects(){
   document.getElementById('videoClientFilter').innerHTML = '<option value="">Todos os clientes</option>' + opts;
   document.getElementById('postsClientFilter').innerHTML = '<option value="">Todos os clientes</option>' + opts;
 }
+
+/* ---- Link público do cronograma (sem login) ---- */
+const SHARE_BASE = 'https://tapegrowth.agency/p/';
+let shareClientId = null;
+function slugify(t){ return (t||'cliente').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40) || 'cliente'; }
+function randSuffix(){ const a=new Uint8Array(6); crypto.getRandomValues(a); return Array.from(a,b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join(''); }
+function newShareSlug(name){ return slugify(name)+'-'+randSuffix(); }
+function refreshShareModal(){
+  const c = S.clients.find(x=>x.id===shareClientId); if(!c) return;
+  document.getElementById('shareTitle').textContent = 'Link do cronograma: '+c.name;
+  const on = !!c.shareSlug;
+  document.getElementById('shareUrl').value = on ? SHARE_BASE+c.shareSlug : '';
+  document.getElementById('shareUrl').placeholder = on ? '' : 'Link desativado';
+  document.getElementById('shareCopy').style.display = on ? '' : 'none';
+  document.getElementById('shareOff').style.display = on ? '' : 'none';
+  document.getElementById('shareNew').textContent = on ? 'Gerar novo link' : 'Ativar link';
+}
+window.openShare = async function(id){
+  const c = S.clients.find(x=>x.id===id); if(!c) return;
+  shareClientId = id;
+  if(!c.shareSlug){
+    const slug = newShareSlug(c.name);
+    const { error } = await sb.from('clients').update({shareSlug: slug}).eq('id', id);
+    if(error){ alert('Não consegui criar o link. Rodou o SQL do link do cronograma? '+error.message); return; }
+    c.shareSlug = slug;
+  }
+  refreshShareModal(); openModal('modalShare');
+};
+document.getElementById('shareCopy').addEventListener('click', async ()=>{
+  const v = document.getElementById('shareUrl').value;
+  try{ await navigator.clipboard.writeText(v); document.getElementById('shareCopy').textContent='Copiado!'; setTimeout(()=>document.getElementById('shareCopy').textContent='Copiar',1500); }
+  catch(e){ document.getElementById('shareUrl').select(); }
+});
+document.getElementById('shareNew').addEventListener('click', async ()=>{
+  const c = S.clients.find(x=>x.id===shareClientId); if(!c) return;
+  if(c.shareSlug && !confirm('O link atual vai parar de funcionar. Gerar um novo?')) return;
+  const slug = newShareSlug(c.name);
+  const { error } = await sb.from('clients').update({shareSlug: slug}).eq('id', c.id);
+  if(error){ alert(error.message); return; }
+  c.shareSlug = slug; refreshShareModal();
+});
+document.getElementById('shareOff').addEventListener('click', async ()=>{
+  const c = S.clients.find(x=>x.id===shareClientId); if(!c) return;
+  if(!confirm('Desativar o link? Quem tiver o link antigo perde o acesso.')) return;
+  const { error } = await sb.from('clients').update({shareSlug: null}).eq('id', c.id);
+  if(error){ alert(error.message); return; }
+  c.shareSlug = null; refreshShareModal();
+});
+
 function renderClients(){
   const grid = document.getElementById('clientsGrid');
   if(S.clients.length===0){
@@ -1240,6 +1302,7 @@ function renderClients(){
       <div class="client-tags">${tags}</div>
       <div class="client-actions">
         ${c.driveFolder ? `<a href="${escapeHtml(c.driveFolder)}" target="_blank" class="drivebtn"><svg class="icon" style="width:13px;height:13px;"><use href="#ic-folder"/></svg>Drive</a>` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="openShare('${c.id}')"><svg class="icon"><use href="#ic-link"/></svg>Link do cronograma</button>
         <button class="btn btn-ghost btn-sm" onclick="editClient('${c.id}')"><svg class="icon"><use href="#ic-edit"/></svg>Editar</button>
         <button class="btn btn-ghost btn-sm" onclick="deleteClient('${c.id}')"><svg class="icon"><use href="#ic-trash"/></svg></button>
       </div>
