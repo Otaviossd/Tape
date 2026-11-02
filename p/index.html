@@ -188,11 +188,11 @@ function lightbox(link,title){
   document.body.appendChild(el);
   if(!id) return;
   const box=el.querySelector('.lbbox');
-  const useFrame=()=>{ if(!el.isConnected||box.querySelector('iframe')) return; const f=document.createElement('iframe'); f.src='https://drive.google.com/file/d/'+id+'/preview'; f.allow='autoplay; fullscreen'; f.allowFullscreen=true; f.onload=()=>{const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); const po=box.querySelector('.lbposter'); if(po) setTimeout(()=>po.remove(),400)}; const v=box.querySelector('video'); if(v) v.remove(); box.appendChild(f); };
+  const useFrame=()=>{ if(!el.isConnected||box.querySelector('iframe')) return; const f=document.createElement('iframe'); f.src='https://drive.google.com/file/d/'+id+'/preview'; f.allow='autoplay; fullscreen'; f.allowFullscreen=true; f.onload=()=>{const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); const po=box.querySelector('.lbposter'); if(po) setTimeout(()=>po.remove(),400)}; const v=box.querySelector('video'); if(v){ v.pause(); v.removeAttribute('src'); v.load(); v.remove(); } const u=box.querySelector('.lbui'); if(u) u.remove(); box.classList.remove('paused'); box.appendChild(f); };
   const v=document.createElement('video'); v.controls=false; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto'; v.autoplay=true;
   v.src='https://drive.usercontent.google.com/download?id='+id+'&export=download&confirm=t';
   let ok=false;
-  v.addEventListener('loadeddata',()=>{ ok=true; const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); const po=box.querySelector('.lbposter'); if(po) po.remove(); });
+  v.addEventListener('loadeddata',()=>{ ok=true; box.classList.add('ready'); const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); const po=box.querySelector('.lbposter'); if(po) po.remove(); });
   v.addEventListener('error',useFrame);
   box.appendChild(v);
   const fmt=t=>{t=Math.max(0,Math.floor(t||0));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
@@ -213,7 +213,7 @@ function lightbox(link,title){
   });
   sync();
   const p=v.play(); if(p&&p.catch) p.catch(()=>{ sync(); });
-  setTimeout(()=>{ if(!ok) useFrame(); },5000);
+  setTimeout(()=>{ if(!ok && v.readyState<2) useFrame(); },12000);
 }
 function render(){
   const app=document.getElementById('app');
