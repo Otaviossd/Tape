@@ -68,6 +68,7 @@
   .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
   .vcard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;padding:0;font:inherit;color:inherit}
   .vth{position:relative;aspect-ratio:9/14;background:linear-gradient(135deg,#0f1a18,#1d3a35);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .vth video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
   .vth img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .vth .pl{position:relative;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center}
   .vth .pl:after{content:"";margin-left:4px;border-left:13px solid var(--ink);border-top:8px solid transparent;border-bottom:8px solid transparent}
@@ -139,6 +140,7 @@ function card(p){
 }
 let tab=null;
 const ytag=m=>{const[y,mm]=m.split('-');return MONTHS[+mm-1]+' '+y};
+const fileUrl=fp=>SB+'/storage/v1/object/public/entregas/'+String(fp).split('/').map(encodeURIComponent).join('/');
 function driveId(u){const m=String(u||'').match(/\/d\/([\w-]+)/)||String(u||'').match(/[?&]id=([\w-]+)/);return m?m[1]:''}
 function flags(){
   const pl=(data&&data.plan)||{};
@@ -166,31 +168,34 @@ function renderVid(){
     if(qty){const pct=Math.min(100,Math.round(list.length/qty*100));
       h+='<div class="prog"><div class="row"><div>'+(m==='sin-mes'?'Videos':ytag(m))+'</div><span>'+list.length+' de '+qty+' videos entregados</span></div><div class="barx"><i style="width:'+pct+'%"></i></div></div>';
     } else h+='<h2>'+(m==='sin-mes'?'Videos':ytag(m))+' · '+list.length+(list.length===1?' video':' videos')+'</h2>';
-    h+='<div class="vgrid" style="margin-top:12px">'+list.map(v=>{const id=driveId(v.finalLink);
-      return '<div class="vcard" role="button" tabindex="0" data-l="'+esc(v.finalLink)+'" data-t="'+esc(v.title||'Video')+'"><div class="vth"><span class="vnum">'+(v.number?String(v.number).padStart(2,'0'):'&#9654;')+'</span>'+(id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w480" onerror="this.remove()">':'')+'<div class="pl"></div></div><div class="vinfo"><span>'+esc(v.title||'Video')+'</span>'+'</div></div>'}).join('')+'</div>';
+    h+='<div class="vgrid" style="margin-top:12px">'+list.map(v=>{const id=driveId(v.finalLink), fp=v.filePath;
+      const cover=fp?'<video muted playsinline preload="metadata" src="'+esc(fileUrl(fp))+'#t=0.1"></video>':(id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w480" onerror="this.remove()">':'');
+      return '<div class="vcard" role="button" tabindex="0" data-l="'+esc(v.finalLink)+'" data-fp="'+esc(fp||'')+'" data-t="'+esc(v.title||'Video')+'"><div class="vth"><span class="vnum">'+(v.number?String(v.number).padStart(2,'0'):'&#9654;')+'</span>'+cover+'<div class="pl"></div></div><div class="vinfo"><span>'+esc(v.title||'Video')+'</span></div></div>'}).join('')+'</div>';
   });
   h+='<div class="foot">Preparado por Tape · tapegrowth.agency</div>';
   app.innerHTML=h; bindTabs();
-  app.querySelectorAll('.vcard').forEach(b=>b.onclick=e=>{ if(e.target.closest('.dl')) return; lightbox(b.dataset.l,b.dataset.t)});
+  app.querySelectorAll('.vcard').forEach(b=>b.onclick=e=>{ if(e.target.closest('.dl')) return; lightbox(b.dataset.l,b.dataset.t,b.dataset.fp)});
 }
-function lightbox(link,title){
+function lightbox(link,title,fp){
   const id=driveId(link);
+  const src=fp?fileUrl(fp):'';
+  const dlUrl=id?'https://drive.usercontent.google.com/download?id='+id+'&export=download&confirm=t':(fp?src+'?download='+encodeURIComponent((title||'video')+'.mp4'):'');
   const el=document.createElement('div'); el.className='lb';
-  const thumb=id?'https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w800':'';
+  const thumb=(!fp&&id)?'https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w800':'';
   el.innerHTML='<div class="lbtop"><b>'+esc(title)+'</b><button data-a="x" aria-label="Cerrar">&times;</button></div>'
    +'<div class="lbstage"><div class="lbbox">'+(thumb?'<img class="lbposter" alt="" src="'+thumb+'" onerror="this.remove()">':'')+'<div class="lbspin"></div></div></div>'
-   +'<div class="lbbot"><button data-a="dl" class="pri">Descargar</button><button data-a="drive">Abrir en Drive</button></div>';
+   +'<div class="lbbot"><button data-a="dl" class="pri">Descargar</button>'+(id?'<button data-a="drive">Abrir en Drive</button>':'')+'</div>';
   const close=()=>{el.remove();document.body.style.overflow='';document.removeEventListener('keydown',key)};
   const key=e=>{if(e.key==='Escape')close()};
-  el.onclick=e=>{const a=e.target.dataset&&e.target.dataset.a; if(a==='x') close(); if(a==='drive') window.open(link,'_blank','noopener'); if(a==='dl'&&id) window.open('https://drive.google.com/uc?export=download&id='+id,'_blank','noopener');};
+  el.onclick=e=>{const a=e.target.dataset&&e.target.dataset.a; if(a==='x') close(); if(a==='drive') window.open(link,'_blank','noopener'); if(a==='dl'&&dlUrl) window.open(dlUrl,'_blank','noopener');};
   document.addEventListener('keydown',key);
   document.body.style.overflow='hidden';
   document.body.appendChild(el);
-  if(!id) return;
+  if(!id&&!fp) return;
   const box=el.querySelector('.lbbox');
-  const useFrame=()=>{ if(!el.isConnected||box.querySelector('iframe')) return; const f=document.createElement('iframe'); f.src='https://drive.google.com/file/d/'+id+'/preview'; f.allow='autoplay; fullscreen'; f.allowFullscreen=true; f.onload=()=>{const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); const po=box.querySelector('.lbposter'); if(po) setTimeout(()=>po.remove(),400)}; const v=box.querySelector('video'); if(v){ v.pause(); v.removeAttribute('src'); v.load(); v.remove(); } const u=box.querySelector('.lbui'); if(u) u.remove(); box.classList.remove('paused'); box.appendChild(f); };
+  const useFrame=()=>{ if(fp){ const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); box.insertAdjacentHTML('beforeend','<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;padding:24px;text-align:center;font-size:14px">No se pudo reproducir. Usa Descargar.</div>'); return; } if(!el.isConnected||box.querySelector('iframe')) return; const f=document.createElement('iframe'); f.src='https://drive.google.com/file/d/'+id+'/preview'; f.allow='autoplay; fullscreen'; f.allowFullscreen=true; f.onload=()=>{const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); const po=box.querySelector('.lbposter'); if(po) setTimeout(()=>po.remove(),400)}; const v=box.querySelector('video'); if(v){ v.pause(); v.removeAttribute('src'); v.load(); v.remove(); } const u=box.querySelector('.lbui'); if(u) u.remove(); box.classList.remove('paused'); box.appendChild(f); };
   const v=document.createElement('video'); v.controls=false; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto'; v.autoplay=true;
-  v.src='https://drive.usercontent.google.com/download?id='+id+'&export=download&confirm=t';
+  v.src=fp?src:'https://drive.usercontent.google.com/download?id='+id+'&export=download&confirm=t';
   let ok=false;
   v.addEventListener('loadeddata',()=>{ ok=true; box.classList.add('ready'); const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); const po=box.querySelector('.lbposter'); if(po) po.remove(); });
   v.addEventListener('error',useFrame);
@@ -213,7 +218,7 @@ function lightbox(link,title){
   });
   sync();
   const p=v.play(); if(p&&p.catch) p.catch(()=>{ sync(); });
-  setTimeout(()=>{ if(!ok && v.readyState<2) useFrame(); },12000);
+  if(!fp) setTimeout(()=>{ if(!ok && v.readyState<2) useFrame(); },12000);
 }
 function render(){
   const app=document.getElementById('app');
