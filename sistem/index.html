@@ -198,6 +198,32 @@
   .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--teal);background:#fff;}
   .field textarea{resize:vertical;min-height:70px;}
   .field-row{display:flex;gap:10px;}
+  .field-row > .field{flex:1 1 0;min-width:0;}
+  input[type=date],input[type=time],input[type=month]{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;text-align:left;}
+  input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and-time-value,input[type=month]::-webkit-date-and-time-value{text-align:left;}
+  @media (max-width:900px){.field input,.field select{min-height:46px;}}
+  .dp{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:18px;overflow:hidden;}
+  .dp-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  .dp-head h3{font-size:15.5px;font-weight:800;letter-spacing:-.01em;}
+  .dp-sub{font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:14px;}
+  .dp .mi{width:auto;min-width:150px;min-height:40px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:600;}
+  .dc{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:13px;padding:13px 14px;background:#fff;margin-bottom:10px;cursor:pointer;font:inherit;color:inherit;}
+  .dc:last-child{margin-bottom:0}
+  .dc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;}
+  .dc-name{font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;min-width:0;}
+  .dc-name .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .dc-count{font-weight:800;font-size:14px;white-space:nowrap;}
+  .dc-count small{color:var(--muted);font-weight:600;font-size:12px;}
+  .pbar{height:8px;border-radius:99px;background:#e3edea;overflow:hidden;}
+  .pbar i{display:block;height:100%;background:#2E9E6A;border-radius:99px;transition:width .4s;}
+  .dc-foot{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-top:8px;font-weight:600;}
+  .dc.full{border-color:#bfe3cf;background:#f4fbf7;}
+  .dc.full .dc-foot b{color:#1f7a47;}
+  .dp-form{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:4px;}
+  @media (max-width:640px){.dp-form{grid-template-columns:1fr;}}
+  .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .dp-actions .btn{flex:1 1 auto;justify-content:center;}
+  .vgrid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:16px;}
   .field-row .field{flex:1;}
   .checkrow{display:flex;flex-wrap:wrap;gap:8px;}
   .checkchip{display:flex;align-items:center;gap:6px;padding:7px 11px;border:1px solid var(--line);border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;}
@@ -473,6 +499,7 @@
           <button class="btn btn-primary" id="btnNewPostTask"><svg class="icon"><use href="#ic-plus"/></svg>Novo post</button>
         </div>
       </div>
+      <div id="postsDemand"></div>
       <div class="kanban" id="postsKanban"></div>
     </div>
 
@@ -604,7 +631,7 @@
         <select id="pPostRef"><option value="">Nenhum (preencher manualmente)</option></select>
       </div>
       <div class="field" id="pVideoField">
-        <label>Vídeo/arte de referência (opcional)</label>
+        <label>Vídeo pronto para postar (opcional)</label>
         <select id="pVideoRef"><option value="">Nenhum (preencher manualmente)</option></select>
       </div>
       <div class="field-row">
@@ -1449,7 +1476,7 @@ function fillPostRefSelect(clientId, selectedId){
 }
 function fillVideoRefSelect(clientId, selectedVideoId){
   const sel = document.getElementById('pVideoRef');
-  const vids = S.videoTasks.filter(v=>v.clientId===clientId);
+  const vids = S.videoTasks.filter(v=>v.clientId===clientId).sort((a,b)=>((b.status==='entregue')-(a.status==='entregue'))||String(b.month||'').localeCompare(String(a.month||''))||((b.number||0)-(a.number||0)));
   const opts = vids.map(v=>`<option value="${v.id}">${escapeHtml(v.title)} · ${VIDEO_STATUS_LABEL[v.status]||v.status}</option>`).join('');
   sel.innerHTML = '<option value="">Nenhum (preencher manualmente)</option>' + opts;
   sel.value = selectedVideoId || '';
@@ -1720,7 +1747,7 @@ const pad2 = n=>String(n).padStart(2,'0');
 function driveIdOf(u){ const m=String(u||'').match(/\/d\/([\w-]+)/)||String(u||'').match(/[?&]id=([\w-]+)/); return m?m[1]:''; }
 function monthLabel(ym){ const [y,m]=ym.split('-'); return MONTHS[+m-1]+' '+y; }
 window.delPick = function(id){ const f=document.getElementById('videoClientFilter'); f.value=id; renderKanban(); };
-window.delMonthChange = function(v){ if(v){ delMonth=v; renderDeliveryPanel(); } };
+window.delMonthChange = function(v){ if(v){ delMonth=v; renderDeliveryPanel(); renderPostsDemand(); } };
 window.delAdd = async function(){
   const clientId = document.getElementById('videoClientFilter').value; if(!clientId) return;
   const link = document.getElementById('delLink').value.trim();
@@ -1731,20 +1758,29 @@ window.delAdd = async function(){
   document.getElementById('delLink').value=''; document.getElementById('delTitle').value='';
   await db.collection('video_tasks').add({clientId, month:delMonth, number:num, title, status:'entregue', finalLink:link, createdAt:new Date().toISOString()});
 };
+function demandCard(color,name,done,qty,unit,onclick){
+  const pct = qty ? Math.min(100,Math.round(done/qty*100)) : 0;
+  const full = qty>0 && done>=qty;
+  const left = qty ? Math.max(0,qty-done) : 0;
+  return `<button type="button" class="dc ${full?'full':''}" onclick="${onclick}">
+    <div class="dc-top"><div class="dc-name"><span class="client-dot" style="background:${color||'#999'}"></span><span class="n">${escapeHtml(name)}</span></div>
+    <div class="dc-count">${done}${qty?` <small>de ${qty}</small>`:` <small>${unit}</small>`}</div></div>
+    ${qty?`<div class="pbar"><i style="width:${pct}%"></i></div><div class="dc-foot"><span>${full?'<b>Completo</b>':`Faltam <b>${left}</b> ${unit}`}</span><span>${pct}%</span></div>`:`<div class="dc-foot"><span>Defina a quantidade por mês no cadastro do cliente</span></div>`}
+  </button>`;
+}
+function monthInputHtml(fn){ return `<input type="month" class="mi" value="${delMonth}" onchange="${fn}(this.value)">`; }
 function renderDeliveryPanel(){
   const box = document.getElementById('deliveryPanel'); if(!box) return;
   const filt = document.getElementById('videoClientFilter').value;
   const keep = {t:(document.getElementById('delTitle')||{}).value||'', l:(document.getElementById('delLink')||{}).value||''};
   const vcs = S.clients.filter(c=>(c.services||[]).includes('video') && c.status!=='encerrado');
-  const monthInput = `<input type="month" value="${delMonth}" onchange="delMonthChange(this.value)" style="padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:600;">`;
+  const countFor = id => S.videoTasks.filter(v=>v.clientId===id && v.month===delMonth && v.status==='entregue').length;
   if(!filt){
     if(!vcs.length){ box.innerHTML=''; return; }
-    box.innerHTML = `<div class="card" style="margin-bottom:16px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;"><b>Entregas do mês · clientes de vídeo</b>${monthInput}</div>
-      <div style="display:grid;gap:10px;">${vcs.map(c=>{
-        const n=S.videoTasks.filter(v=>v.clientId===c.id && v.month===delMonth && v.status==='entregue').length;
-        const q=planOf(c).qtyVideo; const pct=q?Math.min(100,Math.round(n/q*100)):0;
-        return `<div onclick="delPick('${c.id}')" style="cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:12px;"><div style="display:flex;justify-content:space-between;font-weight:700;font-size:13.5px;"><span>${escapeHtml(c.name)}</span><span style="color:var(--muted);font-weight:600;">${n}${q?' de '+q:''} vídeos</span></div>${q?`<div style="height:7px;border-radius:99px;background:#eaf6f4;margin-top:9px;overflow:hidden;"><i style="display:block;height:100%;width:${pct}%;background:var(--teal);"></i></div>`:''}</div>`;
-      }).join('')}</div></div>`;
+    let totalQ=0,totalD=0; vcs.forEach(c=>{ const q=planOf(c).qtyVideo; totalQ+=q; totalD+=Math.min(countFor(c.id),q||countFor(c.id)); });
+    box.innerHTML = `<div class="dp"><div class="dp-head"><h3>Demanda do mês</h3>${monthInputHtml('delMonthChange')}</div>
+      <div class="dp-sub">${totalQ?`${Math.max(0,totalQ-totalD)} vídeos para entregar em ${monthLabel(delMonth)}`:'Escolha um cliente para subir os vídeos'}</div>
+      ${vcs.map(c=>demandCard(c.color,c.name,countFor(c.id),planOf(c).qtyVideo,'vídeos',`delPick('${c.id}')`)).join('')}</div>`;
     return;
   }
   const c = clientById(filt); if(!c){ box.innerHTML=''; return; }
@@ -1752,23 +1788,38 @@ function renderDeliveryPanel(){
   const done = list.filter(v=>v.status==='entregue').length;
   const q = planOf(c).qtyVideo; const pct = q?Math.min(100,Math.round(done/q*100)):0;
   let max=0; list.forEach(v=>{ if((v.number||0)>max) max=v.number; });
-  box.innerHTML = `<div class="card" style="margin-bottom:16px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;"><b>${escapeHtml(c.name)} · ${monthLabel(delMonth)}</b>${monthInput}</div>
-    <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:8px;"><span>${done}${q?' de '+q:''} vídeos entregues</span>${q?`<span style="color:var(--muted)">${pct}%</span>`:''}</div>
-    ${q?`<div style="height:8px;border-radius:99px;background:#eaf6f4;overflow:hidden;margin-bottom:14px;"><i style="display:block;height:100%;width:${pct}%;background:var(--teal);"></i></div>`:'<div style="height:6px"></div>'}
-    <div class="field-row" style="align-items:flex-end;">
+  box.innerHTML = `<div class="dp">
+    <div class="dp-head"><h3>${escapeHtml(c.name)}</h3>${monthInputHtml('delMonthChange')}</div>
+    <div class="dp-sub">${monthLabel(delMonth)}</div>
+    ${demandCard(c.color,'Vídeos entregues',done,q,'vídeos','void(0)')}
+    <div class="dp-form" style="margin-top:16px;">
       <div class="field" style="margin:0;"><label>Nome (opcional)</label><input id="delTitle" placeholder="Vídeo ${pad2(max+1)}"></div>
       <div class="field" style="margin:0;"><label>Link do Drive</label><input id="delLink" type="url" placeholder="https://drive.google.com/..."></div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+    <div class="dp-actions">
       <button class="btn btn-primary" onclick="delAdd()"><svg class="icon"><use href="#ic-plus"/></svg>Adicionar vídeo ${pad2(max+1)}</button>
       <button class="btn btn-outline" onclick="openShare('${c.id}')"><svg class="icon"><use href="#ic-link"/></svg>Link para o cliente</button>
-      <button class="btn btn-ghost" onclick="delPick('')">Todos os clientes</button>
+      <button class="btn btn-ghost" onclick="delPick('')">Voltar</button>
     </div>
-    ${list.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:14px;">${list.map(v=>{const id=driveIdOf(v.finalLink);return `<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;"><a href="${escapeHtml(v.finalLink||'#')}" target="_blank" style="display:block;aspect-ratio:9/12;background:#10201d;position:relative;">${id?`<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id=${id}&sz=w320" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">`:''}</a><div style="padding:8px 10px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(v.title)}</span><button class="btn btn-ghost btn-sm" onclick="deleteVideo('${v.id}')" style="padding:3px 5px;"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-trash"/></svg></button></div></div>`;}).join('')}</div>`:''}
+    ${list.length?`<div class="vgrid2">${list.map(v=>{const id=driveIdOf(v.finalLink);return `<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;"><a href="${escapeHtml(v.finalLink||'#')}" target="_blank" style="display:block;aspect-ratio:9/12;background:#10201d;position:relative;">${id?`<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id=${id}&sz=w320" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">`:''}</a><div style="padding:8px 10px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(v.title)}</span><button class="btn btn-ghost btn-sm" onclick="deleteVideo('${v.id}')" style="padding:3px 5px;"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-trash"/></svg></button></div></div>`;}).join('')}</div>`:''}
   </div>`;
   if(keep.t) document.getElementById('delTitle').value=keep.t;
   if(keep.l) document.getElementById('delLink').value=keep.l;
+}
+function postMonthOf(t){ return String(t.dueDate||t.createdAt||'').slice(0,7); }
+window.postsPick = function(id){ document.getElementById('postsClientFilter').value=id; renderPostsBoard(); };
+window.postsMonthChange = function(v){ if(v){ delMonth=v; renderPostsDemand(); renderDeliveryPanel(); } };
+function renderPostsDemand(){
+  const box = document.getElementById('postsDemand'); if(!box) return;
+  const filt = document.getElementById('postsClientFilter').value;
+  let cs = S.clients.filter(c=>c.status!=='encerrado' && (c.services||[]).includes('social'));
+  if(filt) cs = cs.filter(c=>c.id===filt);
+  if(!cs.length){ box.innerHTML=''; return; }
+  const countFor = id => S.postTasks.filter(t=>t.clientId===id && t.status==='entregue' && postMonthOf(t)===delMonth).length;
+  let tq=0,td=0; cs.forEach(c=>{ const q=planOf(c).qtySocial; tq+=q; td+=Math.min(countFor(c.id),q||countFor(c.id)); });
+  box.innerHTML = `<div class="dp"><div class="dp-head"><h3>Demanda do mês</h3>${monthInputHtml('postsMonthChange')}</div>
+    <div class="dp-sub">${tq?`${Math.max(0,tq-td)} posts para entregar em ${monthLabel(delMonth)}`:monthLabel(delMonth)}</div>
+    ${cs.map(c=>demandCard(c.color,c.name,countFor(c.id),planOf(c).qtySocial,'posts',`postsPick('${c.id}')`)).join('')}</div>`;
 }
 function renderKanban(){
   renderDeliveryPanel();
@@ -1863,6 +1914,7 @@ document.getElementById('postTaskForm').addEventListener('submit', async e=>{
   }catch(err){ alert('Não consegui salvar: '+(err.message||err)); }
 });
 function renderPostsBoard(){
+  renderPostsDemand();
   const filt = document.getElementById('postsClientFilter').value;
   let tasks = [...S.postTasks];
   if(filt) tasks = tasks.filter(t=>t.clientId===filt);
