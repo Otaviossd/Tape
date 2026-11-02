@@ -1918,6 +1918,7 @@ window.delAddFull = async function(){
   const file = delPickedFile;
   if(!link && !file){ alert('Cole o link do Drive e/ou escolha o arquivo do vídeo.'); return; }
   if(link && !/^https?:\/\//i.test(link)){ alert('Cole o link completo do Drive (https://...).'); return; }
+  if(!link && !confirm('Sem o link do Drive, o cliente NÃO poderá baixar o original (só assistir a prévia). Continuar mesmo assim?')) return;
   let next=0; S.videoTasks.filter(v=>v.clientId===clientId && vMonth(v)===delMonth).forEach(v=>{ if((v.number||0)>next) next=v.number; });
   next++;
   const title = typed || ('Vídeo '+pad2(next));

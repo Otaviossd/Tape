@@ -179,12 +179,12 @@ function renderVid(){
 function lightbox(link,title,fp){
   const id=driveId(link);
   const src=fp?fileUrl(fp):'';
-  const dlUrl=id?'https://drive.usercontent.google.com/download?id='+id+'&export=download&confirm=t':(fp?src+'?download='+encodeURIComponent((title||'video')+'.mp4'):'');
+  const dlUrl=id?'https://drive.usercontent.google.com/download?id='+id+'&export=download&confirm=t':'';
   const el=document.createElement('div'); el.className='lb';
   const thumb=(!fp&&id)?'https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w800':'';
   el.innerHTML='<div class="lbtop"><b>'+esc(title)+'</b><button data-a="x" aria-label="Cerrar">&times;</button></div>'
    +'<div class="lbstage"><div class="lbbox">'+(thumb?'<img class="lbposter" alt="" src="'+thumb+'" onerror="this.remove()">':'')+'<div class="lbspin"></div></div></div>'
-   +'<div class="lbbot"><button data-a="dl" class="pri">Descargar</button>'+(id?'<button data-a="drive">Abrir en Drive</button>':'')+'</div>';
+   +'<div class="lbbot">'+(id?'<button data-a="dl" class="pri">Descargar</button>':'')+''+(id?'<button data-a="drive">Abrir en Drive</button>':'')+'</div>';
   const close=()=>{el.remove();document.body.style.overflow='';document.removeEventListener('keydown',key)};
   const key=e=>{if(e.key==='Escape')close()};
   el.onclick=e=>{const a=e.target.dataset&&e.target.dataset.a; if(a==='x') close(); if(a==='drive') window.open(link,'_blank','noopener'); if(a==='dl'&&dlUrl) window.open(dlUrl,'_blank','noopener');};
