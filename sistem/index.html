@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>Tape Sistema</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -79,6 +79,17 @@
   @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
   .view-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px;}
+  html,body{overflow-x:hidden;max-width:100%;}
+  .view-head > div:last-child{display:flex;gap:8px;flex-wrap:wrap;min-width:0;}
+  .view-head select{min-width:0;max-width:100%;}
+  @media (max-width:640px){
+    .view-head{flex-direction:column;align-items:stretch;gap:12px;}
+    .view-head > div{min-width:0;}
+    .view-head > div:last-child{width:100%;}
+    .view-head > div:last-child select{flex:1 1 100%;width:100%;}
+    .view-head > div:last-child .btn{flex:1 1 0;justify-content:center;white-space:nowrap;padding-left:10px;padding-right:10px;}
+    .kb-card,.card,.modal{max-width:100%;}
+  }
   .view-head h1{font-size:23px;font-weight:800;letter-spacing:-0.01em;}
   .view-head p{color:var(--muted);font-size:13.5px;margin-top:4px;}
 
@@ -436,7 +447,7 @@
     <div class="view" id="view-social">
       <div class="view-head">
         <div><h1>Social Media</h1><p>Calendário de postagens por cliente</p></div>
-        <div style="display:flex;gap:8px;">
+        <div>
           <select id="socialClientFilter" style="padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:600;"></select>
           <button class="btn btn-primary" id="btnNewPost"><svg class="icon"><use href="#ic-plus"/></svg>Nova postagem</button>
         </div>
@@ -457,7 +468,7 @@
     <div class="view" id="view-posts">
       <div class="view-head">
         <div><h1>Posts</h1><p>Artes e posts para criar e entregar, com arquivos no Drive</p></div>
-        <div style="display:flex;gap:8px;">
+        <div>
           <select id="postsClientFilter" style="padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:600;"></select>
           <button class="btn btn-primary" id="btnNewPostTask"><svg class="icon"><use href="#ic-plus"/></svg>Novo post</button>
         </div>
@@ -468,12 +479,13 @@
     <div class="view" id="view-video">
       <div class="view-head">
         <div><h1>Vídeo</h1><p>Entregas por cliente, integradas ao Drive</p></div>
-        <div style="display:flex;gap:8px;">
+        <div>
           <select id="videoClientFilter" style="padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:600;"></select>
           <button class="btn btn-outline" id="btnBulkVideo"><svg class="icon"><use href="#ic-folder"/></svg>Entregas em lote</button>
           <button class="btn btn-primary" id="btnNewVideo"><svg class="icon"><use href="#ic-plus"/></svg>Nova entrega</button>
         </div>
       </div>
+      <div id="deliveryPanel"></div>
       <div class="kanban" id="videoKanban"></div>
     </div>
 
@@ -948,10 +960,11 @@ async function loadSessionAndStart(){
 const ACCESS_DEFAULTS = {
   admin: {clientes:true, social:true, posts:true, video:true, lancamentos:true, financeiro:true, equipe:true},
   social: {clientes:true, social:true, posts:true, video:false, lancamentos:true, financeiro:false, equipe:false},
-  video: {clientes:true, social:false, video:true, lancamentos:true, financeiro:false, equipe:false},
+  video: {clientes:true, social:false, video:true, lancamentos:false, financeiro:false, equipe:false},
   outro: {clientes:true, social:false, video:false, lancamentos:false, financeiro:false, equipe:false},
   cliente: {cronograma:true},
 };
+function canSeeMoney(){ return !!(currentMember && (currentMember.role==='admin' || (currentMember.access && currentMember.access.financeiro))); }
 function isClient(){ return !!(currentMember && currentMember.role==='cliente'); }
 function setAccessCheckboxes(access){
   document.querySelectorAll('#personForm .checkchip input:not([disabled])').forEach(chk=>{
@@ -1326,7 +1339,7 @@ function renderClients(){
       if(s==='video' && pl.qtyVideo) t = pl.qtyVideo+' vídeos/mês';
       if(s==='social' && pl.qtySocial) t = pl.qtySocial+' posts/mês';
       return `<span class="tag">${escapeHtml(t)}</span>`;
-    }).join('') + (c.monthlyValue ? `<span class="tag plantag">₲ ${Number(c.monthlyValue).toLocaleString('es-PY')}/mês</span>` : '');
+    }).join('') + (c.monthlyValue && canSeeMoney() ? `<span class="tag plantag">₲ ${Number(c.monthlyValue).toLocaleString('es-PY')}/mês</span>` : '');
     return `<div class="card client-card">
       <div class="client-top">
         <div style="display:flex;gap:9px;">
@@ -1353,6 +1366,9 @@ function buildColorPicker(sel){
     s.classList.add('sel'); document.getElementById('cColor').value = s.dataset.c;
   }));
 }
+function applyMoneyVisibility(){
+  document.getElementById('cValue').closest('.field-row').style.display = canSeeMoney() ? '' : 'none';
+}
 function syncPlanRows(){
   document.querySelectorAll('#planBox .planrow').forEach(r=>{ const on=r.querySelector('input[type=checkbox]').checked; r.classList.toggle('on', on); const q=r.querySelector('.qty input'); if(q) q.disabled=!on; });
 }
@@ -1372,6 +1388,7 @@ document.getElementById('btnNewClient').addEventListener('click', ()=>{
   syncPlanRows();
   document.getElementById('cColor').value = COLORS[S.clients.length % COLORS.length];
   buildColorPicker(document.getElementById('cColor').value);
+  applyMoneyVisibility();
   openModal('modalClient');
 });
 window.editClient = function(id){
@@ -1390,6 +1407,7 @@ window.editClient = function(id){
   syncPlanRows();
   document.getElementById('cColor').value = c.color||COLORS[0];
   buildColorPicker(c.color||COLORS[0]);
+  applyMoneyVisibility();
   openModal('modalClient');
 };
 window.deleteClient = async function(id){
@@ -1402,8 +1420,6 @@ document.getElementById('clientForm').addEventListener('submit', async e=>{
   const services = [...document.querySelectorAll('#clientForm .checkchip input:checked')].map(i=>i.value);
   const data = {
     name: document.getElementById('cName').value.trim(),
-    monthlyValue: parseFloat(document.getElementById('cValue').value)||0,
-    billingDay: parseInt(document.getElementById('cBillingDay').value)||null,
     status: document.getElementById('cStatus').value,
     driveFolder: document.getElementById('cDrive').value.trim(),
     services, color: document.getElementById('cColor').value,
@@ -1413,6 +1429,7 @@ document.getElementById('clientForm').addEventListener('submit', async e=>{
       trafego: {on: services.includes('trafego')}, branding: {on: services.includes('branding')}, web: {on: services.includes('web')}
     },
   };
+  if(canSeeMoney()){ data.monthlyValue = parseFloat(document.getElementById('cValue').value)||0; data.billingDay = parseInt(document.getElementById('cBillingDay').value)||null; }
   if(id){ await db.collection('clients').doc(id).update(data); }
   else{ data.createdAt = new Date().toISOString(); await db.collection('clients').add(data); }
   closeModal('modalClient');
@@ -1647,7 +1664,7 @@ document.getElementById('bulkForm').addEventListener('submit', async e=>{
   for(let i=0;i<links.length;i++){
     const num = max+i+1;
     await db.collection('video_tasks').add({
-      clientId, month, number:num, title: prefix+' '+num, status:'entregue',
+      clientId, month, number:num, title: prefix+' '+pad2(num), status:'entregue',
       finalLink: links[i], createdAt: new Date().toISOString()
     });
   }
@@ -1698,7 +1715,63 @@ document.getElementById('videoForm').addEventListener('submit', async e=>{
 const VIDEO_STATUSES = ['pendente','gravado','editado','entregue'];
 const VIDEO_STATUS_LABEL = {pendente:'Pendente',gravado:'Gravado',editado:'Editado',entregue:'Entregue'};
 let draggedVideoId = null;
+let delMonth = (()=>{const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');})();
+const pad2 = n=>String(n).padStart(2,'0');
+function driveIdOf(u){ const m=String(u||'').match(/\/d\/([\w-]+)/)||String(u||'').match(/[?&]id=([\w-]+)/); return m?m[1]:''; }
+function monthLabel(ym){ const [y,m]=ym.split('-'); return MONTHS[+m-1]+' '+y; }
+window.delPick = function(id){ const f=document.getElementById('videoClientFilter'); f.value=id; renderKanban(); };
+window.delMonthChange = function(v){ if(v){ delMonth=v; renderDeliveryPanel(); } };
+window.delAdd = async function(){
+  const clientId = document.getElementById('videoClientFilter').value; if(!clientId) return;
+  const link = document.getElementById('delLink').value.trim();
+  if(!/^https?:\/\//i.test(link)){ alert('Cole o link completo do Drive (https://...).'); return; }
+  let max=0; S.videoTasks.filter(v=>v.clientId===clientId && v.month===delMonth).forEach(v=>{ if((v.number||0)>max) max=v.number; });
+  const num = max+1;
+  const title = document.getElementById('delTitle').value.trim() || ('Vídeo '+pad2(num));
+  document.getElementById('delLink').value=''; document.getElementById('delTitle').value='';
+  await db.collection('video_tasks').add({clientId, month:delMonth, number:num, title, status:'entregue', finalLink:link, createdAt:new Date().toISOString()});
+};
+function renderDeliveryPanel(){
+  const box = document.getElementById('deliveryPanel'); if(!box) return;
+  const filt = document.getElementById('videoClientFilter').value;
+  const keep = {t:(document.getElementById('delTitle')||{}).value||'', l:(document.getElementById('delLink')||{}).value||''};
+  const vcs = S.clients.filter(c=>(c.services||[]).includes('video') && c.status!=='encerrado');
+  const monthInput = `<input type="month" value="${delMonth}" onchange="delMonthChange(this.value)" style="padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:600;">`;
+  if(!filt){
+    if(!vcs.length){ box.innerHTML=''; return; }
+    box.innerHTML = `<div class="card" style="margin-bottom:16px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;"><b>Entregas do mês · clientes de vídeo</b>${monthInput}</div>
+      <div style="display:grid;gap:10px;">${vcs.map(c=>{
+        const n=S.videoTasks.filter(v=>v.clientId===c.id && v.month===delMonth && v.status==='entregue').length;
+        const q=planOf(c).qtyVideo; const pct=q?Math.min(100,Math.round(n/q*100)):0;
+        return `<div onclick="delPick('${c.id}')" style="cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:12px;"><div style="display:flex;justify-content:space-between;font-weight:700;font-size:13.5px;"><span>${escapeHtml(c.name)}</span><span style="color:var(--muted);font-weight:600;">${n}${q?' de '+q:''} vídeos</span></div>${q?`<div style="height:7px;border-radius:99px;background:#eaf6f4;margin-top:9px;overflow:hidden;"><i style="display:block;height:100%;width:${pct}%;background:var(--teal);"></i></div>`:''}</div>`;
+      }).join('')}</div></div>`;
+    return;
+  }
+  const c = clientById(filt); if(!c){ box.innerHTML=''; return; }
+  const list = S.videoTasks.filter(v=>v.clientId===filt && v.month===delMonth).sort((a,b)=>(a.number||0)-(b.number||0));
+  const done = list.filter(v=>v.status==='entregue').length;
+  const q = planOf(c).qtyVideo; const pct = q?Math.min(100,Math.round(done/q*100)):0;
+  let max=0; list.forEach(v=>{ if((v.number||0)>max) max=v.number; });
+  box.innerHTML = `<div class="card" style="margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;"><b>${escapeHtml(c.name)} · ${monthLabel(delMonth)}</b>${monthInput}</div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:8px;"><span>${done}${q?' de '+q:''} vídeos entregues</span>${q?`<span style="color:var(--muted)">${pct}%</span>`:''}</div>
+    ${q?`<div style="height:8px;border-radius:99px;background:#eaf6f4;overflow:hidden;margin-bottom:14px;"><i style="display:block;height:100%;width:${pct}%;background:var(--teal);"></i></div>`:'<div style="height:6px"></div>'}
+    <div class="field-row" style="align-items:flex-end;">
+      <div class="field" style="margin:0;"><label>Nome (opcional)</label><input id="delTitle" placeholder="Vídeo ${pad2(max+1)}"></div>
+      <div class="field" style="margin:0;"><label>Link do Drive</label><input id="delLink" type="url" placeholder="https://drive.google.com/..."></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+      <button class="btn btn-primary" onclick="delAdd()"><svg class="icon"><use href="#ic-plus"/></svg>Adicionar vídeo ${pad2(max+1)}</button>
+      <button class="btn btn-outline" onclick="openShare('${c.id}')"><svg class="icon"><use href="#ic-link"/></svg>Link para o cliente</button>
+      <button class="btn btn-ghost" onclick="delPick('')">Todos os clientes</button>
+    </div>
+    ${list.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:14px;">${list.map(v=>{const id=driveIdOf(v.finalLink);return `<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;"><a href="${escapeHtml(v.finalLink||'#')}" target="_blank" style="display:block;aspect-ratio:9/12;background:#10201d;position:relative;">${id?`<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id=${id}&sz=w320" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">`:''}</a><div style="padding:8px 10px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(v.title)}</span><button class="btn btn-ghost btn-sm" onclick="deleteVideo('${v.id}')" style="padding:3px 5px;"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-trash"/></svg></button></div></div>`;}).join('')}</div>`:''}
+  </div>`;
+  if(keep.t) document.getElementById('delTitle').value=keep.t;
+  if(keep.l) document.getElementById('delLink').value=keep.l;
+}
 function renderKanban(){
+  renderDeliveryPanel();
   const filt = document.getElementById('videoClientFilter').value;
   let tasks = [...S.videoTasks];
   if(filt) tasks = tasks.filter(t=>t.clientId===filt);
@@ -2578,8 +2651,6 @@ async function boot(){
 
   await loadSessionAndStart();
 }
-/* trava zoom (iOS ignora user-scalable) */
-['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
 boot();
 </script>
 </body>
