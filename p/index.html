@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="robots" content="noindex, nofollow">
-<title>Cronograma de publicaciones | Tape</title>
+<title>Tu espacio | Tape</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -55,6 +55,27 @@
   .empty{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px 16px;text-align:center;color:var(--muted);font-size:14px}
   .empty b{display:block;color:var(--ink);margin-bottom:4px}
   .foot{margin-top:36px;text-align:center;font-size:12px;color:var(--muted)}
+  .tabs{display:flex;gap:6px;margin:20px 0 0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px;width:max-content;max-width:100%}
+  .tabs button{border:0;background:transparent;padding:9px 18px;border-radius:9px;font:600 13.5px 'Inter';color:var(--muted);cursor:pointer}
+  .tabs button.on{background:var(--ink);color:#fff}
+  .prog{margin:22px 0 6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .prog .row{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600;margin-bottom:9px}
+  .prog .row span{color:var(--muted);font-weight:500}
+  .prog .barx{height:7px;border-radius:99px;background:var(--teal-lt);overflow:hidden}
+  .prog .barx i{display:block;height:100%;background:var(--teal);border-radius:99px}
+  .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+  .vcard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;padding:0;font:inherit;color:inherit}
+  .vth{position:relative;aspect-ratio:9/12;background:linear-gradient(135deg,#0f1a18,#1d3a35);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .vth img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .vth .pl{position:relative;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center}
+  .vth .pl:after{content:"";margin-left:4px;border-left:13px solid var(--ink);border-top:8px solid transparent;border-bottom:8px solid transparent}
+  .vinfo{padding:10px 12px;font-size:13.5px;font-weight:700}
+  .lb{position:fixed;inset:0;background:rgba(5,8,8,.88);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+  .lbin{width:100%;max-width:520px;background:#fff;border-radius:16px;overflow:hidden}
+  .lbin iframe{display:block;width:100%;height:min(62vh,560px);border:0;background:#000}
+  .lbbar{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:12px 14px}
+  .lbbar b{font-size:14px}
+  .lbbar button{border:1px solid var(--line);background:#fff;border-radius:9px;height:36px;padding:0 14px;font:600 13px 'Inter';cursor:pointer}
   @media(max-width:560px){.body{padding-left:14px}.day{min-height:56px;padding:6px}.wrap{padding:22px 14px 50px}}
 </style>
 </head>
@@ -75,7 +96,7 @@ const todayISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMo
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 async function load(){
   try{
-    const r=await fetch(SB+'/rest/v1/rpc/get_shared_calendar',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_slug:slug})});
+    const r=await fetch(SB+'/rest/v1/rpc/get_shared_client',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_slug:slug})});
     if(!r.ok) throw new Error(r.status);
     data=await r.json();
   }catch(e){ if(!data){ document.getElementById('app').innerHTML='<div class="empty"><b>No pudimos cargar el cronograma</b>Revisa tu conexión e intenta de nuevo.</div>'; return; } }
@@ -86,8 +107,52 @@ function card(p){
   const cap=p.caption||'(texto en preparación)';
   return '<details data-id="'+esc(id)+'" '+(open.has(id)?'open':'')+'><summary><div class="pd"><b>'+d.getDate()+'</b><span>'+WD[d.getDay()]+'</span></div><div class="pm"><div class="pt"><span>'+esc((p.time||'').slice(0,5))+'</span><span class="badge '+(done?'ok':'')+'">'+(done?'Publicado':'Programado')+'</span></div><div class="cap">'+esc(cap)+'</div></div><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><div class="body"><div class="full">'+esc(cap)+'</div>'+(p.driveLink?'<a class="link" target="_blank" rel="noopener" href="'+esc(p.driveLink)+'">Ver archivo</a>':'')+'</div></details>';
 }
+let tab=null;
+const ytag=m=>{const[y,mm]=m.split('-');return MONTHS[+mm-1]+' '+y};
+function driveId(u){const m=String(u||'').match(/\/d\/([\w-]+)/)||String(u||'').match(/[?&]id=([\w-]+)/);return m?m[1]:''}
+function flags(){
+  const pl=(data&&data.plan)||{};
+  const cal=(pl.social?pl.social.on:true)||((data.posts||[]).length>0);
+  const vid=(pl.video&&pl.video.on)||((data.videos||[]).length>0);
+  return {cal:cal||!vid, vid:vid};
+}
+function tabsHtml(){
+  const f=flags(); if(!(f.cal&&f.vid)) return '';
+  return '<div class="tabs"><button data-t="cal" class="'+(tab==='cal'?'on':'')+'">Cronograma</button><button data-t="vid" class="'+(tab==='vid'?'on':'')+'">Entregas</button></div>';
+}
+function bindTabs(){
+  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
+}
+function renderVid(){
+  const app=document.getElementById('app');
+  const vids=data.videos||[], pl=(data.plan&&data.plan.video)||{}, qty=+pl.qty||0;
+  const by={}; vids.forEach(v=>{const k=v.month||'sin-mes';(by[k]=by[k]||[]).push(v)});
+  const months=Object.keys(by).sort().reverse();
+  const nowYm=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+  let h='<h1>'+esc(data.name)+'</h1><p class="sub">Tus videos entregados. Toca uno para verlo aquí mismo o abrirlo en Drive.</p>'+tabsHtml();
+  if(!vids.length) h+='<div class="empty" style="margin-top:22px"><b>Aún no hay videos entregados</b>Apenas estén listos aparecerán aquí.</div>';
+  months.forEach(m=>{
+    const list=by[m];
+    if(qty){const pct=Math.min(100,Math.round(list.length/qty*100));
+      h+='<div class="prog"><div class="row"><div>'+(m==='sin-mes'?'Videos':ytag(m))+'</div><span>'+list.length+' de '+qty+' videos entregados</span></div><div class="barx"><i style="width:'+pct+'%"></i></div></div>';
+    } else h+='<h2>'+(m==='sin-mes'?'Videos':ytag(m))+' · '+list.length+(list.length===1?' video':' videos')+'</h2>';
+    h+='<div class="vgrid" style="margin-top:12px">'+list.map(v=>{const id=driveId(v.finalLink);
+      return '<button class="vcard" data-l="'+esc(v.finalLink)+'" data-t="'+esc(v.title||'Video')+'"><div class="vth">'+(id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w480" onerror="this.remove()">':'')+'<div class="pl"></div></div><div class="vinfo">'+esc(v.title||'Video')+'</div></button>'}).join('')+'</div>';
+  });
+  h+='<div class="foot">Preparado por Tape · tapegrowth.agency</div>';
+  app.innerHTML=h; bindTabs();
+  app.querySelectorAll('.vcard').forEach(b=>b.onclick=()=>lightbox(b.dataset.l,b.dataset.t));
+}
+function lightbox(link,title){
+  const id=driveId(link);
+  const el=document.createElement('div'); el.className='lb';
+  el.innerHTML='<div class="lbin">'+(id?'<iframe src="https://drive.google.com/file/d/'+esc(id)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>':'<div class="empty" style="border:0">Vista previa no disponible.</div>')+'<div class="lbbar"><b>'+esc(title)+'</b><span style="display:flex;gap:8px"><button data-a="drive">Abrir en Drive</button><button data-a="x">Cerrar</button></span></div></div>';
+  el.onclick=e=>{ if(e.target===el||e.target.dataset.a==='x') el.remove(); if(e.target.dataset.a==='drive') window.open(link,'_blank','noopener'); };
+  document.body.appendChild(el);
+}
 function render(){
   const app=document.getElementById('app');
+  if(data){ const f=flags(); if(!tab||(tab==='cal'&&!f.cal)||(tab==='vid'&&!f.vid)) tab=f.cal?'cal':'vid'; if(tab==='vid') return renderVid(); }
   if(!data){ app.innerHTML='<div class="empty"><b>Enlace no disponible</b>Este enlace no existe o fue desactivado. Pide uno nuevo a tu equipo de Tape.</div>'; return; }
   const posts=data.posts||[];
   const by={}; posts.forEach(p=>(by[p.date]=by[p.date]||[]).push(p));
@@ -99,11 +164,12 @@ function render(){
   const ym=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0');
   let list=posts.filter(p=>sel?p.date===sel:p.date.startsWith(ym));
   list.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
-  app.innerHTML='<h1>'+esc(data.name)+'</h1><p class="sub">Cronograma de publicaciones. Toca una publicación para ver el texto completo.</p>'
+  app.innerHTML='<h1>'+esc(data.name)+'</h1><p class="sub">Cronograma de publicaciones. Toca una publicación para ver el texto completo.</p>'+tabsHtml()
    +'<div class="bar"><div class="nav"><button id="pv" aria-label="Mes anterior">&lt;</button><div class="title">'+MONTHS[month.getMonth()]+' '+month.getFullYear()+'</div><button id="nx" aria-label="Mes siguiente">&gt;</button></div><button class="today" id="td">Hoy</button></div>'
    +'<div class="grid">'+g+'</div><h2>'+(sel?'Publicaciones del día':'Publicaciones de '+MONTHS[month.getMonth()])+'</h2>'
    +(list.length?list.map(card).join(''):'<div class="empty"><b>Nada programado</b>'+(sel?'No hay publicaciones este día.':'Aún no hay publicaciones programadas este mes.')+'</div>')
    +'<div class="foot">Preparado por Tape · tapegrowth.agency</div>';
+  bindTabs();
   document.getElementById('pv').onclick=()=>{month.setMonth(month.getMonth()-1);sel=null;render()};
   document.getElementById('nx').onclick=()=>{month.setMonth(month.getMonth()+1);sel=null;render()};
   document.getElementById('td').onclick=()=>{month=new Date();month.setDate(1);sel=null;render()};

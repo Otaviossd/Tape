@@ -191,6 +191,12 @@
   .checkrow{display:flex;flex-wrap:wrap;gap:8px;}
   .checkchip{display:flex;align-items:center;gap:6px;padding:7px 11px;border:1px solid var(--line);border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;}
   .checkchip input{width:14px;height:14px;}
+  .planrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .planrow:last-child{border-bottom:0}
+  .planrow .qty{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);font-weight:600;opacity:.45;}
+  .planrow.on .qty{opacity:1}
+  .planrow .qty input{width:70px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;}
+  .plantag{background:#eaf6f4;color:#23857a;}
   .modal-actions{display:flex;gap:8px;margin-top:18px;}
   .modal-actions .btn{flex:1;justify-content:center;}
   .colorpick{display:flex;gap:8px;}
@@ -464,6 +470,7 @@
         <div><h1>Vídeo</h1><p>Entregas por cliente, integradas ao Drive</p></div>
         <div style="display:flex;gap:8px;">
           <select id="videoClientFilter" style="padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:600;"></select>
+          <button class="btn btn-outline" id="btnBulkVideo"><svg class="icon"><use href="#ic-folder"/></svg>Entregas em lote</button>
           <button class="btn btn-primary" id="btnNewVideo"><svg class="icon"><use href="#ic-plus"/></svg>Nova entrega</button>
         </div>
       </div>
@@ -544,7 +551,7 @@
       <input type="hidden" id="clientId">
       <div class="field"><label>Nome</label><input id="cName" required></div>
       <div class="field-row">
-        <div class="field"><label>Valor mensal (₲)</label><input id="cValue" type="number" step="1" min="0"></div>
+        <div class="field"><label>Valor mensal do pacote (₲)</label><input id="cValue" type="number" step="1" min="0"></div>
         <div class="field"><label>Dia de cobrança</label><input id="cBillingDay" type="number" min="1" max="31" placeholder="Ex: 5"></div>
       </div>
       <div class="field">
@@ -552,14 +559,15 @@
         <select id="cStatus"><option value="ativo">Ativo</option><option value="pausado">Pausado</option><option value="encerrado">Encerrado</option></select>
       </div>
       <div class="field"><label>Pasta do cliente no Google Drive</label><input id="cDrive" type="url" placeholder="https://drive.google.com/..."></div>
-      <div class="field"><label>Serviços</label>
-        <div class="checkrow">
-          <label class="checkchip"><input type="checkbox" value="branding">Branding</label>
-          <label class="checkchip"><input type="checkbox" value="video">Vídeo</label>
-          <label class="checkchip"><input type="checkbox" value="trafego">Tráfego pago</label>
-          <label class="checkchip"><input type="checkbox" value="social">Social media</label>
-          <label class="checkchip"><input type="checkbox" value="web">Site/App</label>
+      <div class="field"><label>O que o cliente contratou</label>
+        <div class="planbox" id="planBox">
+          <div class="planrow"><label class="checkchip"><input type="checkbox" value="social">Social media (posts)</label><span class="qty">Posts por mês <input type="number" min="0" id="cQtySocial" placeholder="12"></span></div>
+          <div class="planrow"><label class="checkchip"><input type="checkbox" value="video">Vídeos</label><span class="qty">Vídeos por mês <input type="number" min="0" id="cQtyVideo" placeholder="15"></span></div>
+          <div class="planrow"><label class="checkchip"><input type="checkbox" value="trafego">Tráfego pago</label><span class="qty"></span></div>
+          <div class="planrow"><label class="checkchip"><input type="checkbox" value="branding">Branding</label><span class="qty"></span></div>
+          <div class="planrow"><label class="checkchip"><input type="checkbox" value="web">Site/App</label><span class="qty"></span></div>
         </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px;">Só vídeo: marque apenas Vídeos. O cliente não terá cronograma, só a área de entregas.</div>
       </div>
       <div class="field"><label>Cor</label>
         <div class="colorpick" id="colorPick"></div>
@@ -641,6 +649,26 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modalBulk">
+  <div class="modal">
+    <h2>Entregas de vídeo em lote</h2>
+    <form id="bulkForm">
+      <div class="field"><label>Cliente</label><select id="bClient" required></select></div>
+      <div class="field-row">
+        <div class="field"><label>Mês</label><input id="bMonth" type="month" required></div>
+        <div class="field"><label>Nome dos vídeos</label><input id="bPrefix" value="Vídeo"></div>
+      </div>
+      <div class="field"><label>Links do Drive (um por linha, na ordem: vídeo 1, vídeo 2...)</label>
+        <textarea id="bLinks" rows="8" required placeholder="https://drive.google.com/file/d/..."></textarea>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px;">No Drive, o arquivo precisa estar com acesso "qualquer pessoa com o link" para a prévia aparecer. A numeração continua de onde parou no mês.</div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalBulk')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Adicionar entregas</button>
+      </div>
+    </form>
+  </div>
+</div>
 <div class="modal-overlay" id="modalVideo">
   <div class="modal">
     <h2 id="videoModalTitle">Nova entrega de vídeo</h2>
@@ -1228,7 +1256,9 @@ function renderUpcomingCard(posts, videos){
 
 function fillClientSelects(){
   const opts = S.clients.filter(c=>c.status!=='encerrado').map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
-  ['pClient','vClient','fClient','ptClient'].forEach(id=>{ document.getElementById(id).innerHTML = opts || '<option value="">Nenhum cliente cadastrado</option>'; });
+  const optsSocial = S.clients.filter(c=>c.status!=='encerrado' && ((c.plan && c.plan.social) ? c.plan.social.on : true)).map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+  ['vClient','fClient'].forEach(id=>{ document.getElementById(id).innerHTML = opts || '<option value="">Nenhum cliente cadastrado</option>'; });
+  ['pClient','ptClient'].forEach(id=>{ document.getElementById(id).innerHTML = optsSocial || opts || '<option value="">Nenhum cliente cadastrado</option>'; });
   document.getElementById('socialClientFilter').innerHTML = '<option value="">Todos os clientes</option>' + opts;
   document.getElementById('videoClientFilter').innerHTML = '<option value="">Todos os clientes</option>' + opts;
   document.getElementById('postsClientFilter').innerHTML = '<option value="">Todos os clientes</option>' + opts;
@@ -1290,7 +1320,13 @@ function renderClients(){
   }
   grid.innerHTML = S.clients.map(c=>{
     const statusBadge = c.status==='ativo' ? '<span class="badge badge-ok">Ativo</span>' : c.status==='pausado' ? '<span class="badge badge-warn">Pausado</span>' : '<span class="badge badge-muted">Encerrado</span>';
-    const tags = (c.services||[]).map(s=>`<span class="tag">${SERVICE_LABELS[s]||s}</span>`).join('');
+    const pl = planOf(c);
+    const tags = (c.services||[]).map(s=>{
+      let t = SERVICE_LABELS[s]||s;
+      if(s==='video' && pl.qtyVideo) t = pl.qtyVideo+' vídeos/mês';
+      if(s==='social' && pl.qtySocial) t = pl.qtySocial+' posts/mês';
+      return `<span class="tag">${escapeHtml(t)}</span>`;
+    }).join('') + (c.monthlyValue ? `<span class="tag plantag">₲ ${Number(c.monthlyValue).toLocaleString('es-PY')}/mês</span>` : '');
     return `<div class="card client-card">
       <div class="client-top">
         <div style="display:flex;gap:9px;">
@@ -1317,10 +1353,23 @@ function buildColorPicker(sel){
     s.classList.add('sel'); document.getElementById('cColor').value = s.dataset.c;
   }));
 }
+function syncPlanRows(){
+  document.querySelectorAll('#planBox .planrow').forEach(r=>{ const on=r.querySelector('input[type=checkbox]').checked; r.classList.toggle('on', on); const q=r.querySelector('.qty input'); if(q) q.disabled=!on; });
+}
+document.getElementById('planBox').addEventListener('change', syncPlanRows);
+syncPlanRows();
+function planOf(c){
+  const p = c.plan || {};
+  return {
+    qtySocial: +(p.social && p.social.qty)||0,
+    qtyVideo: +(p.video && p.video.qty)||0
+  };
+}
 document.getElementById('btnNewClient').addEventListener('click', ()=>{
   document.getElementById('clientModalTitle').textContent = 'Novo cliente';
   document.getElementById('clientForm').reset();
   document.getElementById('clientId').value='';
+  syncPlanRows();
   document.getElementById('cColor').value = COLORS[S.clients.length % COLORS.length];
   buildColorPicker(document.getElementById('cColor').value);
   openModal('modalClient');
@@ -1335,6 +1384,10 @@ window.editClient = function(id){
   document.getElementById('cStatus').value = c.status||'ativo';
   document.getElementById('cDrive').value = c.driveFolder||'';
   document.querySelectorAll('#clientForm .checkchip input').forEach(chk=>{ chk.checked = (c.services||[]).includes(chk.value); });
+  const pl = planOf(c);
+  document.getElementById('cQtySocial').value = pl.qtySocial||'';
+  document.getElementById('cQtyVideo').value = pl.qtyVideo||'';
+  syncPlanRows();
   document.getElementById('cColor').value = c.color||COLORS[0];
   buildColorPicker(c.color||COLORS[0]);
   openModal('modalClient');
@@ -1354,6 +1407,11 @@ document.getElementById('clientForm').addEventListener('submit', async e=>{
     status: document.getElementById('cStatus').value,
     driveFolder: document.getElementById('cDrive').value.trim(),
     services, color: document.getElementById('cColor').value,
+    plan: {
+      social: {on: services.includes('social'), qty: parseInt(document.getElementById('cQtySocial').value)||0},
+      video: {on: services.includes('video'), qty: parseInt(document.getElementById('cQtyVideo').value)||0},
+      trafego: {on: services.includes('trafego')}, branding: {on: services.includes('branding')}, web: {on: services.includes('web')}
+    },
   };
   if(id){ await db.collection('clients').doc(id).update(data); }
   else{ data.createdAt = new Date().toISOString(); await db.collection('clients').add(data); }
@@ -1565,6 +1623,36 @@ window.openDay = function(iso){
 };
 
 document.getElementById('videoClientFilter').addEventListener('change', renderKanban);
+document.getElementById('btnBulkVideo').addEventListener('click', ()=>{
+  if(S.clients.length===0){ alert('Cadastre um cliente primeiro.'); return; }
+  document.getElementById('bulkForm').reset();
+  document.getElementById('bClient').innerHTML = document.getElementById('vClient').innerHTML;
+  const filt = document.getElementById('videoClientFilter').value;
+  if(filt) document.getElementById('bClient').value = filt;
+  const n = new Date();
+  document.getElementById('bMonth').value = n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
+  document.getElementById('bPrefix').value = 'Vídeo';
+  openModal('modalBulk');
+});
+document.getElementById('bulkForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const clientId = document.getElementById('bClient').value;
+  const month = document.getElementById('bMonth').value;
+  const prefix = document.getElementById('bPrefix').value.trim() || 'Vídeo';
+  const links = document.getElementById('bLinks').value.split(/\s*\n\s*/).map(x=>x.trim()).filter(Boolean);
+  if(!links.length) return;
+  if(links.some(l=>!/^https?:\/\//i.test(l))){ alert('Cada linha precisa ser um link completo (https://...).'); return; }
+  let max = 0;
+  S.videoTasks.filter(v=>v.clientId===clientId && v.month===month).forEach(v=>{ if((v.number||0)>max) max=v.number; });
+  for(let i=0;i<links.length;i++){
+    const num = max+i+1;
+    await db.collection('video_tasks').add({
+      clientId, month, number:num, title: prefix+' '+num, status:'entregue',
+      finalLink: links[i], createdAt: new Date().toISOString()
+    });
+  }
+  closeModal('modalBulk');
+});
 document.getElementById('btnNewVideo').addEventListener('click', ()=>{
   if(S.clients.length===0){ alert('Cadastre um cliente antes de criar uma entrega.'); return; }
   document.getElementById('videoModalTitle').textContent = 'Nova entrega de vídeo';
