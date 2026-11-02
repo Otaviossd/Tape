@@ -1810,7 +1810,7 @@ function renderDeliveryPanel(){
       <button class="btn btn-outline" onclick="openShare('${c.id}')"><svg class="icon"><use href="#ic-link"/></svg>Link para o cliente</button>
       <button class="btn btn-ghost" onclick="delPick('')">Voltar</button>
     </div>
-    ${list.length?`<div class="vgrid2">${list.map(v=>{const id=driveIdOf(v.finalLink);return `<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;"><a href="${escapeHtml(v.finalLink||'#')}" target="_blank" style="display:block;aspect-ratio:9/12;background:#10201d;position:relative;">${v.filePath?`<video muted playsinline preload="metadata" src="${fileUrlOf(v.filePath)}#t=0.1" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>`:(id?`<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id=${id}&sz=w320" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">`:'')}</a><div style="padding:8px 10px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(v.title)}</span><button class="btn btn-ghost btn-sm" onclick="deleteVideo('${v.id}')" style="padding:3px 5px;"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-trash"/></svg></button></div></div>`;}).join('')}</div>`:''}
+    ${list.length?`<div class="vgrid2">${list.map(v=>{const id=driveIdOf(v.finalLink);return `<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;"><a href="${escapeHtml(v.finalLink||'#')}" target="_blank" style="display:block;aspect-ratio:9/12;background:#10201d;position:relative;">${v.filePath?`<video muted playsinline preload="metadata" src="${fileUrlOf(v.filePath)}#t=0.1" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>`:(id?`<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id=${id}&sz=w320" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">`:'')}</a><div style="padding:8px 10px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(v.title)}</span><button class="btn btn-ghost btn-sm" onclick="deleteVideo('${v.id}')" style="padding:3px 5px;"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-trash"/></svg></button></div><div style="padding:0 10px 10px;">${v.filePath?'<span class="badge badge-ok">Prévia ok</span>':`<button class="btn btn-outline btn-sm" style="width:100%;justify-content:center;" onclick="delAttach('${v.id}')">Adicionar prévia</button>`}</div></div>`;}).join('')}</div>`:''}
   </div>`;
   if(keep.t && document.getElementById('delTitle')) document.getElementById('delTitle').value=keep.t;
   if(keep.l && document.getElementById('delLink')) document.getElementById('delLink').value=keep.l;
@@ -1887,6 +1887,29 @@ async function compressVideo(file, onPct){
   }
 }
 window.delPickFile = function(input){ delPickedFile = input.files[0]||null; const l=document.getElementById('delFileName'); if(l) l.textContent = delPickedFile ? delPickedFile.name : 'Nenhum arquivo escolhido'; };
+window.delAttach = function(id){
+  if(delBusy) return;
+  const v = S.videoTasks.find(x=>x.id===id); if(!v) return;
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='video/*';
+  inp.onchange = async ()=>{
+    const file = inp.files[0]; if(!file) return;
+    delBusy = true;
+    try{
+      setUpStatus('<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Preparando compressor...</div><div class="pbar"><i style="width:3%"></i></div>');
+      let blob = file;
+      try{ blob = await compressVideo(file, pct=>setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Comprimindo a prévia: ${pct}%</div><div class="pbar"><i style="width:${pct}%"></i></div>`)); }
+      catch(e){ if(file.size>50*1024*1024) throw new Error('Não deu para comprimir e o arquivo é grande. Tente pelo computador.'); }
+      const path = `${v.clientId}/${vMonth(v)||delMonth}/${Date.now()}-${pad2(v.number||0)}.mp4`;
+      await uploadWithProgress(blob, path, pct=>setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Enviando prévia: ${pct}%</div><div class="pbar"><i style="width:${pct}%"></i></div>`));
+      if(v.filePath){ try{ await sb.storage.from('entregas').remove([v.filePath]); }catch(_){} }
+      const upd = {filePath:path}; if(!v.finalLink) upd.finalLink = fileUrlOf(path);
+      await db.collection('video_tasks').doc(id).update(upd);
+      setUpStatus('<div style="color:#1f7a47;font-weight:700;font-size:13px;">Prévia adicionada.</div>'); setTimeout(()=>setUpStatus(''),3000);
+    }catch(err){ setUpStatus(`<div style="color:#b3261e;font-weight:700;font-size:13px;">Falhou: ${escapeHtml(err.message||'erro')}</div>`); }
+    finally{ delBusy=false; }
+  };
+  inp.click();
+};
 window.delAddFull = async function(){
   if(delBusy) return;
   const clientId = document.getElementById('videoClientFilter').value; if(!clientId) return;
