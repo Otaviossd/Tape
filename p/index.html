@@ -6,6 +6,8 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Tu espacio | Tape</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://drive.google.com">
+<link rel="preconnect" href="https://drive.usercontent.google.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{--ink:#0a0e0d;--muted:#6b7170;--teal:#3FAFA3;--teal-dk:#23857a;--teal-lt:#eaf6f4;--line:rgba(10,14,13,.1);--bg:#f5f7f6;}
@@ -63,20 +65,25 @@
   .prog .row span{color:var(--muted);font-weight:500}
   .prog .barx{height:7px;border-radius:99px;background:var(--teal-lt);overflow:hidden}
   .prog .barx i{display:block;height:100%;background:var(--teal);border-radius:99px}
-  .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+  .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
   .vcard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;padding:0;font:inherit;color:inherit}
-  .vth{position:relative;aspect-ratio:9/12;background:linear-gradient(135deg,#0f1a18,#1d3a35);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .vth{position:relative;aspect-ratio:9/14;background:linear-gradient(135deg,#0f1a18,#1d3a35);display:flex;align-items:center;justify-content:center;overflow:hidden}
   .vth img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .vth .pl{position:relative;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center}
   .vth .pl:after{content:"";margin-left:4px;border-left:13px solid var(--ink);border-top:8px solid transparent;border-bottom:8px solid transparent}
-  .vinfo{padding:10px 12px;font-size:13.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .vinfo{padding:8px 10px;font-size:12.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vnum{position:absolute;left:8px;top:8px;z-index:2;background:rgba(5,8,8,.62);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px}
   .vinfo .dl{font-size:11.5px;font-weight:700;color:var(--teal-dk);text-decoration:none;background:var(--teal-lt);padding:5px 9px;border-radius:8px}
   .lb{position:fixed;inset:0;z-index:50;background:#050808;display:flex;flex-direction:column;height:100vh;height:100dvh}
   .lbtop{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));color:#fff}
   .lbtop b{font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .lbtop button{flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:26px;line-height:1;cursor:pointer}
   .lbstage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 12px}
-  .lbstage iframe{width:100%;max-width:560px;height:100%;border:0;border-radius:14px;background:#000}
+  .lbbox{position:relative;width:100%;max-width:560px;height:100%;border-radius:14px;overflow:hidden;background:#000}
+  .lbbox iframe,.lbbox video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;object-fit:contain}
+  .lbposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(2px) brightness(.6)}
+  .lbspin{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px 0 0 -19px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;z-index:2;pointer-events:none}
+  @keyframes sp{to{transform:rotate(360deg)}}
   .lbbot{display:flex;gap:10px;padding:14px 16px;padding-bottom:max(14px,env(safe-area-inset-bottom));justify-content:center}
   .lbbot button{flex:1;max-width:240px;height:46px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;font:600 14px 'Inter';cursor:pointer}
   .lbbot button.pri{background:var(--teal);border-color:var(--teal);color:#04110f}
@@ -141,7 +148,7 @@ function renderVid(){
       h+='<div class="prog"><div class="row"><div>'+(m==='sin-mes'?'Videos':ytag(m))+'</div><span>'+list.length+' de '+qty+' videos entregados</span></div><div class="barx"><i style="width:'+pct+'%"></i></div></div>';
     } else h+='<h2>'+(m==='sin-mes'?'Videos':ytag(m))+' · '+list.length+(list.length===1?' video':' videos')+'</h2>';
     h+='<div class="vgrid" style="margin-top:12px">'+list.map(v=>{const id=driveId(v.finalLink);
-      return '<div class="vcard" role="button" tabindex="0" data-l="'+esc(v.finalLink)+'" data-t="'+esc(v.title||'Video')+'"><div class="vth">'+(id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w480" onerror="this.remove()">':'')+'<div class="pl"></div></div><div class="vinfo"><span>'+esc(v.title||'Video')+'</span>'+(id?'<a class="dl" href="https://drive.google.com/uc?export=download&id='+esc(id)+'" target="_blank" rel="noopener">Descargar</a>':'')+'</div></div>'}).join('')+'</div>';
+      return '<div class="vcard" role="button" tabindex="0" data-l="'+esc(v.finalLink)+'" data-t="'+esc(v.title||'Video')+'"><div class="vth"><span class="vnum">'+(v.number?String(v.number).padStart(2,'0'):'&#9654;')+'</span>'+(id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w480" onerror="this.remove()">':'')+'<div class="pl"></div></div><div class="vinfo"><span>'+esc(v.title||'Video')+'</span>'+'</div></div>'}).join('')+'</div>';
   });
   h+='<div class="foot">Preparado por Tape · tapegrowth.agency</div>';
   app.innerHTML=h; bindTabs();
@@ -150,8 +157,9 @@ function renderVid(){
 function lightbox(link,title){
   const id=driveId(link);
   const el=document.createElement('div'); el.className='lb';
+  const thumb=id?'https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w800':'';
   el.innerHTML='<div class="lbtop"><b>'+esc(title)+'</b><button data-a="x" aria-label="Cerrar">&times;</button></div>'
-   +'<div class="lbstage">'+(id?'<iframe src="https://drive.google.com/file/d/'+esc(id)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>':'<div class="empty" style="border:0">Vista previa no disponible.</div>')+'</div>'
+   +'<div class="lbstage"><div class="lbbox">'+(thumb?'<img class="lbposter" alt="" src="'+thumb+'" onerror="this.remove()">':'')+'<div class="lbspin"></div></div></div>'
    +'<div class="lbbot"><button data-a="dl" class="pri">Descargar</button><button data-a="drive">Abrir en Drive</button></div>';
   const close=()=>{el.remove();document.body.style.overflow='';document.removeEventListener('keydown',key)};
   const key=e=>{if(e.key==='Escape')close()};
@@ -159,6 +167,17 @@ function lightbox(link,title){
   document.addEventListener('keydown',key);
   document.body.style.overflow='hidden';
   document.body.appendChild(el);
+  if(!id) return;
+  const box=el.querySelector('.lbbox');
+  const useFrame=()=>{ if(!el.isConnected||box.querySelector('iframe')) return; const f=document.createElement('iframe'); f.src='https://drive.google.com/file/d/'+id+'/preview'; f.allow='autoplay; fullscreen'; f.allowFullscreen=true; f.onload=()=>{const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); const po=box.querySelector('.lbposter'); if(po) setTimeout(()=>po.remove(),400)}; const v=box.querySelector('video'); if(v) v.remove(); box.appendChild(f); };
+  const v=document.createElement('video'); v.controls=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto'; v.autoplay=true;
+  v.src='https://drive.usercontent.google.com/download?id='+id+'&export=download&confirm=t';
+  let ok=false;
+  v.addEventListener('loadeddata',()=>{ ok=true; const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); const po=box.querySelector('.lbposter'); if(po) po.remove(); });
+  v.addEventListener('error',useFrame);
+  box.appendChild(v);
+  const p=v.play(); if(p&&p.catch) p.catch(()=>{});
+  setTimeout(()=>{ if(!ok) useFrame(); },5000);
 }
 function render(){
   const app=document.getElementById('app');

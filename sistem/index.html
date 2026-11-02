@@ -1687,7 +1687,7 @@ document.getElementById('bulkForm').addEventListener('submit', async e=>{
   if(!links.length) return;
   if(links.some(l=>!/^https?:\/\//i.test(l))){ alert('Cada linha precisa ser um link completo (https://...).'); return; }
   let max = 0;
-  S.videoTasks.filter(v=>v.clientId===clientId && v.month===month).forEach(v=>{ if((v.number||0)>max) max=v.number; });
+  S.videoTasks.filter(v=>v.clientId===clientId && vMonth(v)===month).forEach(v=>{ if((v.number||0)>max) max=v.number; });
   for(let i=0;i<links.length;i++){
     const num = max+i+1;
     await db.collection('video_tasks').add({
@@ -1735,6 +1735,7 @@ document.getElementById('videoForm').addEventListener('submit', async e=>{
     finalLink: document.getElementById('vFinal').value.trim(),
     notes: document.getElementById('vNotes').value.trim(),
   };
+  { const prev = id ? S.videoTasks.find(x=>x.id===id) : null; data.month = (prev && prev.month) || String(data.dueDate||new Date().toISOString()).slice(0,7); }
   if(id){ await db.collection('video_tasks').doc(id).update(data); }
   else{ data.createdAt = new Date().toISOString(); await db.collection('video_tasks').add(data); }
   closeModal('modalVideo');
@@ -1744,6 +1745,7 @@ const VIDEO_STATUS_LABEL = {pendente:'Pendente',gravado:'Gravado',editado:'Edita
 let draggedVideoId = null;
 let delMonth = (()=>{const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');})();
 const pad2 = n=>String(n).padStart(2,'0');
+function vMonth(v){ return v.month || String(v.dueDate||v.createdAt||'').slice(0,7); }
 function driveIdOf(u){ const m=String(u||'').match(/\/d\/([\w-]+)/)||String(u||'').match(/[?&]id=([\w-]+)/); return m?m[1]:''; }
 function monthLabel(ym){ const [y,m]=ym.split('-'); return MONTHS[+m-1]+' '+y; }
 window.delPick = function(id){ const f=document.getElementById('videoClientFilter'); f.value=id; renderKanban(); };
@@ -1752,7 +1754,7 @@ window.delAdd = async function(){
   const clientId = document.getElementById('videoClientFilter').value; if(!clientId) return;
   const link = document.getElementById('delLink').value.trim();
   if(!/^https?:\/\//i.test(link)){ alert('Cole o link completo do Drive (https://...).'); return; }
-  let max=0; S.videoTasks.filter(v=>v.clientId===clientId && v.month===delMonth).forEach(v=>{ if((v.number||0)>max) max=v.number; });
+  let max=0; S.videoTasks.filter(v=>v.clientId===clientId && vMonth(v)===delMonth).forEach(v=>{ if((v.number||0)>max) max=v.number; });
   const num = max+1;
   const title = document.getElementById('delTitle').value.trim() || ('Vídeo '+pad2(num));
   document.getElementById('delLink').value=''; document.getElementById('delTitle').value='';
@@ -1774,7 +1776,7 @@ function renderDeliveryPanel(){
   const filt = document.getElementById('videoClientFilter').value;
   const keep = {t:(document.getElementById('delTitle')||{}).value||'', l:(document.getElementById('delLink')||{}).value||''};
   const vcs = S.clients.filter(c=>(c.services||[]).includes('video') && c.status!=='encerrado');
-  const countFor = id => S.videoTasks.filter(v=>v.clientId===id && v.month===delMonth && v.status==='entregue').length;
+  const countFor = id => S.videoTasks.filter(v=>v.clientId===id && vMonth(v)===delMonth && v.status==='entregue').length;
   if(!filt){
     if(!vcs.length){ box.innerHTML=''; return; }
     let totalQ=0,totalD=0; vcs.forEach(c=>{ const q=planOf(c).qtyVideo; totalQ+=q; totalD+=Math.min(countFor(c.id),q||countFor(c.id)); });
@@ -1784,7 +1786,7 @@ function renderDeliveryPanel(){
     return;
   }
   const c = clientById(filt); if(!c){ box.innerHTML=''; return; }
-  const list = S.videoTasks.filter(v=>v.clientId===filt && v.month===delMonth).sort((a,b)=>(a.number||0)-(b.number||0));
+  const list = S.videoTasks.filter(v=>v.clientId===filt && vMonth(v)===delMonth).sort((a,b)=>(a.number||0)-(b.number||0));
   const done = list.filter(v=>v.status==='entregue').length;
   const q = planOf(c).qtyVideo; const pct = q?Math.min(100,Math.round(done/q*100)):0;
   let max=0; list.forEach(v=>{ if((v.number||0)>max) max=v.number; });
