@@ -84,6 +84,25 @@
   .lbposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(2px) brightness(.6)}
   .lbspin{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px 0 0 -19px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;z-index:2;pointer-events:none}
   @keyframes sp{to{transform:rotate(360deg)}}
+  .lbui{position:absolute;inset:0;z-index:3;pointer-events:none}
+  .lbui button{pointer-events:auto;border:0;cursor:pointer;color:#fff}
+  .bigplay{position:absolute;left:50%;top:50%;width:68px;height:68px;margin:-34px 0 0 -34px;border-radius:50%;background:rgba(255,255,255,.92);display:none}
+  .bigplay:after{content:"";position:absolute;left:27px;top:20px;border-left:20px solid #0a0e0d;border-top:14px solid transparent;border-bottom:14px solid transparent}
+  .lbbox.paused .bigplay{display:block}
+  .ctl{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:8px;padding:28px 12px 12px;background:linear-gradient(transparent,rgba(0,0,0,.75));pointer-events:auto}
+  .ctl .sm{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center}
+  .ctl .ic{display:block;width:14px;height:14px;position:relative}
+  .ctl [aria-label=Pausa] .ic{border-left:4px solid #fff;border-right:4px solid #fff;height:14px;width:14px;box-sizing:border-box}
+  .lbbox.paused .ctl [aria-label=Pausa] .ic{border:0;border-left:11px solid #fff;border-top:7px solid transparent;border-bottom:7px solid transparent;width:0;height:0;margin-left:3px}
+  .ctl .mu .ic{border:2px solid #fff;border-radius:3px;height:10px;width:10px}
+  .lbbox.muted .ctl .mu .ic{opacity:.35}
+  .ctl [aria-label="Pantalla completa"] .ic{border:2px solid #fff;border-radius:2px}
+  .ctl input{flex:1;min-width:0;height:22px;-webkit-appearance:none;appearance:none;background:transparent;--p:0%}
+  .ctl input::-webkit-slider-runnable-track{height:4px;border-radius:99px;background:linear-gradient(to right,var(--teal) var(--p),rgba(255,255,255,.3) var(--p))}
+  .ctl input::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;margin-top:-5px}
+  .ctl input::-moz-range-track{height:4px;border-radius:99px;background:rgba(255,255,255,.3)}
+  .ctl input::-moz-range-progress{height:4px;background:var(--teal)}
+  .ctl .tm{flex:0 0 auto;font-size:11.5px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums}
   .lbbot{display:flex;gap:10px;padding:14px 16px;padding-bottom:max(14px,env(safe-area-inset-bottom));justify-content:center}
   .lbbot button{flex:1;max-width:240px;height:46px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;font:600 14px 'Inter';cursor:pointer}
   .lbbot button.pri{background:var(--teal);border-color:var(--teal);color:#04110f}
@@ -170,13 +189,30 @@ function lightbox(link,title){
   if(!id) return;
   const box=el.querySelector('.lbbox');
   const useFrame=()=>{ if(!el.isConnected||box.querySelector('iframe')) return; const f=document.createElement('iframe'); f.src='https://drive.google.com/file/d/'+id+'/preview'; f.allow='autoplay; fullscreen'; f.allowFullscreen=true; f.onload=()=>{const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); const po=box.querySelector('.lbposter'); if(po) setTimeout(()=>po.remove(),400)}; const v=box.querySelector('video'); if(v) v.remove(); box.appendChild(f); };
-  const v=document.createElement('video'); v.controls=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto'; v.autoplay=true;
+  const v=document.createElement('video'); v.controls=false; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto'; v.autoplay=true;
   v.src='https://drive.usercontent.google.com/download?id='+id+'&export=download&confirm=t';
   let ok=false;
   v.addEventListener('loadeddata',()=>{ ok=true; const sp=box.querySelector('.lbspin'); if(sp) sp.remove(); const po=box.querySelector('.lbposter'); if(po) po.remove(); });
   v.addEventListener('error',useFrame);
   box.appendChild(v);
-  const p=v.play(); if(p&&p.catch) p.catch(()=>{});
+  const fmt=t=>{t=Math.max(0,Math.floor(t||0));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
+  const ui=document.createElement('div'); ui.className='lbui';
+  ui.innerHTML='<button class="bigplay" data-c="tog" aria-label="Reproducir"></button><div class="ctl"><button class="sm" data-c="tog" aria-label="Pausa"><i class="ic"></i></button><input type="range" min="0" max="1000" value="0" step="1" aria-label="Progreso"><span class="tm">0:00</span><button class="sm mu" data-c="mute" aria-label="Sonido"><i class="ic"></i></button><button class="sm" data-c="fs" aria-label="Pantalla completa"><i class="ic"></i></button></div>';
+  box.appendChild(ui);
+  const rng=ui.querySelector('input'), tm=ui.querySelector('.tm');
+  const sync=()=>{ box.classList.toggle('paused',v.paused); box.classList.toggle('muted',v.muted); };
+  v.addEventListener('play',sync); v.addEventListener('pause',sync); v.addEventListener('volumechange',sync);
+  v.addEventListener('timeupdate',()=>{ if(!rng.dataset.d&&v.duration){ rng.value=Math.round(v.currentTime/v.duration*1000); rng.style.setProperty('--p',(v.currentTime/v.duration*100)+'%'); } tm.textContent=fmt(v.currentTime)+' / '+fmt(v.duration); });
+  rng.addEventListener('input',()=>{ rng.dataset.d='1'; if(v.duration) v.currentTime=rng.value/1000*v.duration; rng.style.setProperty('--p',(rng.value/10)+'%'); });
+  rng.addEventListener('change',()=>{ delete rng.dataset.d; });
+  v.addEventListener('click',()=>{ v.paused?v.play():v.pause(); });
+  ui.addEventListener('click',e=>{ const c=e.target.closest('[data-c]'); if(!c) return; const a=c.dataset.c;
+    if(a==='tog') v.paused?v.play():v.pause();
+    if(a==='mute') v.muted=!v.muted;
+    if(a==='fs'){ if(v.webkitEnterFullscreen) v.webkitEnterFullscreen(); else if(box.requestFullscreen) box.requestFullscreen(); }
+  });
+  sync();
+  const p=v.play(); if(p&&p.catch) p.catch(()=>{ sync(); });
   setTimeout(()=>{ if(!ok) useFrame(); },5000);
 }
 function render(){
