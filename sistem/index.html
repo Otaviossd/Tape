@@ -508,13 +508,13 @@
         <div><h1>Vídeo</h1><p>Entregas por cliente, integradas ao Drive</p></div>
         <div>
           <select id="videoClientFilter" style="padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:600;"></select>
-          <button class="btn btn-outline" id="btnBulkVideo"><svg class="icon"><use href="#ic-folder"/></svg>Entregas em lote</button>
-          <button class="btn btn-primary" id="btnNewVideo"><svg class="icon"><use href="#ic-plus"/></svg>Nova entrega</button>
+          <button class="btn btn-outline" id="btnBulkVideo" style="display:none"><svg class="icon"><use href="#ic-folder"/></svg>Entregas em lote</button>
+          <button class="btn btn-primary" id="btnNewVideo" style="display:none"><svg class="icon"><use href="#ic-plus"/></svg>Nova entrega</button>
         </div>
       </div>
       <div id="deliveryPanel"></div>
       <div id="delUpStatus"></div>
-      <div class="kanban" id="videoKanban"></div>
+      <div class="kanban" id="videoKanban" style="display:none"></div>
     </div>
 
     <div class="view" id="view-lancamentos">
@@ -651,7 +651,7 @@
 
 <div class="modal-overlay" id="modalShare">
   <div class="modal">
-    <h2 id="shareTitle">Link do cronograma</h2>
+    <h2 id="shareTitle">Link do cliente</h2>
     <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">Quem tem este link vê só o calendário de postagens deste cliente, sem login e sem acesso a mais nada do sistema.</p>
     <div class="field"><label>Link</label><input id="shareUrl" readonly onclick="this.select()"></div>
     <div class="modal-actions" style="flex-wrap:wrap;">
@@ -689,6 +689,25 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modalDelEdit">
+  <div class="modal">
+    <h2>Editar entrega</h2>
+    <form id="delEditForm">
+      <input type="hidden" id="deId">
+      <div class="field"><label>Qual vídeo é</label><select id="deNum"></select></div>
+      <div class="field"><label>Nome (opcional)</label><input id="deTitle"></div>
+      <div class="field"><label>Link do Drive (original em alta qualidade)</label><input id="deLink" type="url" placeholder="https://drive.google.com/..."></div>
+      <div class="field"><label>Nova prévia (opcional)</label>
+        <input id="deFile" type="file" accept="video/*">
+        <div style="font-size:12px;color:var(--muted);margin-top:6px;">Deixe vazio para manter a prévia atual. Se escolher um arquivo, o sistema comprime e troca a prévia antiga.</div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalDelEdit')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
 <div class="modal-overlay" id="modalBulk">
   <div class="modal">
     <h2>Entregas de vídeo em lote</h2>
@@ -1313,7 +1332,7 @@ function randSuffix(){ const a=new Uint8Array(6); crypto.getRandomValues(a); ret
 function newShareSlug(name){ return slugify(name)+'-'+randSuffix(); }
 function refreshShareModal(){
   const c = S.clients.find(x=>x.id===shareClientId); if(!c) return;
-  document.getElementById('shareTitle').textContent = 'Link do cronograma: '+c.name;
+  document.getElementById('shareTitle').textContent = 'Link do cliente: '+c.name;
   const on = !!c.shareSlug;
   document.getElementById('shareUrl').value = on ? SHARE_BASE+c.shareSlug : '';
   document.getElementById('shareUrl').placeholder = on ? '' : 'Link desativado';
@@ -1379,7 +1398,7 @@ function renderClients(){
       <div class="client-tags">${tags}</div>
       <div class="client-actions">
         ${c.driveFolder ? `<a href="${escapeHtml(c.driveFolder)}" target="_blank" class="drivebtn"><svg class="icon" style="width:13px;height:13px;"><use href="#ic-folder"/></svg>Drive</a>` : ''}
-        <button class="btn btn-ghost btn-sm" onclick="openShare('${c.id}')"><svg class="icon"><use href="#ic-link"/></svg>Link do cronograma</button>
+        <button class="btn btn-ghost btn-sm" onclick="openShare('${c.id}')"><svg class="icon"><use href="#ic-link"/></svg>Link do cliente</button>
         <button class="btn btn-ghost btn-sm" onclick="editClient('${c.id}')"><svg class="icon"><use href="#ic-edit"/></svg>Editar</button>
         <button class="btn btn-ghost btn-sm" onclick="deleteClient('${c.id}')"><svg class="icon"><use href="#ic-trash"/></svg></button>
       </div>
@@ -1751,8 +1770,8 @@ const pad2 = n=>String(n).padStart(2,'0');
 function vMonth(v){ return v.month || String(v.dueDate||v.createdAt||'').slice(0,7); }
 function driveIdOf(u){ const m=String(u||'').match(/\/d\/([\w-]+)/)||String(u||'').match(/[?&]id=([\w-]+)/); return m?m[1]:''; }
 function monthLabel(ym){ const [y,m]=ym.split('-'); return MONTHS[+m-1]+' '+y; }
-window.delPick = function(id){ const f=document.getElementById('videoClientFilter'); f.value=id; renderKanban(); };
-window.delMonthChange = function(v){ if(v){ delMonth=v; renderDeliveryPanel(); renderPostsDemand(); } };
+window.delPick = function(id){ delNumSel = null; const f=document.getElementById('videoClientFilter'); f.value=id; renderKanban(); };
+window.delMonthChange = function(v){ if(v){ delNumSel=null; delMonth=v; renderDeliveryPanel(); renderPostsDemand(); } };
 window.delAdd = async function(){
   const clientId = document.getElementById('videoClientFilter').value; if(!clientId) return;
   const link = document.getElementById('delLink').value.trim();
@@ -1798,19 +1817,20 @@ function renderDeliveryPanel(){
     <div class="dp-sub">${monthLabel(delMonth)}</div>
     ${demandCard(c.color,'Vídeos entregues',done,q,'vídeos','void(0)')}
     <div class="dp-form" style="margin-top:16px;">
-      <div class="field" style="margin:0;"><label>Nome (opcional)</label><input id="delTitle" placeholder="Vídeo ${pad2(max+1)}"></div>
-      <div class="field" style="margin:0;"><label>Link do Drive (original em alta qualidade)</label><input id="delLink" type="url" placeholder="https://drive.google.com/..."></div>
+      <div class="field" style="margin:0;"><label>Qual vídeo é</label><select id="delNum" onchange="delNumSel=+this.value">${numOptionsHtml(filt, delMonth, delNumSel, null)}</select></div>
+      <div class="field" style="margin:0;"><label>Nome (opcional)</label><input id="delTitle" placeholder="Vídeo"></div>
     </div>
+    <div class="field" style="margin:10px 0 0;"><label>Link do Drive (original em alta qualidade)</label><input id="delLink" type="url" placeholder="https://drive.google.com/..."></div>
     <div class="field" style="margin:10px 0 0;"><label>Arquivo do vídeo (o sistema comprime sozinho para a prévia)</label>
       <label class="btn btn-outline" style="cursor:pointer;width:100%;justify-content:center;"><svg class="icon"><use href="#ic-folder"/></svg>Escolher arquivo<input type="file" accept="video/*" hidden onchange="delPickFile(this)"></label>
       <div id="delFileName" style="font-size:12px;color:var(--muted);margin-top:6px;word-break:break-all;">${delPickedFile?escapeHtml(delPickedFile.name):'Nenhum arquivo escolhido'}</div>
     </div>
     <div class="dp-actions">
-      <button class="btn btn-primary" onclick="delAddFull()"><svg class="icon"><use href="#ic-plus"/></svg>Adicionar vídeo ${pad2(max+1)}</button>
+      <button class="btn btn-primary" onclick="delAddFull()"><svg class="icon"><use href="#ic-plus"/></svg>Adicionar vídeo</button>
       <button class="btn btn-outline" onclick="openShare('${c.id}')"><svg class="icon"><use href="#ic-link"/></svg>Link para o cliente</button>
       <button class="btn btn-ghost" onclick="delPick('')">Voltar</button>
     </div>
-    ${list.length?`<div class="vgrid2">${list.map(v=>{const id=driveIdOf(v.finalLink);return `<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;"><a href="${escapeHtml(v.finalLink||'#')}" target="_blank" style="display:block;aspect-ratio:9/12;background:#10201d;position:relative;">${v.filePath?`<video muted playsinline preload="metadata" src="${fileUrlOf(v.filePath)}#t=0.1" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>`:(id?`<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id=${id}&sz=w320" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">`:'')}</a><div style="padding:8px 10px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(v.title)}</span><button class="btn btn-ghost btn-sm" onclick="deleteVideo('${v.id}')" style="padding:3px 5px;"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-trash"/></svg></button></div><div style="padding:0 10px 10px;">${v.filePath?'<span class="badge badge-ok">Prévia ok</span>':`<button class="btn btn-outline btn-sm" style="width:100%;justify-content:center;" onclick="delAttach('${v.id}')">Adicionar prévia</button>`}</div></div>`;}).join('')}</div>`:''}
+    ${list.length?`<div class="vgrid2">${list.map(v=>{const id=driveIdOf(v.finalLink);return `<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;"><a href="${escapeHtml(v.finalLink||'#')}" target="_blank" style="display:block;aspect-ratio:9/12;background:#10201d;position:relative;">${v.filePath?`<video muted playsinline preload="metadata" src="${fileUrlOf(v.filePath)}#t=0.1" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>`:(id?`<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id=${id}&sz=w320" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">`:'')}</a><div style="padding:8px 10px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(v.title)}</span><button class="btn btn-ghost btn-sm" onclick="deleteVideo('${v.id}')" style="padding:3px 5px;"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-trash"/></svg></button></div><div style="padding:0 10px 10px;">${v.filePath?'<span class="badge badge-ok">Prévia ok</span> ':''}<button class="btn btn-outline btn-sm" style="width:100%;justify-content:center;margin-top:6px;" onclick="delEdit('${v.id}')"><svg class="icon"><use href="#ic-edit"/></svg>Editar</button>}</div></div>`;}).join('')}</div>`:''}
   </div>`;
   if(keep.t && document.getElementById('delTitle')) document.getElementById('delTitle').value=keep.t;
   if(keep.l && document.getElementById('delLink')) document.getElementById('delLink').value=keep.l;
@@ -1910,50 +1930,101 @@ window.delAttach = function(id){
   };
   inp.click();
 };
+let delNumSel = null;
+function numOptionsHtml(clientId, month, selected, excludeId){
+  const c = clientById(clientId); const q = c ? planOf(c).qtyVideo : 0;
+  const tasks = S.videoTasks.filter(v=>v.clientId===clientId && vMonth(v)===month && v.id!==excludeId);
+  const taken = new Set(tasks.map(v=>v.number)); let max=0; tasks.forEach(v=>{ if((v.number||0)>max) max=v.number; });
+  const N = q ? Math.max(q,max,selected||0) : Math.max(max+3,6,selected||0);
+  let sel = selected;
+  if(!sel){ for(let i=1;i<=N;i++){ if(!taken.has(i)){ sel=i; break; } } if(!sel) sel=N; }
+  let h=''; for(let i=1;i<=N;i++){ h+=`<option value="${i}" ${i===sel?'selected':''}>Vídeo ${pad2(i)}${taken.has(i)?' (já enviado)':''}</option>`; }
+  return h;
+}
+async function saveDelivery({clientId, month, number, title, link, file, existing}){
+  const data = {clientId, month, number, title, status:'entregue'};
+  let finalLink = link || (existing ? (existing.finalLink||'') : '');
+  let oldPath = null;
+  if(file){
+    let blob = file;
+    try{
+      setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Preparando compressor...</div><div class="pbar"><i style="width:3%"></i></div>`);
+      blob = await compressVideo(file, pct=>setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Comprimindo a prévia: ${pct}%</div><div class="pbar"><i style="width:${pct}%"></i></div>`));
+    }catch(err){
+      if(file.size > 50*1024*1024) throw new Error('Não deu para comprimir e o arquivo é grande. Tente de novo no computador ou use só o link do Drive.');
+      blob = file;
+    }
+    const path = `${clientId}/${month}/${Date.now()}-${pad2(number)}.mp4`;
+    const label = pct=>`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Enviando prévia (${(blob.size/1048576).toFixed(1)} MB): ${pct}%</div><div class="pbar"><i style="width:${pct}%"></i></div>`;
+    setUpStatus(label(0));
+    await uploadWithProgress(blob, path, pct=>setUpStatus(label(pct)));
+    data.filePath = path;
+    if(existing && existing.filePath) oldPath = existing.filePath;
+    if(!finalLink || (existing && existing.filePath && finalLink===fileUrlOf(existing.filePath))) finalLink = fileUrlOf(path);
+  }
+  data.finalLink = finalLink;
+  if(existing){ await db.collection('video_tasks').doc(existing.id).update(data); }
+  else { data.createdAt = new Date().toISOString(); await db.collection('video_tasks').add(data); }
+  if(oldPath){ try{ await sb.storage.from('entregas').remove([oldPath]); }catch(_){} }
+}
 window.delAddFull = async function(){
   if(delBusy) return;
   const clientId = document.getElementById('videoClientFilter').value; if(!clientId) return;
   const link = (document.getElementById('delLink').value||'').trim();
   const typed = (document.getElementById('delTitle').value||'').trim();
+  const number = +document.getElementById('delNum').value;
   const file = delPickedFile;
   if(!link && !file){ alert('Cole o link do Drive e/ou escolha o arquivo do vídeo.'); return; }
   if(link && !/^https?:\/\//i.test(link)){ alert('Cole o link completo do Drive (https://...).'); return; }
   if(!link && !confirm('Sem o link do Drive, o cliente NÃO poderá baixar o original (só assistir a prévia). Continuar mesmo assim?')) return;
-  let next=0; S.videoTasks.filter(v=>v.clientId===clientId && vMonth(v)===delMonth).forEach(v=>{ if((v.number||0)>next) next=v.number; });
-  next++;
-  const title = typed || ('Vídeo '+pad2(next));
-  const data = {clientId, month:delMonth, number:next, title, status:'entregue', finalLink:link, createdAt:new Date().toISOString()};
+  const existing = S.videoTasks.find(v=>v.clientId===clientId && vMonth(v)===delMonth && v.number===number);
+  if(existing && !confirm('O Vídeo '+pad2(number)+' já foi enviado. Substituir pelo novo?')) return;
   delBusy = true;
   try{
-    if(file){
-      let blob = file, note = '';
-      try{
-        setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Preparando compressor...</div><div class="pbar"><i id="upBar" style="width:3%"></i></div>`);
-        blob = await compressVideo(file, pct=>{
-          setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Comprimindo a prévia: ${pct}%</div><div class="pbar"><i id="upBar" style="width:${pct}%"></i></div>`);
-        });
-      }catch(err){
-        if(file.size > 50*1024*1024) throw new Error('Não deu para comprimir e o arquivo é grande. Tente de novo no computador ou use só o link do Drive.');
-        blob = file;
-      }
-      const path = `${clientId}/${delMonth}/${Date.now()}-${pad2(next)}.mp4`;
-      setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Enviando prévia (${(blob.size/1048576).toFixed(1)} MB): 0%</div><div class="pbar"><i id="upBar" style="width:0%"></i></div>`);
-      await uploadWithProgress(blob, path, pct=>{
-        setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Enviando prévia (${(blob.size/1048576).toFixed(1)} MB): ${pct}%</div><div class="pbar"><i id="upBar" style="width:${pct}%"></i></div>`);
-      });
-      data.filePath = path;
-      if(!link) data.finalLink = fileUrlOf(path);
-    }
-    await db.collection('video_tasks').add(data);
-    delPickedFile = null;
+    await saveDelivery({clientId, month:delMonth, number, title: typed || ('Vídeo '+pad2(number)), link, file, existing});
+    delPickedFile = null; delNumSel = null;
     document.getElementById('delTitle').value=''; document.getElementById('delLink').value='';
     const l=document.getElementById('delFileName'); if(l) l.textContent='Nenhum arquivo escolhido';
-    setUpStatus('<div style="color:#1f7a47;font-weight:700;font-size:13px;">Vídeo adicionado.</div>');
-    setTimeout(()=>setUpStatus(''),3000);
+    setUpStatus('<div style="color:#1f7a47;font-weight:700;font-size:13px;">Vídeo adicionado.</div>'); setTimeout(()=>setUpStatus(''),3000);
+    renderDeliveryPanel();
   }catch(err){
     setUpStatus(`<div style="color:#b3261e;font-weight:700;font-size:13px;">Falhou: ${escapeHtml(err.message||'erro')}</div>`);
   }finally{ delBusy=false; }
 };
+window.delEdit = function(id){
+  const v = S.videoTasks.find(x=>x.id===id); if(!v) return;
+  document.getElementById('deId').value = id;
+  document.getElementById('deNum').innerHTML = numOptionsHtml(v.clientId, vMonth(v), v.number||1, null);
+  document.getElementById('deTitle').value = v.title||'';
+  document.getElementById('deLink').value = (v.filePath && v.finalLink===fileUrlOf(v.filePath)) ? '' : (v.finalLink||'');
+  document.getElementById('deFile').value = '';
+  openModal('modalDelEdit');
+};
+document.getElementById('delEditForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  if(delBusy) return;
+  const id = document.getElementById('deId').value;
+  const v = S.videoTasks.find(x=>x.id===id); if(!v) return;
+  const link = document.getElementById('deLink').value.trim();
+  if(link && !/^https?:\/\//i.test(link)){ alert('Cole o link completo do Drive (https://...).'); return; }
+  const number = +document.getElementById('deNum').value;
+  const file = document.getElementById('deFile').files[0] || null;
+  const month = vMonth(v);
+  const other = S.videoTasks.find(x=>x.id!==id && x.clientId===v.clientId && vMonth(x)===month && x.number===number);
+  if(other && !confirm('O Vídeo '+pad2(number)+' já existe. Trocar a posição dos dois?')) return;
+  const typed = document.getElementById('deTitle').value.trim();
+  const autoOld = 'Vídeo '+pad2(v.number||0);
+  const title = (typed && typed!==autoOld) ? typed : ('Vídeo '+pad2(number));
+  closeModal('modalDelEdit');
+  delBusy = true;
+  try{
+    await saveDelivery({clientId:v.clientId, month, number, title, link, file, existing:v});
+    if(other){ await db.collection('video_tasks').doc(other.id).update({number:v.number||0, title: (other.title===('Vídeo '+pad2(other.number||0)))?('Vídeo '+pad2(v.number||0)):other.title}); }
+    setUpStatus('<div style="color:#1f7a47;font-weight:700;font-size:13px;">Entrega atualizada.</div>'); setTimeout(()=>setUpStatus(''),3000);
+  }catch(err){
+    setUpStatus(`<div style="color:#b3261e;font-weight:700;font-size:13px;">Falhou: ${escapeHtml(err.message||'erro')}</div>`);
+  }finally{ delBusy=false; }
+});
 function renderKanban(){
   renderDeliveryPanel();
   const filt = document.getElementById('videoClientFilter').value;

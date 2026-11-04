@@ -65,6 +65,9 @@
   .prog .row span{color:var(--muted);font-weight:500}
   .prog .barx{height:7px;border-radius:99px;background:var(--teal-lt);overflow:hidden}
   .prog .barx i{display:block;height:100%;background:var(--teal);border-radius:99px}
+  .mchips{display:flex;gap:8px;overflow-x:auto;margin:18px 0 0;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .mchips button{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:99px;padding:9px 18px;font:600 13.5px 'Inter';color:var(--ink);cursor:pointer}
+  .mchips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
   .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
   .vcard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;padding:0;font:inherit;color:inherit}
   .vth{position:relative;aspect-ratio:9/14;background:linear-gradient(135deg,#0f1a18,#1d3a35);display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -144,37 +147,39 @@ const fileUrl=fp=>SB+'/storage/v1/object/public/entregas/'+String(fp).split('/')
 function driveId(u){const m=String(u||'').match(/\/d\/([\w-]+)/)||String(u||'').match(/[?&]id=([\w-]+)/);return m?m[1]:''}
 function flags(){
   const pl=(data&&data.plan)||{};
-  const cal=(pl.social?pl.social.on:true)||((data.posts||[]).length>0);
+  const cal=!!(pl.social&&pl.social.on)||((data.posts||[]).length>0);
   const vid=(pl.video&&pl.video.on)||((data.videos||[]).length>0);
   return {cal:cal||!vid, vid:vid};
 }
 function tabsHtml(){
   const f=flags(); if(!(f.cal&&f.vid)) return '';
-  return '<div class="tabs"><button data-t="cal" class="'+(tab==='cal'?'on':'')+'">Cronograma</button><button data-t="vid" class="'+(tab==='vid'?'on':'')+'">Entregas</button></div>';
+  return '<div class="tabs"><button data-t="vid" class="'+(tab==='vid'?'on':'')+'">Videos</button><button data-t="cal" class="'+(tab==='cal'?'on':'')+'">Cronograma</button></div>';
 }
 function bindTabs(){
   document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
 }
+let vmonth=null;
 function renderVid(){
   const app=document.getElementById('app');
   const vids=data.videos||[], pl=(data.plan&&data.plan.video)||{}, qty=+pl.qty||0;
-  const by={}; vids.forEach(v=>{const k=v.month||'sin-mes';(by[k]=by[k]||[]).push(v)});
-  const months=Object.keys(by).sort().reverse();
   const nowYm=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
-  let h='<h1>'+esc(data.name)+'</h1><p class="sub">Tus videos entregados. Toca uno para verlo aquí mismo o abrirlo en Drive.</p>'+tabsHtml();
-  if(!vids.length) h+='<div class="empty" style="margin-top:22px"><b>Aún no hay videos entregados</b>Apenas estén listos aparecerán aquí.</div>';
-  months.forEach(m=>{
-    const list=by[m];
-    if(qty){const pct=Math.min(100,Math.round(list.length/qty*100));
-      h+='<div class="prog"><div class="row"><div>'+(m==='sin-mes'?'Videos':ytag(m))+'</div><span>'+list.length+' de '+qty+' videos entregados</span></div><div class="barx"><i style="width:'+pct+'%"></i></div></div>';
-    } else h+='<h2>'+(m==='sin-mes'?'Videos':ytag(m))+' · '+list.length+(list.length===1?' video':' videos')+'</h2>';
-    h+='<div class="vgrid" style="margin-top:12px">'+list.map(v=>{const id=driveId(v.finalLink), fp=v.filePath;
-      const cover=fp?'<video muted playsinline preload="metadata" src="'+esc(fileUrl(fp))+'#t=0.1"></video>':(id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w480" onerror="this.remove()">':'');
-      return '<div class="vcard" role="button" tabindex="0" data-l="'+esc(v.finalLink)+'" data-fp="'+esc(fp||'')+'" data-t="'+esc(v.title||'Video')+'"><div class="vth"><span class="vnum">'+(v.number?String(v.number).padStart(2,'0'):'&#9654;')+'</span>'+cover+'<div class="pl"></div></div><div class="vinfo"><span>'+esc(v.title||'Video')+'</span></div></div>'}).join('')+'</div>';
-  });
+  const set=new Set(vids.map(v=>v.month).filter(Boolean)); if(pl.on) set.add(nowYm);
+  const months=[...set].sort();
+  if(!vmonth||!set.has(vmonth)) vmonth=set.has(nowYm)?nowYm:(months[months.length-1]||nowYm);
+  const list=vids.filter(v=>(v.month||'')===vmonth).sort((a,b)=>(a.number||999)-(b.number||999));
+  let h='<h1>'+esc(data.name)+'</h1><p class="sub">Tus videos listos. Toca uno para verlo aquí mismo.</p>'+tabsHtml();
+  if(months.length>1||true) h+='<div class="mchips">'+months.map(m=>'<button data-m="'+m+'" class="'+(m===vmonth?'on':'')+'">'+MONTHS[+m.split('-')[1]-1]+(m.slice(0,4)!==nowYm.slice(0,4)?' '+m.slice(0,4):'')+'</button>').join('')+'</div>';
+  if(qty){const pct=Math.min(100,Math.round(list.length/qty*100));
+    h+='<div class="prog"><div class="row"><div>'+ytag(vmonth)+'</div><span>'+list.length+' de '+qty+' videos entregados</span></div><div class="barx"><i style="width:'+pct+'%"></i></div></div>';
+  } else h+='<h2>'+ytag(vmonth)+' · '+list.length+(list.length===1?' video':' videos')+'</h2>';
+  if(!list.length) h+='<div class="empty" style="margin-top:14px"><b>Aún no hay videos en '+MONTHS[+vmonth.split('-')[1]-1]+'</b>Apenas estén listos aparecerán aquí.</div>';
+  else h+='<div class="vgrid" style="margin-top:12px">'+list.map(v=>{const id=driveId(v.finalLink), fp=v.filePath;
+    const cover=fp?'<video muted playsinline preload="metadata" src="'+esc(fileUrl(fp))+'#t=0.1"></video>':(id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w480" onerror="this.remove()">':'');
+    return '<div class="vcard" role="button" tabindex="0" data-l="'+esc(v.finalLink)+'" data-fp="'+esc(fp||'')+'" data-t="'+esc(v.title||'Video')+'"><div class="vth"><span class="vnum">'+(v.number?String(v.number).padStart(2,'0'):'&#9654;')+'</span>'+cover+'<div class="pl"></div></div><div class="vinfo"><span>'+esc(v.title||'Video')+'</span></div></div>'}).join('')+'</div>';
   h+='<div class="foot">Preparado por Tape · tapegrowth.agency</div>';
   app.innerHTML=h; bindTabs();
-  app.querySelectorAll('.vcard').forEach(b=>b.onclick=e=>{ if(e.target.closest('.dl')) return; lightbox(b.dataset.l,b.dataset.t,b.dataset.fp)});
+  app.querySelectorAll('.mchips button').forEach(b=>b.onclick=()=>{vmonth=b.dataset.m;renderVid()});
+  app.querySelectorAll('.vcard').forEach(b=>b.onclick=e=>{ lightbox(b.dataset.l,b.dataset.t,b.dataset.fp)});
 }
 function lightbox(link,title,fp){
   const id=driveId(link);
@@ -220,6 +225,12 @@ function lightbox(link,title,fp){
   const p=v.play(); if(p&&p.catch) p.catch(()=>{ sync(); });
   if(!fp) setTimeout(()=>{ if(!ok && v.readyState<2) useFrame(); },12000);
 }
+function calProg(posts){
+  const q=+((data.plan&&data.plan.social)||{}).qty||0; if(!q) return '';
+  const ym=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0');
+  const n=posts.filter(p=>String(p.date).startsWith(ym)).length, pct=Math.min(100,Math.round(n/q*100));
+  return '<div class="prog"><div class="row"><div>'+MONTHS[month.getMonth()]+'</div><span>'+n+' de '+q+' publicaciones programadas</span></div><div class="barx"><i style="width:'+pct+'%"></i></div></div>';
+}
 function render(){
   const app=document.getElementById('app');
   if(data){ const f=flags(); if(!tab||(tab==='cal'&&!f.cal)||(tab==='vid'&&!f.vid)) tab=f.cal?'cal':'vid'; if(tab==='vid') return renderVid(); }
@@ -234,7 +245,7 @@ function render(){
   const ym=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0');
   let list=posts.filter(p=>sel?p.date===sel:p.date.startsWith(ym));
   list.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
-  app.innerHTML='<h1>'+esc(data.name)+'</h1><p class="sub">Cronograma de publicaciones. Toca una publicación para ver el texto completo.</p>'+tabsHtml()
+  app.innerHTML='<h1>'+esc(data.name)+'</h1><p class="sub">Cronograma de publicaciones. Toca una publicación para ver el texto completo.</p>'+tabsHtml()+calProg(posts)
    +'<div class="bar"><div class="nav"><button id="pv" aria-label="Mes anterior">&lt;</button><div class="title">'+MONTHS[month.getMonth()]+' '+month.getFullYear()+'</div><button id="nx" aria-label="Mes siguiente">&gt;</button></div><button class="today" id="td">Hoy</button></div>'
    +'<div class="grid">'+g+'</div><h2>'+(sel?'Publicaciones del día':'Publicaciones de '+MONTHS[month.getMonth()])+'</h2>'
    +(list.length?list.map(card).join(''):'<div class="empty"><b>Nada programado</b>'+(sel?'No hay publicaciones este día.':'Aún no hay publicaciones programadas este mes.')+'</div>')
