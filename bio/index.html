@@ -16,10 +16,11 @@
   *{box-sizing:border-box;margin:0;padding:0}
   html{-webkit-text-size-adjust:100%}
   body{font-family:'Inter',system-ui,sans-serif;background:var(--ink);color:#fff;min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased}
-  .wrap{position:relative;max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;overflow:hidden}
-  .cover{position:absolute;inset:0 0 auto 0;height:62vh;min-height:380px;z-index:0;background:#0a0e0d url(../media/drone.jpg) center/cover}
-  .cover video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85}
-  .cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,14,13,.35) 0%,rgba(10,14,13,.55) 45%,var(--ink) 100%)}
+  .wrap{position:relative;max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+  .cover{position:fixed;inset:0;z-index:0;overflow:hidden;background:#0a0e0d}
+  .cover i{position:absolute;inset:-4%;background:url(../media/drone.jpg) center/cover;animation:pan 26s ease-in-out infinite alternate;opacity:.8}
+  .cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,14,13,.55) 0%,rgba(10,14,13,.7) 50%,rgba(10,14,13,.92) 100%)}
+  @keyframes pan{from{transform:scale(1) translateY(0)}to{transform:scale(1.08) translateY(-1.5%)}}
   .content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 44px) 22px calc(env(safe-area-inset-bottom) + 28px)}
   .logo{display:flex;align-items:center;justify-content:center;gap:12px}
   .mark{position:relative;width:30px;height:30px}
@@ -27,7 +28,7 @@
   .mark:before{left:50%;top:0;width:3px;height:100%;transform:translateX(-50%)}
   .mark:after{top:50%;left:0;height:3px;width:100%;transform:translateY(-50%)}
   .logo b{font-size:30px;font-weight:800;letter-spacing:-.03em}
-  .hero{margin:min(24vh,170px) 0 26px;text-align:center}
+  .hero{margin:34px 0 26px;text-align:center}
   .tag{font-size:11.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-b);display:inline-flex;align-items:center;gap:9px}
   .tag i{width:7px;height:7px;border-radius:2px;background:var(--teal-b)}
   h1{font-size:clamp(26px,7.6vw,32px);line-height:1.12;font-weight:800;letter-spacing:-.025em;margin:14px 0 10px}
@@ -46,13 +47,13 @@
   .rise{opacity:0;transform:translateY(14px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards}
   @keyframes rise{to{opacity:1;transform:none}}
   @media (hover:hover){.lk:hover{background:rgba(255,255,255,.12)}.lk.main:hover{background:var(--teal-b)}}
-  @media (prefers-reduced-motion:reduce){.rise{animation:none;opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.rise{animation:none;opacity:1;transform:none}.cover i{animation:none}}
   @media (min-width:520px){.wrap{border-left:1px solid rgba(255,255,255,.06);border-right:1px solid rgba(255,255,255,.06)}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="cover"><video autoplay muted loop playsinline preload="auto" poster="../media/drone.jpg"><source src="../media/drone.mp4" type="video/mp4"><source src="../media/drone.webm" type="video/webm"></video></div>
+  <div class="cover"><i></i></div>
   <div class="content">
     <div class="logo rise"><span class="mark"></span><b>Tape</b></div>
     <div class="hero rise" style="animation-delay:.08s">
@@ -66,14 +67,14 @@
         <span>Hablar por WhatsApp<em>Respondemos rápido</em></span>
         <svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
       </a>
-      <a class="lk rise" style="animation-delay:.22s" href="https://instagram.com/tapegrowth" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>
-        <span>Instagram<em>@tapegrowth</em></span>
-        <svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
-      </a>
       <a class="lk rise" style="animation-delay:.28s" href="https://tapegrowth.agency" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 3.9 5.7 3.9 9s-1.3 6.3-3.9 9c-2.6-2.7-3.9-5.7-3.9-9S9.4 5.7 12 3Z"/></svg>
         <span>Sitio oficial<em>Conocé la empresa, planes y trabajos</em></span>
+        <svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+      </a>
+      <a class="lk rise" style="animation-delay:.28s" href="https://www.tiktok.com/@tapegrowth" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 3c.3 2.4 1.7 3.9 4 4.1v3.1c-1.4.1-2.7-.3-4-1.1v5.9c0 3.8-3.1 6-6.1 5.5-2.6-.4-4.5-2.6-4.4-5.3.1-3.3 3.1-5.3 6.2-4.7v3.3c-1.4-.5-3.1.3-3.1 1.9 0 1.2 1 2.1 2.2 2 1.3-.1 1.9-.9 1.9-2.2V3h3.3Z"/></svg>
+        <span>TikTok<em>Mirá nuestros videos</em></span>
         <svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
       </a>
       <a class="lk rise" style="animation-delay:.34s" href="mailto:tape.agency.py@gmail.com">
