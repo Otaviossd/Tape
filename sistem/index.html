@@ -219,6 +219,9 @@
   .dc-foot{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-top:8px;font-weight:600;}
   .dc.full{border-color:#bfe3cf;background:#f4fbf7;}
   .dc.full .dc-foot b{color:#1f7a47;}
+  #delUpStatus .dp{position:fixed;left:16px;right:16px;bottom:96px;z-index:70;margin:0!important;box-shadow:0 12px 40px rgba(0,0,0,.18);max-width:520px}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spn .7s linear infinite;margin-right:8px;vertical-align:-2px}
+  @keyframes spn{to{transform:rotate(360deg)}}
   .dp-form{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:4px;}
   @media (max-width:640px){.dp-form{grid-template-columns:1fr;}}
   .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
@@ -1707,7 +1710,7 @@ document.getElementById('bulkForm').addEventListener('submit', async e=>{
   if(!links.length) return;
   if(links.some(l=>!/^https?:\/\//i.test(l))){ alert('Cada linha precisa ser um link completo (https://...).'); return; }
   let max = 0;
-  S.videoTasks.filter(v=>v.clientId===clientId && vMonth(v)===month).forEach(v=>{ if((v.number||0)>max) max=v.number; });
+  S.videoTasks.filter(v=>v.clientId===clientId && vMonth(v)===month).forEach(v=>{ if(vNum(v)>max) max=vNum(v); });
   for(let i=0;i<links.length;i++){
     const num = max+i+1;
     await db.collection('video_tasks').add({
@@ -1767,6 +1770,7 @@ const VIDEO_STATUS_LABEL = {pendente:'Pendente',gravado:'Gravado',editado:'Edita
 let draggedVideoId = null;
 let delMonth = (()=>{const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');})();
 const pad2 = n=>String(n).padStart(2,'0');
+function vNum(v){ const m=String(v.title||'').match(/^v[ií]deo\s*0*(\d+)\s*$/i); return m?+m[1]:(v.number||0); }
 function vMonth(v){ return v.month || String(v.dueDate||v.createdAt||'').slice(0,7); }
 function driveIdOf(u){ const m=String(u||'').match(/\/d\/([\w-]+)/)||String(u||'').match(/[?&]id=([\w-]+)/); return m?m[1]:''; }
 function monthLabel(ym){ const [y,m]=ym.split('-'); return MONTHS[+m-1]+' '+y; }
@@ -1776,7 +1780,7 @@ window.delAdd = async function(){
   const clientId = document.getElementById('videoClientFilter').value; if(!clientId) return;
   const link = document.getElementById('delLink').value.trim();
   if(!/^https?:\/\//i.test(link)){ alert('Cole o link completo do Drive (https://...).'); return; }
-  let max=0; S.videoTasks.filter(v=>v.clientId===clientId && vMonth(v)===delMonth).forEach(v=>{ if((v.number||0)>max) max=v.number; });
+  let max=0; S.videoTasks.filter(v=>v.clientId===clientId && vMonth(v)===delMonth).forEach(v=>{ if(vNum(v)>max) max=vNum(v); });
   const num = max+1;
   const title = document.getElementById('delTitle').value.trim() || ('Vídeo '+pad2(num));
   document.getElementById('delLink').value=''; document.getElementById('delTitle').value='';
@@ -1808,10 +1812,10 @@ function renderDeliveryPanel(){
     return;
   }
   const c = clientById(filt); if(!c){ box.innerHTML=''; return; }
-  const list = S.videoTasks.filter(v=>v.clientId===filt && vMonth(v)===delMonth).sort((a,b)=>(a.number||0)-(b.number||0));
+  const list = S.videoTasks.filter(v=>v.clientId===filt && vMonth(v)===delMonth).sort((a,b)=>vNum(a)-vNum(b));
   const done = list.filter(v=>v.status==='entregue').length;
   const q = planOf(c).qtyVideo; const pct = q?Math.min(100,Math.round(done/q*100)):0;
-  let max=0; list.forEach(v=>{ if((v.number||0)>max) max=v.number; });
+  let max=0; list.forEach(v=>{ if(vNum(v)>max) max=vNum(v); });
   box.innerHTML = `<div class="dp">
     <div class="dp-head"><h3>${escapeHtml(c.name)}</h3>${monthInputHtml('delMonthChange')}</div>
     <div class="dp-sub">${monthLabel(delMonth)}</div>
@@ -1826,7 +1830,7 @@ function renderDeliveryPanel(){
       <div id="delFileName" style="font-size:12px;color:var(--muted);margin-top:6px;word-break:break-all;">${delPickedFile?escapeHtml(delPickedFile.name):'Nenhum arquivo escolhido'}</div>
     </div>
     <div class="dp-actions">
-      <button class="btn btn-primary" onclick="delAddFull()"><svg class="icon"><use href="#ic-plus"/></svg>Adicionar vídeo</button>
+      <button class="btn btn-primary" id="delBtn" onclick="delAddFull()" ${delBtnLabel?'disabled':''}>${delBtnLabel?`<span class="spin"></span>${delBtnLabel}`:'<svg class="icon"><use href="#ic-plus"/></svg>Adicionar vídeo'}</button>
       <button class="btn btn-outline" onclick="openShare('${c.id}')"><svg class="icon"><use href="#ic-link"/></svg>Link para o cliente</button>
       <button class="btn btn-ghost" onclick="delPick('')">Voltar</button>
     </div>
@@ -1872,6 +1876,13 @@ function uploadWithProgress(file, path, onPct){
     x.onerror = ()=>reject(new Error('Falha de conexão no envio.'));
     x.send(file);
   });
+}
+let delBtnLabel = null;
+function setBtnLabel(t){
+  delBtnLabel = t;
+  const b=document.getElementById('delBtn'); if(!b) return;
+  b.disabled = !!t;
+  b.innerHTML = t ? `<span class="spin"></span>${t}` : '<svg class="icon"><use href="#ic-plus"/></svg>Adicionar vídeo';
 }
 function setUpStatus(html){
   const b=document.getElementById('delUpStatus'); if(!b) return;
@@ -1919,7 +1930,7 @@ window.delAttach = function(id){
       let blob = file;
       try{ blob = await compressVideo(file, pct=>setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Comprimindo a prévia: ${pct}%</div><div class="pbar"><i style="width:${pct}%"></i></div>`)); }
       catch(e){ if(file.size>50*1024*1024) throw new Error('Não deu para comprimir e o arquivo é grande. Tente pelo computador.'); }
-      const path = `${v.clientId}/${vMonth(v)||delMonth}/${Date.now()}-${pad2(v.number||0)}.mp4`;
+      const path = `${v.clientId}/${vMonth(v)||delMonth}/${Date.now()}-${pad2(vNum(v))}.mp4`;
       await uploadWithProgress(blob, path, pct=>setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Enviando prévia: ${pct}%</div><div class="pbar"><i style="width:${pct}%"></i></div>`));
       if(v.filePath){ try{ await sb.storage.from('entregas').remove([v.filePath]); }catch(_){} }
       const upd = {filePath:path}; if(!v.finalLink) upd.finalLink = fileUrlOf(path);
@@ -1934,7 +1945,7 @@ let delNumSel = null;
 function numOptionsHtml(clientId, month, selected, excludeId){
   const c = clientById(clientId); const q = c ? planOf(c).qtyVideo : 0;
   const tasks = S.videoTasks.filter(v=>v.clientId===clientId && vMonth(v)===month && v.id!==excludeId);
-  const taken = new Set(tasks.map(v=>v.number)); let max=0; tasks.forEach(v=>{ if((v.number||0)>max) max=v.number; });
+  const taken = new Set(tasks.map(v=>vNum(v))); let max=0; tasks.forEach(v=>{ if(vNum(v)>max) max=vNum(v); });
   const N = q ? Math.max(q,max,selected||0) : Math.max(max+3,6,selected||0);
   let sel = selected;
   if(!sel){ for(let i=1;i<=N;i++){ if(!taken.has(i)){ sel=i; break; } } if(!sel) sel=N; }
@@ -1948,16 +1959,17 @@ async function saveDelivery({clientId, month, number, title, link, file, existin
   if(file){
     let blob = file;
     try{
+      setBtnLabel('Preparando...');
       setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Preparando compressor...</div><div class="pbar"><i style="width:3%"></i></div>`);
-      blob = await compressVideo(file, pct=>setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Comprimindo a prévia: ${pct}%</div><div class="pbar"><i style="width:${pct}%"></i></div>`));
+      blob = await compressVideo(file, pct=>{ setBtnLabel('Comprimindo '+pct+'%'); setUpStatus(`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Comprimindo a prévia: ${pct}%</div><div class="pbar"><i style="width:${pct}%"></i></div>`); });
     }catch(err){
       if(file.size > 50*1024*1024) throw new Error('Não deu para comprimir e o arquivo é grande. Tente de novo no computador ou use só o link do Drive.');
       blob = file;
     }
     const path = `${clientId}/${month}/${Date.now()}-${pad2(number)}.mp4`;
     const label = pct=>`<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Enviando prévia (${(blob.size/1048576).toFixed(1)} MB): ${pct}%</div><div class="pbar"><i style="width:${pct}%"></i></div>`;
-    setUpStatus(label(0));
-    await uploadWithProgress(blob, path, pct=>setUpStatus(label(pct)));
+    setBtnLabel('Enviando 0%'); setUpStatus(label(0));
+    await uploadWithProgress(blob, path, pct=>{ setBtnLabel('Enviando '+pct+'%'); setUpStatus(label(pct)); });
     data.filePath = path;
     if(existing && existing.filePath) oldPath = existing.filePath;
     if(!finalLink || (existing && existing.filePath && finalLink===fileUrlOf(existing.filePath))) finalLink = fileUrlOf(path);
@@ -1977,9 +1989,9 @@ window.delAddFull = async function(){
   if(!link && !file){ alert('Cole o link do Drive e/ou escolha o arquivo do vídeo.'); return; }
   if(link && !/^https?:\/\//i.test(link)){ alert('Cole o link completo do Drive (https://...).'); return; }
   if(!link && !confirm('Sem o link do Drive, o cliente NÃO poderá baixar o original (só assistir a prévia). Continuar mesmo assim?')) return;
-  const existing = S.videoTasks.find(v=>v.clientId===clientId && vMonth(v)===delMonth && v.number===number);
+  const existing = S.videoTasks.find(v=>v.clientId===clientId && vMonth(v)===delMonth && vNum(v)===number);
   if(existing && !confirm('O Vídeo '+pad2(number)+' já foi enviado. Substituir pelo novo?')) return;
-  delBusy = true;
+  delBusy = true; setBtnLabel('Iniciando...');
   try{
     await saveDelivery({clientId, month:delMonth, number, title: typed || ('Vídeo '+pad2(number)), link, file, existing});
     delPickedFile = null; delNumSel = null;
@@ -1989,12 +2001,12 @@ window.delAddFull = async function(){
     renderDeliveryPanel();
   }catch(err){
     setUpStatus(`<div style="color:#b3261e;font-weight:700;font-size:13px;">Falhou: ${escapeHtml(err.message||'erro')}</div>`);
-  }finally{ delBusy=false; }
+  }finally{ delBusy=false; setBtnLabel(null); }
 };
 window.delEdit = function(id){
   const v = S.videoTasks.find(x=>x.id===id); if(!v) return;
   document.getElementById('deId').value = id;
-  document.getElementById('deNum').innerHTML = numOptionsHtml(v.clientId, vMonth(v), v.number||1, null);
+  document.getElementById('deNum').innerHTML = numOptionsHtml(v.clientId, vMonth(v), vNum(v)||1, null);
   document.getElementById('deTitle').value = v.title||'';
   document.getElementById('deLink').value = (v.filePath && v.finalLink===fileUrlOf(v.filePath)) ? '' : (v.finalLink||'');
   document.getElementById('deFile').value = '';
@@ -2010,20 +2022,20 @@ document.getElementById('delEditForm').addEventListener('submit', async e=>{
   const number = +document.getElementById('deNum').value;
   const file = document.getElementById('deFile').files[0] || null;
   const month = vMonth(v);
-  const other = S.videoTasks.find(x=>x.id!==id && x.clientId===v.clientId && vMonth(x)===month && x.number===number);
+  const other = S.videoTasks.find(x=>x.id!==id && x.clientId===v.clientId && vMonth(x)===month && vNum(x)===number);
   if(other && !confirm('O Vídeo '+pad2(number)+' já existe. Trocar a posição dos dois?')) return;
   const typed = document.getElementById('deTitle').value.trim();
-  const autoOld = 'Vídeo '+pad2(v.number||0);
+  const autoOld = 'Vídeo '+pad2(vNum(v));
   const title = (typed && typed!==autoOld) ? typed : ('Vídeo '+pad2(number));
   closeModal('modalDelEdit');
   delBusy = true;
   try{
     await saveDelivery({clientId:v.clientId, month, number, title, link, file, existing:v});
-    if(other){ await db.collection('video_tasks').doc(other.id).update({number:v.number||0, title: (other.title===('Vídeo '+pad2(other.number||0)))?('Vídeo '+pad2(v.number||0)):other.title}); }
+    if(other){ await db.collection('video_tasks').doc(other.id).update({number:vNum(v), title: (other.title===('Vídeo '+pad2(vNum(other))))?('Vídeo '+pad2(vNum(v))):other.title}); }
     setUpStatus('<div style="color:#1f7a47;font-weight:700;font-size:13px;">Entrega atualizada.</div>'); setTimeout(()=>setUpStatus(''),3000);
   }catch(err){
     setUpStatus(`<div style="color:#b3261e;font-weight:700;font-size:13px;">Falhou: ${escapeHtml(err.message||'erro')}</div>`);
-  }finally{ delBusy=false; }
+  }finally{ delBusy=false; setBtnLabel(null); }
 });
 function renderKanban(){
   renderDeliveryPanel();

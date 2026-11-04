@@ -144,6 +144,7 @@ function card(p){
 let tab=null;
 const ytag=m=>{const[y,mm]=m.split('-');return MONTHS[+mm-1]+' '+y};
 const fileUrl=fp=>SB+'/storage/v1/object/public/entregas/'+String(fp).split('/').map(encodeURIComponent).join('/');
+function vN(v){const m=String(v.title||'').match(/^v[ií]deo\s*0*(\d+)\s*$/i);return m?+m[1]:(v.number||0)}
 function driveId(u){const m=String(u||'').match(/\/d\/([\w-]+)/)||String(u||'').match(/[?&]id=([\w-]+)/);return m?m[1]:''}
 function flags(){
   const pl=(data&&data.plan)||{};
@@ -166,7 +167,7 @@ function renderVid(){
   const set=new Set(vids.map(v=>v.month).filter(Boolean)); if(pl.on) set.add(nowYm);
   const months=[...set].sort();
   if(!vmonth||!set.has(vmonth)) vmonth=set.has(nowYm)?nowYm:(months[months.length-1]||nowYm);
-  const list=vids.filter(v=>(v.month||'')===vmonth).sort((a,b)=>(a.number||999)-(b.number||999));
+  const list=vids.filter(v=>(v.month||'')===vmonth).sort((a,b)=>(vN(a)||999)-(vN(b)||999));
   let h='<h1>'+esc(data.name)+'</h1><p class="sub">Tus videos listos. Toca uno para verlo aquí mismo.</p>'+tabsHtml();
   if(months.length>1||true) h+='<div class="mchips">'+months.map(m=>'<button data-m="'+m+'" class="'+(m===vmonth?'on':'')+'">'+MONTHS[+m.split('-')[1]-1]+(m.slice(0,4)!==nowYm.slice(0,4)?' '+m.slice(0,4):'')+'</button>').join('')+'</div>';
   if(qty){const pct=Math.min(100,Math.round(list.length/qty*100));
@@ -175,7 +176,7 @@ function renderVid(){
   if(!list.length) h+='<div class="empty" style="margin-top:14px"><b>Aún no hay videos en '+MONTHS[+vmonth.split('-')[1]-1]+'</b>Apenas estén listos aparecerán aquí.</div>';
   else h+='<div class="vgrid" style="margin-top:12px">'+list.map(v=>{const id=driveId(v.finalLink), fp=v.filePath;
     const cover=fp?'<video muted playsinline preload="metadata" src="'+esc(fileUrl(fp))+'#t=0.1"></video>':(id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w480" onerror="this.remove()">':'');
-    return '<div class="vcard" role="button" tabindex="0" data-l="'+esc(v.finalLink)+'" data-fp="'+esc(fp||'')+'" data-t="'+esc(v.title||'Video')+'"><div class="vth"><span class="vnum">'+(v.number?String(v.number).padStart(2,'0'):'&#9654;')+'</span>'+cover+'<div class="pl"></div></div><div class="vinfo"><span>'+esc(v.title||'Video')+'</span></div></div>'}).join('')+'</div>';
+    return '<div class="vcard" role="button" tabindex="0" data-l="'+esc(v.finalLink)+'" data-fp="'+esc(fp||'')+'" data-t="'+esc(v.title||'Video')+'"><div class="vth"><span class="vnum">'+(vN(v)?String(vN(v)).padStart(2,'0'):'&#9654;')+'</span>'+cover+'<div class="pl"></div></div><div class="vinfo"><span>'+esc(v.title||'Video')+'</span></div></div>'}).join('')+'</div>';
   h+='<div class="foot">Preparado por Tape · tapegrowth.agency</div>';
   app.innerHTML=h; bindTabs();
   app.querySelectorAll('.mchips button').forEach(b=>b.onclick=()=>{vmonth=b.dataset.m;renderVid()});
