@@ -430,3 +430,6 @@ details.fq p{color:var(--muted);margin-top:12px;max-width:680px}.dk details.fq p
 .sx .vis .bw,.sx:nth-child(even) .vis .bw,.sx .vis:hover .bw{transform:none}
 .sx .mob{transform:translateZ(46px)}
 @media(max-width:700px){.lz .chs{gap:8px}.lz .chs span{font-size:12.5px;padding:9px 12px;border-radius:10px}}
+
+.lbx.land{max-width:min(1100px,100%);height:auto;aspect-ratio:16/9;align-self:center}
+.lbx.land video{object-fit:contain}

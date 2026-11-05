@@ -105,7 +105,7 @@ function openLb(c){
  el.innerHTML='<div class="lbt"><b>'+c.dataset.t+'</b><button aria-label="Cerrar">&times;</button></div><div class="lbs"><div class="lbx"><video playsinline poster="'+c.dataset.p+'"></video><button class="bp" aria-label="Reproducir"></button><div class="ctl"><button data-c="t" aria-label="Pausa">II</button><input type="range" min="0" max="1000" value="0"><span class="tm">0:00</span><button data-c="m" aria-label="Sonido">&#9835;</button><button data-c="f" aria-label="Pantalla completa">&#9974;</button></div></div></div>';
  D.body.appendChild(el);D.body.style.overflow='hidden';
  var x=$('.lbx',el),v=$('video',el),r=$('input',el),tm=$('.tm',el),tg=$('[data-c=t]',el);
- v.src=c.dataset.s;v.autoplay=true;
+ if(c.dataset.l)x.classList.add('land');v.src=c.dataset.s;v.autoplay=true;
  function sy(){x.classList.toggle('ps',v.paused);tg.textContent=v.paused?'▶':'II'}
  v.addEventListener('play',sy);v.addEventListener('pause',sy);
  v.addEventListener('timeupdate',function(){if(v.duration&&!r.dataset.d){r.value=Math.round(v.currentTime/v.duration*1000);r.style.setProperty('--p',v.currentTime/v.duration*100+'%')}tm.textContent=fmt(v.currentTime)+' / '+fmt(v.duration)});
