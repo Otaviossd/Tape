@@ -120,3 +120,23 @@ function openLb(c){
 }
 D.addEventListener('click',function(e){var c=e.target.closest('.vc[data-s],.xc[data-s],.vl[data-s]');if(c){e.preventDefault();openLb(c)}});
 })();
+;(function(){
+var D=document,W=window;
+function openImg(list,i){
+ var el=D.createElement('div');el.className='lb';
+ el.innerHTML='<div class="lbt"><b>Pedi Yapa | Cobertura de evento</b><button aria-label="Cerrar">&times;</button></div><div class="ie"><img alt=""><button class="nv pv" aria-label="Anterior">&#8249;</button><button class="nv nx" aria-label="Siguiente">&#8250;</button></div>';
+ D.body.appendChild(el);D.body.style.overflow='hidden';
+ var im=el.querySelector('img');
+ function show(n){i=(n+list.length)%list.length;im.src=list[i]}
+ function close(){el.remove();D.body.style.overflow='';W.removeEventListener('keydown',kd)}
+ function kd(e){if(e.key==='Escape')close();if(e.key==='ArrowRight')show(i+1);if(e.key==='ArrowLeft')show(i-1)}
+ W.addEventListener('keydown',kd);
+ el.querySelector('.lbt button').onclick=close;
+ el.querySelector('.pv').onclick=function(){show(i-1)};
+ el.querySelector('.nx').onclick=function(){show(i+1)};
+ var sx=null;el.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},{passive:true});
+ el.addEventListener('touchend',function(e){if(sx===null)return;var d=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(d)>50)show(i+(d<0?1:-1))},{passive:true});
+ show(i);
+}
+D.addEventListener('click',function(e){var b=e.target.closest('.evp[data-i]');if(!b)return;e.preventDefault();var l=[].slice.call(D.querySelectorAll('.evp[data-i]'));openImg(l.map(function(x){return x.dataset.i}),l.indexOf(b))});
+})();
