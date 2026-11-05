@@ -380,3 +380,17 @@ details.fq p{color:var(--muted);margin-top:12px;max-width:680px}.dk details.fq p
 .hrc{box-shadow:none}
 .hrs{bottom:-30px;width:70%;height:40px;background:radial-gradient(ellipse at 50% 0,rgba(7,11,10,.18),rgba(7,11,10,0) 72%)}
 @media(max-width:700px){.hrl span{display:none}.hrl{padding:7px 10px;left:7px;right:7px;bottom:7px}}
+
+.rec{background:#fff}.rec .lc{padding:8px 16px;color:rgba(7,11,10,.7);font-weight:600}
+/* sitios: móvil sin cortes */
+.sx>*{min-width:0}
+@media(max-width:860px){
+.sx .vis{perspective:none;margin-bottom:34px}
+.sx .vis .bw,.sx:nth-child(even) .vis .bw{transform:none}
+.sx .mob,.sx:nth-child(even) .mob{right:10px;left:auto;bottom:-26px;width:27%}
+}
+
+@media(hover:none){.xv .xc video{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.xv .xc:before,.xv .xc:after{display:none}}
+#complementos .g3{grid-template-columns:repeat(2,1fr)}
+@media(max-width:700px){#complementos .g3{grid-template-columns:1fr}}
+@media(max-width:860px){.sx .mob,.sx:nth-child(even) .mob{position:relative;right:auto;left:auto;bottom:auto;width:40%;margin:-56px 12px 0 auto}.sx .vis{margin-bottom:8px}}

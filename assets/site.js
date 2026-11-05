@@ -73,9 +73,10 @@ if(ENGINE)W.addEventListener('scroll',req,{passive:true});
 if(ENGINE)W.addEventListener('resize',function(){if(TOUCH&&Math.abs(W.innerWidth-vw)<2){vh=W.innerHeight;req();return}sizeX();req()});
 if(scene&&!TOUCH){D.addEventListener('mousemove',function(e){mx=(e.clientX/vw-.5);my=(e.clientY/vh-.5);req()},{passive:true})}
 if(ENGINE){sizeX();tick();W.addEventListener('load',function(){sizeX();tick()})}
+/* touch: solo el video de "Lo que hacemos se ve" se reproduce al verse y se pausa al salir */
+if(TOUCH&&'IntersectionObserver' in W){var xvv=$('.xv .xc video');if(xvv){var xio=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.intersectionRatio>=.4){if(!v._l){v._l=1;var s=D.createElement('source');s.src=v.dataset.src;s.type='video/mp4';var s2=D.createElement('source');s2.src=v.dataset.src.replace('.mp4','.webm');s2.type='video/webm';v.appendChild(s);v.appendChild(s2);v.load()}var p=v.play();if(p&&p.catch)p.catch(function(){})}else if(v._l)v.pause()})},{threshold:[0,.4,.7]});xio.observe(xvv)}}
 /* hero: anillo 3D de videos */
 (function(){var h2=$('.h2');if(!h2)return;var tc=$('.tc',h2),t0=Date.now();
- if(tc)setInterval(function(){var s=Math.floor((Date.now()-t0)/1000),p=function(n){return(n<10?'0':'')+n};tc.textContent=p(Math.floor(s/3600))+':'+p(Math.floor(s/60)%60)+':'+p(s%60)},1000);
  if(TOUCH)return;
  var hr=$('.hr',h2),ri=$('.hri',h2),cs=$$('.hrc',h2),STEP=15,DUR=64000,ticking=0;
  W.addEventListener('pointermove',function(e){if(ticking)return;ticking=1;requestAnimationFrame(function(){ticking=0;hr.style.setProperty('--px',((e.clientX/W.innerWidth)*2-1).toFixed(3))})},{passive:true});
