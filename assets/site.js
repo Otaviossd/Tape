@@ -30,7 +30,7 @@ if('IntersectionObserver' in W){
  var vio=new IntersectionObserver(function(e){e.forEach(function(x){var v=x.target;v._vis=x.isIntersecting;if(!v._l)return;if(x.isIntersecting){var p=v.play();if(p&&p.catch)p.catch(function(){})}else v.pause()})},{threshold:.05});
  if(!TOUCH)$$('video[data-src]').forEach(function(v){vio.observe(v)});
  var pio=new IntersectionObserver(function(e){e.forEach(function(x){x.target.classList.toggle('off',!x.isIntersecting)})},{threshold:0});
- $$('.hero,.mq').forEach(function(el){pio.observe(el)})}
+ $$('.hero,.h2,.mq').forEach(function(el){pio.observe(el)})}
 /* scroll engine: reads first, then writes */
 var pgb=$('.pgb'),xv=$('.xv'),dbs=$$('.db .trk'),w3=$('.w3 .stage'),tlw=$('.tlw'),darks=$$('.hero,.xv,.db,.lz,.fin,.sec.dk,.ft');
 var xs=xv?$$('.xs',xv):[],xc=xv?$('.xc',xv):null,xh=xv?$('.xh',xv):null,xo=xv?$('.xo',xv):null,xst=xv?$('.st',xv):null;
