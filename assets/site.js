@@ -73,6 +73,18 @@ if(ENGINE)W.addEventListener('scroll',req,{passive:true});
 if(ENGINE)W.addEventListener('resize',function(){if(TOUCH&&Math.abs(W.innerWidth-vw)<2){vh=W.innerHeight;req();return}sizeX();req()});
 if(scene&&!TOUCH){D.addEventListener('mousemove',function(e){mx=(e.clientX/vw-.5);my=(e.clientY/vh-.5);req()},{passive:true})}
 if(ENGINE){sizeX();tick();W.addEventListener('load',function(){sizeX();tick()})}
+/* hero: anillo 3D de videos */
+(function(){var h2=$('.h2');if(!h2)return;var tc=$('.tc',h2),t0=Date.now();
+ if(tc)setInterval(function(){var s=Math.floor((Date.now()-t0)/1000),p=function(n){return(n<10?'0':'')+n};tc.textContent=p(Math.floor(s/3600))+':'+p(Math.floor(s/60)%60)+':'+p(s%60)},1000);
+ if(TOUCH)return;
+ var hr=$('.hr',h2),ri=$('.hri',h2),cs=$$('.hrc',h2),STEP=15,DUR=64000,ticking=0;
+ W.addEventListener('pointermove',function(e){if(ticking)return;ticking=1;requestAnimationFrame(function(){ticking=0;hr.style.setProperty('--px',((e.clientX/W.innerWidth)*2-1).toFixed(3))})},{passive:true});
+ function ang(){var an=ri.getAnimations&&ri.getAnimations()[0],t=an?an.currentTime:performance.now();return -360*((t%DUR)/DUR)}
+ function upd(){if(h2.classList.contains('off'))return;var a=ang();cs.forEach(function(c,i){var d=((i*STEP+a)%360+540)%360-180,v=c.querySelector('video');
+  if(Math.abs(d)<=62){if(!v){v=D.createElement('video');v.muted=true;v.loop=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');v.preload='auto';var k=c.dataset.k;var s1=D.createElement('source');s1.src='/media/r-'+k+'.webm';s1.type='video/webm';var s2=D.createElement('source');s2.src='/media/r-'+k+'.mp4';s2.type='video/mp4';v.appendChild(s2);v.appendChild(s1);v.insertBefore(s1,s2);c.insertBefore(v,c.querySelector('.hrl'));v.addEventListener('playing',function(){v.classList.add('on')})}
+   if(v.paused){var p=v.play();if(p&&p.catch)p.catch(function(){})}}
+  else if(v&&!v.paused){v.pause()}})}
+ W.addEventListener('load',function(){setTimeout(function(){upd();setInterval(upd,500)},900)})})();
 /* header oscuro sobre secciones oscuras, sin handler de scroll */
 if(hd&&'IntersectionObserver' in W){var dkS=[];var dio=new IntersectionObserver(function(es){es.forEach(function(e){var i=dkS.indexOf(e.target);if(e.isIntersecting&&i<0)dkS.push(e.target);if(!e.isIntersecting&&i>=0)dkS.splice(i,1)});hd.classList.toggle('dk',dkS.length>0)},{rootMargin:'-5% 0px -94% 0px',threshold:0});darks.forEach(function(s){dio.observe(s)})}
 /* lightbox */
