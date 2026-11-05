@@ -415,3 +415,18 @@ details.fq p{color:var(--muted);margin-top:12px;max-width:680px}.dk details.fq p
 .vl .pp:after{content:"";position:absolute;left:12px;top:9px;border-left:11px solid #031311;border-top:7px solid transparent;border-bottom:7px solid transparent}
 @media(max-width:700px){.dg{margin-top:36px}.vl{min-width:100%}}
 @media(prefers-reduced-motion:reduce){.dm{animation:none}}
+
+/* chips tecnicos en lanzamientos */
+.lz .chs{display:flex;flex-wrap:wrap;gap:10px;margin:34px 0 38px;max-width:900px}
+.lz .chs span{font:600 14.5px Inter;letter-spacing:-.01em;padding:12px 18px;border-radius:12px;color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+@media(max-width:700px){.lz .chs span{font-size:13.5px;padding:10px 14px}}
+/* sitios: proporciones correctas + 3D al tocar */
+.sx img{display:block;max-width:100%;height:auto}
+.bw img,.sx .mob img{width:100%;height:auto}
+.sx .mob{aspect-ratio:9/19;border:3px solid #0b1110;border-radius:18px;background:#0b1110}
+.sx .mob img{width:100%;height:100%;object-fit:cover;object-position:top}
+.sx .vis{perspective:none;transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transform-style:preserve-3d;transition:transform .6s var(--ease);touch-action:pan-y;will-change:transform}
+.sx .vis.tl{transition:transform .12s linear}
+.sx .vis .bw,.sx:nth-child(even) .vis .bw,.sx .vis:hover .bw{transform:none}
+.sx .mob{transform:translateZ(46px)}
+@media(max-width:700px){.lz .chs{gap:8px}.lz .chs span{font-size:12.5px;padding:9px 12px;border-radius:10px}}

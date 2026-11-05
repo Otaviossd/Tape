@@ -79,6 +79,12 @@ if(TOUCH&&'IntersectionObserver' in W){var xvv=$('.xv .xc video');if(xvv){var xi
 if(!TOUCH&&'IntersectionObserver' in W){var tio=new IntersectionObserver(function(es){es.forEach(function(e){var t=e.target,v=t.querySelector('video');
  if(e.isIntersecting){if(!v){v=D.createElement('video');v.muted=true;v.loop=true;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';var k=t.dataset.k;['webm','mp4'].forEach(function(x){var s=D.createElement('source');s.src='/media/r-'+k+'.'+x;s.type='video/'+x;v.appendChild(s)});t.appendChild(v);v.addEventListener('playing',function(){v.classList.add('on')})}
   var p=v.play();if(p&&p.catch)p.catch(function(){})}else if(v)v.pause()})},{rootMargin:'0px 100px 0px 100px'});$$('.dt').forEach(function(t){tio.observe(t)})}
+/* sitios: inclinacion 3D al tocar o pasar el mouse */
+$$('.sx .vis').forEach(function(v){var on=0;function tilt(e){var r=v.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;v.style.setProperty('--ry',(x*16).toFixed(1)+'deg');v.style.setProperty('--rx',(-y*12).toFixed(1)+'deg')}
+ function rst(){on=0;v.classList.remove('tl');v.style.setProperty('--ry','0deg');v.style.setProperty('--rx','0deg')}
+ v.addEventListener('pointerdown',function(e){on=1;v.classList.add('tl');tilt(e)});
+ v.addEventListener('pointermove',function(e){if(on||e.pointerType==='mouse'){v.classList.add('tl');tilt(e)}});
+ ['pointerup','pointercancel','pointerleave'].forEach(function(ev){v.addEventListener(ev,function(){setTimeout(rst,ev==='pointerup'?350:0)})})});
 /* hero: anillo 3D de videos */
 (function(){var h2=$('.h2');if(!h2)return;var tc=$('.tc',h2),t0=Date.now();
  if(TOUCH)return;
