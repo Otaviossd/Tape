@@ -394,3 +394,24 @@ details.fq p{color:var(--muted);margin-top:12px;max-width:680px}.dk details.fq p
 #complementos .g3{grid-template-columns:repeat(2,1fr)}
 @media(max-width:700px){#complementos .g3{grid-template-columns:1fr}}
 @media(max-width:860px){.sx .mob,.sx:nth-child(even) .mob{position:relative;right:auto;left:auto;bottom:auto;width:40%;margin:-56px 12px 0 auto}.sx .vis{margin-bottom:8px}}
+
+/* trabajos: bandas diagonales en movimiento */
+.dg{transform:rotate(-6deg);margin:clamp(50px,7vw,90px) -8% 0;display:grid;gap:16px}
+.dr{overflow:hidden}
+.dm{display:flex;gap:16px;width:max-content;animation:dml 70s linear infinite;will-change:transform}
+.dr.r .dm{animation-name:dmr}
+@keyframes dml{to{transform:translate3d(-33.3333%,0,0)}}
+@keyframes dmr{from{transform:translate3d(-33.3333%,0,0)}to{transform:translate3d(0,0,0)}}
+.dt{position:relative;flex:none;width:clamp(120px,14vw,200px);aspect-ratio:9/16;border-radius:clamp(12px,1.3vw,18px);overflow:hidden;background:#111}
+.dt img,.dt video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.dt video{opacity:0;transition:opacity .5s}.dt video.on{opacity:1}
+.db.off .dm{animation-play-state:paused}
+.dn{margin:clamp(70px,9vw,110px) 0 18px;color:rgba(255,255,255,.55);font-size:14px}
+.nl{display:flex;flex-wrap:wrap;gap:10px}
+.vl{display:flex;align-items:center;justify-content:space-between;gap:20px;min-width:min(100%,290px);padding:14px 14px 14px 18px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.2);color:#fff;text-align:left;cursor:pointer;font-family:Inter;transition:transform .3s var(--ease),background .3s}
+.vl:hover{transform:translateY(-2px);background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.07))}
+.vl span{display:flex;flex-direction:column;gap:2px}.vl b{font-weight:600;font-size:15px;letter-spacing:-.01em}.vl i{font-style:normal;font-size:12.5px;color:rgba(255,255,255,.6)}
+.vl .pp{width:32px;height:32px;border-radius:9px;background:var(--teal-b);position:relative;flex:none}
+.vl .pp:after{content:"";position:absolute;left:12px;top:9px;border-left:11px solid #031311;border-top:7px solid transparent;border-bottom:7px solid transparent}
+@media(max-width:700px){.dg{margin-top:36px}.vl{min-width:100%}}
+@media(prefers-reduced-motion:reduce){.dm{animation:none}}

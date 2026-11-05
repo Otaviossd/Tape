@@ -30,7 +30,7 @@ if('IntersectionObserver' in W){
  var vio=new IntersectionObserver(function(e){e.forEach(function(x){var v=x.target;v._vis=x.isIntersecting;if(!v._l)return;if(x.isIntersecting){var p=v.play();if(p&&p.catch)p.catch(function(){})}else v.pause()})},{threshold:.05});
  if(!TOUCH)$$('video[data-src]').forEach(function(v){vio.observe(v)});
  var pio=new IntersectionObserver(function(e){e.forEach(function(x){x.target.classList.toggle('off',!x.isIntersecting)})},{threshold:0});
- $$('.hero,.h2,.mq').forEach(function(el){pio.observe(el)})}
+ $$('.hero,.h2,.mq,.db').forEach(function(el){pio.observe(el)})}
 /* scroll engine: reads first, then writes */
 var pgb=$('.pgb'),xv=$('.xv'),dbs=$$('.db .trk'),w3=$('.w3 .stage'),tlw=$('.tlw'),darks=$$('.hero,.xv,.db,.lz,.fin,.sec.dk,.ft');
 var xs=xv?$$('.xs',xv):[],xc=xv?$('.xc',xv):null,xh=xv?$('.xh',xv):null,xo=xv?$('.xo',xv):null,xst=xv?$('.st',xv):null;
@@ -75,6 +75,10 @@ if(scene&&!TOUCH){D.addEventListener('mousemove',function(e){mx=(e.clientX/vw-.5
 if(ENGINE){sizeX();tick();W.addEventListener('load',function(){sizeX();tick()})}
 /* touch: solo el video de "Lo que hacemos se ve" se reproduce al verse y se pausa al salir */
 if(TOUCH&&'IntersectionObserver' in W){var xvv=$('.xv .xc video');if(xvv){var xio=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.intersectionRatio>=.4){if(!v._l){v._l=1;var s=D.createElement('source');s.src=v.dataset.src;s.type='video/mp4';var s2=D.createElement('source');s2.src=v.dataset.src.replace('.mp4','.webm');s2.type='video/webm';v.appendChild(s);v.appendChild(s2);v.load()}var p=v.play();if(p&&p.catch)p.catch(function(){})}else if(v._l)v.pause()})},{threshold:[0,.4,.7]});xio.observe(xvv)}}
+/* trabajos: clips en loop dentro de las bandas (solo escritorio) */
+if(!TOUCH&&'IntersectionObserver' in W){var tio=new IntersectionObserver(function(es){es.forEach(function(e){var t=e.target,v=t.querySelector('video');
+ if(e.isIntersecting){if(!v){v=D.createElement('video');v.muted=true;v.loop=true;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';var k=t.dataset.k;['webm','mp4'].forEach(function(x){var s=D.createElement('source');s.src='/media/r-'+k+'.'+x;s.type='video/'+x;v.appendChild(s)});t.appendChild(v);v.addEventListener('playing',function(){v.classList.add('on')})}
+  var p=v.play();if(p&&p.catch)p.catch(function(){})}else if(v)v.pause()})},{rootMargin:'0px 100px 0px 100px'});$$('.dt').forEach(function(t){tio.observe(t)})}
 /* hero: anillo 3D de videos */
 (function(){var h2=$('.h2');if(!h2)return;var tc=$('.tc',h2),t0=Date.now();
  if(TOUCH)return;
@@ -108,5 +112,5 @@ function openLb(c){
  $('.lbt button',el).onclick=close;
  var p=v.play();if(p&&p.catch)p.catch(sy);sy();
 }
-D.addEventListener('click',function(e){var c=e.target.closest('.vc[data-s],.xc[data-s]');if(c){e.preventDefault();openLb(c)}});
+D.addEventListener('click',function(e){var c=e.target.closest('.vc[data-s],.xc[data-s],.vl[data-s]');if(c){e.preventDefault();openLb(c)}});
 })();

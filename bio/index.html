@@ -4,74 +4,75 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tape | Growth & Creative</title>
-<meta name="description" content="Tape: branding, video y tráfico pago en Ciudad del Este. Hablá con nosotros por WhatsApp.">
+<meta name="description" content="Tape: branding, video y tráfico pago en Ciudad del Este. Habla con nosotros por WhatsApp.">
 <meta property="og:title" content="Tape | Growth & Creative">
 <meta property="og:description" content="Branding, video y tráfico pago en Ciudad del Este.">
 <meta property="og:image" content="https://tapegrowth.agency/media/drone.jpg">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#f3f3ef">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--ink:#0a0e0d;--muted:#6b7170;--line:rgba(10,14,13,.1);--teal:#3FAFA3;--teal-d:#23857a}
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{-webkit-text-size-adjust:100%}
-  body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:var(--ink);min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:420px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:32px 24px 72px}
-  .logo{display:flex;align-items:center;justify-content:center;gap:9px}
-  .mark{position:relative;width:20px;height:20px}
-  .mark:before,.mark:after{content:"";position:absolute;background:var(--teal)}
-  .mark:before{left:50%;top:0;width:2px;height:100%;transform:translateX(-50%)}
-  .mark:after{top:50%;left:0;height:2px;width:100%;transform:translateY(-50%)}
-  .logo b{font-size:20px;font-weight:700;letter-spacing:-.02em}
-  .hero{margin:28px 0 30px;text-align:center}
-  h1{font-size:19px;line-height:1.35;font-weight:600;letter-spacing:-.015em}
-  .sub{font-size:13.5px;line-height:1.5;color:var(--muted);margin-top:8px}
-  .links{display:flex;flex-direction:column;gap:10px}
-  .lk{display:flex;align-items:center;gap:12px;height:52px;padding:0 16px;border-radius:12px;text-decoration:none;color:var(--ink);font-weight:500;font-size:14.5px;background:#fff;border:1px solid var(--line);transition:border-color .2s,background .2s,transform .15s}
-  .lk:active{transform:scale(.99)}
-  .lk svg{flex:0 0 18px;width:18px;height:18px}
-  .lk span{flex:1}
-  .lk .go{flex:0 0 14px;width:14px;height:14px;opacity:.35}
-  .lk.main{background:var(--ink);border-color:var(--ink);color:#fff}
-  .lk.main svg:first-child{color:var(--teal)}
-  .lk.main .go{opacity:.5}
-  @media (hover:hover){.lk:hover{border-color:rgba(10,14,13,.28)}.lk.main:hover{background:#1b2321}}
-  .foot{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 20px);text-align:center;font-size:11.5px;color:#9aa09e}
-  .rise{opacity:0;transform:translateY(8px);animation:rise .5s ease forwards}
-  @keyframes rise{to{opacity:1;transform:none}}
-  @media (prefers-reduced-motion:reduce){.rise{animation:none;opacity:1;transform:none}}
+:root{--ink:#070b0a;--paper:#f3f3ef;--muted:rgba(7,11,10,.6);--teal:#3FAFA3;--ease:cubic-bezier(.16,.8,.2,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased}
+.wrap{max-width:340px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px 24px 80px}
+.logo{display:flex;align-items:center;gap:10px}
+.mark{position:relative;width:22px;height:22px}
+.mark:before,.mark:after{content:"";position:absolute;background:var(--teal);border-radius:1px}
+.mark:before{left:50%;top:0;width:3px;height:100%;transform:translateX(-50%)}
+.mark:after{top:50%;left:0;height:3px;width:100%;transform:translateY(-50%)}
+.logo b{font-size:15px;font-weight:700;letter-spacing:.24em;padding-left:2px}
+h1{margin:34px 0 14px;font-size:30px;line-height:1.04;font-weight:700;letter-spacing:-.045em}
+h1 .w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}
+h1 .w>span{display:inline-block}
+h1 em{font-style:normal;color:var(--teal)}
+.js h1 .w>span{transform:translateY(112%);animation:up .9s var(--ease) forwards;animation-delay:calc(.25s + var(--i)*.07s)}
+@keyframes up{to{transform:none}}
+.sub{font-size:14px;line-height:1.55;color:var(--muted)}
+.links{display:flex;flex-direction:column;gap:9px;width:100%;margin-top:30px}
+.lk{position:relative;overflow:hidden;display:flex;align-items:center;gap:11px;height:48px;padding:0 6px 0 16px;border-radius:12px;text-decoration:none;color:var(--ink);font-weight:500;font-size:14px;letter-spacing:-.005em;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.6));border:1px solid rgba(7,11,10,.12);box-shadow:inset 0 1px 0 #fff,0 12px 26px -18px rgba(0,0,0,.45);transition:transform .3s var(--ease)}
+.lk svg{flex:0 0 17px;width:17px;height:17px}
+.lk span{flex:1;text-align:left}
+.lk .ar{flex:0 0 34px;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(7,11,10,.06);border:1px solid rgba(7,11,10,.1)}
+.lk .ar svg{width:14px;height:14px}
+.lk:active{transform:scale(.98)}
+.lk.main{color:#fff;border-color:#000;background:linear-gradient(180deg,#2b3634,#070b0a);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 16px 30px -16px rgba(0,0,0,.7)}
+.lk.main>svg:first-child{color:#74e3d6}
+.lk.main .ar{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.2)}
+@media(hover:hover){.lk:hover{transform:translateY(-2px)}}
+.js .fade{opacity:0;transform:translateY(12px);animation:fd .9s var(--ease) forwards;animation-delay:calc(.6s + var(--i)*.1s)}
+.js .logo{opacity:0;animation:fd .8s var(--ease) .05s forwards}
+@keyframes fd{to{opacity:1;transform:none}}
+.foot{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 20px);text-align:center;font-size:11.5px;color:rgba(7,11,10,.42);letter-spacing:.02em}
+@media(prefers-reduced-motion:reduce){.js h1 .w>span,.js .fade,.js .logo{animation:none;transform:none;opacity:1}}
 </style>
 </head>
 <body>
+<script>document.documentElement.className='js'</script>
 <div class="wrap">
-      <div class="logo rise"><span class="mark"></span><b>Tape</b></div>
-    <div class="hero rise" style="animation-delay:.08s">
-      <h1>Marca, video y tráfico para empresas que quieren crecer.</h1>
-      <p class="sub">Desde Ciudad del Este. Contanos tu proyecto y armamos el camino.</p>
-    </div>
-    <nav class="links">
-      <a class="lk main rise" style="animation-delay:.16s" href="https://wa.me/595992149352?text=Hola%2C%20vi%20Tape%20y%20quiero%20saber%20m%C3%A1s." target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91A9.84 9.84 0 0 0 12.04 2Zm0 18.15h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24a8.2 8.2 0 0 1 8.23 8.25c0 4.54-3.7 8.23-8.24 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.8-.23-.09-.39-.12-.56.12-.16.25-.64.8-.78.97-.14.16-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28Z"/></svg>
-        <span>Hablar por WhatsApp</span>
-        <svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
-      </a>
-      <a class="lk rise" style="animation-delay:.28s" href="https://tapegrowth.agency" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 3.9 5.7 3.9 9s-1.3 6.3-3.9 9c-2.6-2.7-3.9-5.7-3.9-9S9.4 5.7 12 3Z"/></svg>
-        <span>Sitio oficial</span>
-        <svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
-      </a>
-      <a class="lk rise" style="animation-delay:.28s" href="https://www.tiktok.com/@tapegrowth" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 3c.3 2.4 1.7 3.9 4 4.1v3.1c-1.4.1-2.7-.3-4-1.1v5.9c0 3.8-3.1 6-6.1 5.5-2.6-.4-4.5-2.6-4.4-5.3.1-3.3 3.1-5.3 6.2-4.7v3.3c-1.4-.5-3.1.3-3.1 1.9 0 1.2 1 2.1 2.2 2 1.3-.1 1.9-.9 1.9-2.2V3h3.3Z"/></svg>
-        <span>TikTok</span>
-        <svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
-      </a>
-      <a class="lk rise" style="animation-delay:.34s" href="mailto:tape.agency.py@gmail.com">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7.5 8 6 8-6"/></svg>
-        <span>E-mail</span>
-        <svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
-      </a>
-    </nav>
-    <div class="foot rise" style="animation-delay:.4s">Tape · Ciudad del Este, Paraguay</div>
+  <div class="logo"><span class="mark"></span><b>TAPE</b></div>
+  <h1 id="t">Marca, video y tráfico pago para empresas que quieren <em>crecer</em>.</h1>
+  <p class="sub fade" style="--i:0">Desde Ciudad del Este. Cuéntanos tu proyecto y armamos el camino.</p>
+  <nav class="links">
+    <a class="lk main fade" style="--i:1" href="https://wa.me/595992149352?text=Hola%2C%20vi%20Tape%20y%20quiero%20saber%20m%C3%A1s." target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91A9.84 9.84 0 0 0 12.04 2Zm0 18.15h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24a8.2 8.2 0 0 1 8.23 8.25c0 4.54-3.7 8.23-8.24 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.8-.23-.09-.39-.12-.56.12-.16.25-.64.8-.78.97-.14.16-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28Z"/></svg>
+      <span>Hablar por WhatsApp</span><i class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i>
+    </a>
+    <a class="lk fade" style="--i:2" href="https://tapegrowth.agency" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 3.9 5.7 3.9 9s-1.3 6.3-3.9 9c-2.6-2.7-3.9-5.7-3.9-9S9.4 5.7 12 3Z"/></svg>
+      <span>Sitio oficial</span><i class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i>
+    </a>
+    <a class="lk fade" style="--i:3" href="mailto:tape.agency.py@gmail.com">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7.5 8 6 8-6"/></svg>
+      <span>E-mail</span><i class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i>
+    </a>
+  </nav>
+  <div class="foot fade" style="--i:4">Tape · Ciudad del Este, Paraguay</div>
 </div>
+<script>
+(function(){var h=document.getElementById('t'),i=0;function walk(n,out){n.childNodes.forEach(function(c){if(c.nodeType===3){c.textContent.split(/(\s+)/).forEach(function(p){if(!p)return;if(/^\s+$/.test(p)){out.appendChild(document.createTextNode(' '))}else{var w=document.createElement('span');w.className='w';var s=document.createElement('span');s.style.setProperty('--i',i++);s.textContent=p;w.appendChild(s);out.appendChild(w)}})}else if(c.nodeType===1){var e=c.cloneNode(false);walk(c,e);out.appendChild(e)}})}
+var o=h.cloneNode(false);walk(h,o);h.innerHTML=o.innerHTML})();
+</script>
 </body>
 </html>
