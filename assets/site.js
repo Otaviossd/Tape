@@ -99,11 +99,12 @@ $$('.sx .vis').forEach(function(v){var on=0;function tilt(e){var r=v.getBounding
 /* header oscuro sobre secciones oscuras, sin handler de scroll */
 if(hd&&'IntersectionObserver' in W){var dkS=[];var dio=new IntersectionObserver(function(es){es.forEach(function(e){var i=dkS.indexOf(e.target);if(e.isIntersecting&&i<0)dkS.push(e.target);if(!e.isIntersecting&&i>=0)dkS.splice(i,1)});hd.classList.toggle('dk',dkS.length>0)},{rootMargin:'-5% 0px -94% 0px',threshold:0});darks.forEach(function(s){dio.observe(s)})}
 /* lightbox */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function fmt(t){t=Math.max(0,Math.floor(t||0));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')}
 function openLb(c){
  var xm=$('.xv .xc video');if(xm){xm.muted=true;var xb=$('.xv .xc .snd');if(xb){xb.classList.remove('on');xb.setAttribute('aria-pressed','false')}}
  var el=D.createElement('div');el.className='lb';
- el.innerHTML='<div class="lbt"><b>'+c.dataset.t+'</b><button aria-label="Cerrar">&times;</button></div><div class="lbs"><div class="lbx"><video playsinline poster="'+c.dataset.p+'"></video><button class="bp" aria-label="Reproducir"></button><div class="ctl"><button data-c="t" aria-label="Pausa">II</button><input type="range" min="0" max="1000" value="0"><span class="tm">0:00</span><button data-c="m" aria-label="Sonido">&#9835;</button><button data-c="f" aria-label="Pantalla completa">&#9974;</button></div></div></div>';
+ el.innerHTML='<div class="lbt"><b>'+esc(c.dataset.t)+'</b><button aria-label="Cerrar">&times;</button></div><div class="lbs"><div class="lbx"><video playsinline poster="'+esc(c.dataset.p)+'"></video><button class="bp" aria-label="Reproducir"></button><div class="ctl"><button data-c="t" aria-label="Pausa">II</button><input type="range" min="0" max="1000" value="0"><span class="tm">0:00</span><button data-c="m" aria-label="Sonido">&#9835;</button><button data-c="f" aria-label="Pantalla completa">&#9974;</button></div></div></div>';
  D.body.appendChild(el);D.body.style.overflow='hidden';
  var x=$('.lbx',el),v=$('video',el),r=$('input',el),tm=$('.tm',el),tg=$('[data-c=t]',el);
  if(c.dataset.l)x.classList.add('land');v.src=c.dataset.s;v.autoplay=true;
@@ -148,3 +149,29 @@ var v=D.querySelector('.xv .xc video');if(!v)return;
 if(!v._l&&typeof lazyVideos==='function'){try{lazyVideos()}catch(_){}}
 v.muted=!v.muted;var on=!v.muted;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');b.setAttribute('aria-label',on?'Silenciar':'Activar sonido');
 if(v.paused){var p=v.play();if(p&&p.catch)p.catch(function(){})}},true)})();
+
+/* trabajos: videos que el equipo marca como "mostrar en el sitio" en el sistema de Tape */
+(function(){
+ var D=document,vg=D.querySelector('.vg');
+ if(!vg||location.pathname.indexOf('/trabajos')!==0)return;
+ var SBU='https://dkpoqvggctglfjrhichs.supabase.co',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrcG9xdmdnY3RnbGZqcmhpY2hzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4MjkxMjcsImV4cCI6MjEwMjQwNTEyN30.va9_OpTA-8KjHiTVduReaQtFALhSALu_R9HE_19495M',ST=SBU+'/storage/v1/object/public/entregas/';
+ function pub(p){return ST+String(p).split('/').map(encodeURIComponent).join('/')}
+ function mk(t,c){var e=D.createElement(t);if(c)e.className=c;return e}
+ if(!window.fetch)return;
+ fetch(SBU+'/rest/v1/rpc/get_showcase',{method:'POST',headers:{'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'},body:'{}'})
+ .then(function(r){return r.ok?r.json():[]})
+ .then(function(list){
+  if(!Array.isArray(list)||!list.length)return;
+  var anchor=vg.firstChild;
+  list.forEach(function(it){
+   if(!it||!it.video)return;
+   var label=String(it.label||'Tape'),sub=String(it.category||it.title||''),b=mk('button','vc');
+   b.type='button';b.setAttribute('data-t',label+(sub?' | '+sub:''));b.setAttribute('data-s',pub(it.video));b.setAttribute('data-p',it.poster?pub(it.poster):'');
+   if(it.poster){var im=mk('img');im.alt=label;im.loading='lazy';im.src=pub(it.poster);b.appendChild(im)}
+   else{var v=mk('video');v.muted=true;v.setAttribute('playsinline','');v.preload='metadata';v.src=pub(it.video)+'#t=0.1';b.appendChild(v)}
+   b.appendChild(mk('span','pl2'));
+   var tt=mk('span','tt'),bb=mk('b'),sp=mk('span');bb.textContent=label;sp.textContent=sub;tt.appendChild(bb);tt.appendChild(sp);b.appendChild(tt);
+   vg.insertBefore(b,anchor);
+  });
+ }).catch(function(){});
+})();
