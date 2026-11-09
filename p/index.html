@@ -192,7 +192,17 @@ async function load(){
     if(!data){ $app.innerHTML='<div class="empty"><b>No pudimos cargar tu espacio</b>Revisa tu conexión e intenta de nuevo.</div>'; }
     return;
   }
-  data=d; if(!document.querySelector('.lb')) render();
+  data=norm(d); if(!document.querySelector('.lb')) render();
+}
+// Compatível com o banco antigo: se o servidor ainda não manda "id" nos itens, cria um
+// (senão o toque no vídeo não encontra o item e nada abre). Sem id real não há aprovação.
+function norm(d){
+  if(!d||typeof d!=='object') return d;
+  ['videos','arts','posts'].forEach(k=>{
+    if(!Array.isArray(d[k])) return;
+    d[k].forEach((x,i)=>{ if(x&&(x.id==null||x.id==='')){ x.id='_'+k+i; x._legacy=true; } });
+  });
+  return d;
 }
 
 /* ---------- Qué secciones tiene este cliente ---------- */
