@@ -32,6 +32,11 @@ function pendingForClient(id){
 }
 function renderClients(){
   const grid = document.getElementById('clientsGrid');
+  // Só o admin vê pausados/encerrados e cadastra cliente
+  const adm = !!(currentMember && currentMember.role === 'admin');
+  if(!adm) clientsFilter = 'ativo';
+  document.getElementById('clientsFilters').style.display = adm ? '' : 'none';
+  document.getElementById('btnNewClient').style.display = adm ? '' : 'none';
   document.querySelectorAll('#clientsFilters button').forEach(b=>b.classList.toggle('on', b.dataset.f === clientsFilter));
   const q = clientsQuery.trim().toLowerCase();
   const list = S.clients.filter(c=>(clientsFilter === 'todos' || (c.status || 'ativo') === clientsFilter) && (!q || (c.name || '').toLowerCase().includes(q)))

@@ -856,3 +856,20 @@ td{padding:13px 16px;border-bottom:1px solid var(--line-2);font-size:13px;}
 .terms-bar label{align-items:flex-start;}
 #funnelBox{margin-top:28px;}
 .cobranca-row.cobranca-hoje{background:#fdf3f1;}
+
+/* ---- Demandas de vídeo (videomaker) ---- */
+.dem-wrap{margin-bottom:16px;}
+.dem{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--line);}
+.dem:first-of-type{border-top:0;}
+.dem.late{background:linear-gradient(90deg,#fdf3f1,transparent 40%);margin:0 -12px;padding:14px 12px;border-radius:12px;}
+.dem-main{flex:1 1 240px;min-width:0;}
+.dem-client{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--muted);}
+.dem-title{font-weight:700;font-size:15px;margin:3px 0 7px;}
+.dem-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.dem-note-t{font-size:12.5px;color:var(--muted);}
+.dem-st{flex:0 0 auto;}
+.dem-act{display:flex;align-items:center;gap:6px;flex:0 0 auto;}
+.dem-empty{padding:22px 4px;color:var(--muted);font-size:14px;}
+.dem-banner{background:var(--teal-lt2,#bfe0da);border-radius:12px;padding:10px 14px;font-size:13.5px;margin-bottom:12px;}
+.dem-banner button{border:0;background:none;font-weight:700;text-decoration:underline;cursor:pointer;margin-left:6px;font-family:inherit;}
+@media (max-width:640px){.dem-st,.dem-act{width:100%;}.dem-st{display:flex;}.dem-st button{flex:1;}.dem-act .btn-primary{flex:1;justify-content:center;}}

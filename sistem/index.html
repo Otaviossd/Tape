@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/sistem/css/app.css?v=20">
+<link rel="stylesheet" href="/sistem/css/app.css?v=21">
 <script src="/sistem/vendor/supabase.js"></script>
 </head>
 <body>
@@ -128,13 +128,14 @@
 
     <div class="view" id="view-video">
       <div class="view-head">
-        <div><h1>Vídeo</h1><p>Entregas por cliente, integradas ao Drive</p></div>
+        <div><h1>Vídeo</h1><p>Demandas com prazo e entregas por cliente</p></div>
         <div>
           <select id="videoClientFilter" style="padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:600;"></select>
           <button class="btn btn-outline" id="btnBulkVideo" style="display:none"><svg class="icon"><use href="#ic-folder"/></svg>Entregas em lote</button>
           <button class="btn btn-primary" id="btnNewVideo" style="display:none"><svg class="icon"><use href="#ic-plus"/></svg>Nova entrega</button>
         </div>
       </div>
+      <div id="demandsPanel"></div>
       <div id="approvalStrip"></div>
       <div id="deliveryPanel"></div>
       <div id="delUpStatus"></div>
@@ -176,7 +177,7 @@
       <div class="field"><label>E-mail (só pra login, não é público)</label><input id="mEmail" type="email" required></div>
       <div class="field" id="mPasswordField"><label id="mPasswordLabel">Senha de acesso</label><input id="mPassword" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></div>
       <div class="field"><label>Função</label>
-        <select id="mRole"><option value="admin">Admin</option><option value="social">Social media</option><option value="video">Vídeo</option><option value="outro">Outro</option><option value="cliente">Cliente (entra pelo link de entregas)</option></select>
+        <select id="mRole"><option value="admin">Admin</option><option value="social">Social media</option><option value="video">Videomaker</option><option value="outro">Outro</option><option value="cliente">Cliente (entra pelo link de entregas)</option></select>
       </div>
       <div class="field" id="mClientField" style="display:none;"><label>Cliente vinculado</label><select id="mClient"></select></div>
       <div class="field" id="mAccessField"><label>Acesso liberado</label>
@@ -344,15 +345,15 @@
 </div>
 <div class="modal-overlay" id="modalVideo">
   <div class="modal">
-    <h2 id="videoModalTitle">Nova entrega de vídeo</h2>
+    <h2 id="videoModalTitle">Nova demanda de vídeo</h2>
     <form id="videoForm">
       <input type="hidden" id="vId">
       <div class="field"><label>Cliente</label><select id="vClient" required></select></div>
-      <div class="field"><label>Título / descrição</label><input id="vTitle" required placeholder="Ex: Reels institucional"></div>
+      <div class="field"><label>Nome do vídeo (do roteiro)</label><input id="vTitle" required placeholder="Ex: Reels consulta"></div>
       <div class="field-row">
         <div class="field"><label>Prazo de entrega</label><input id="vDue" type="date"></div>
         <div class="field"><label>Status</label>
-          <select id="vStatus"><option value="pendente">Pendente</option><option value="gravado">Gravado</option><option value="editado">Editado</option><option value="entregue">Entregue</option></select>
+          <select id="vStatus"><option value="pendente">A gravar</option><option value="gravado">Gravado</option><option value="editado">Editado</option><option value="entregue">Entregue</option></select>
         </div>
       </div>
       <div class="field"><label>Material bruto (Drive)</label><input id="vRaw" type="url" placeholder="https://drive.google.com/..."></div>
@@ -571,6 +572,7 @@
 <script src="/sistem/js/mod-traffic.js?v=1"></script>
 <script src="/sistem/js/mod-report.js?v=2"></script>
 <script src="/sistem/js/mod-lanza.js?v=2"></script>
+<script src="/sistem/js/mod-demands.js?v=1"></script>
 <script src="/sistem/js/boot.js?v=1"></script>
 </body>
 </html>

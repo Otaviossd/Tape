@@ -5,7 +5,7 @@ const S = {
 };
 const COLORS = ['#2F8F82','#4C6EF5','#E8590C','#9C36B5','#2F9E44','#E03131','#1098AD'];
 const SERVICE_LABELS = {branding:'Branding',video:'Vídeo',trafego:'Tráfego pago',social:'Social media',web:'Site/App'};
-const ROLE_LABELS = {admin:'Admin',social:'Social media',video:'Vídeo',outro:'Equipe',cliente:'Cliente'};
+const ROLE_LABELS = {admin:'Admin',social:'Social media',video:'Videomaker',outro:'Equipe',cliente:'Cliente'};
 const WEEKDAYS_SHORT = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MONTHS_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -387,7 +387,7 @@ document.getElementById('bulkForm').addEventListener('submit', async e=>{
 });
 document.getElementById('btnNewVideo').addEventListener('click', ()=>{
   if(S.clients.length===0){ alert('Cadastre um cliente antes de criar uma entrega.'); return; }
-  document.getElementById('videoModalTitle').textContent = 'Nova entrega de vídeo';
+  document.getElementById('videoModalTitle').textContent = 'Nova demanda de vídeo';
   document.getElementById('videoForm').reset();
   document.getElementById('vId').value='';
   const filt = document.getElementById('videoClientFilter').value;
@@ -396,7 +396,7 @@ document.getElementById('btnNewVideo').addEventListener('click', ()=>{
 });
 window.editVideo = function(id){
   const v = S.videoTasks.find(x=>x.id===id); if(!v) return;
-  document.getElementById('videoModalTitle').textContent = 'Editar entrega';
+  document.getElementById('videoModalTitle').textContent = 'Editar demanda';
   document.getElementById('vId').value = v.id;
   document.getElementById('vClient').value = v.clientId;
   document.getElementById('vTitle').value = v.title;
@@ -431,7 +431,7 @@ document.getElementById('videoForm').addEventListener('submit', async e=>{
   closeModal('modalVideo');
 });
 const VIDEO_STATUSES = ['pendente','gravado','editado','entregue'];
-const VIDEO_STATUS_LABEL = {pendente:'Pendente',gravado:'Gravado',editado:'Editado',entregue:'Entregue'};
+const VIDEO_STATUS_LABEL = {pendente:'A gravar',gravado:'Gravado',editado:'Editado',entregue:'Entregue'};
 let draggedVideoId = null;
 let delMonth = (()=>{const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');})();
 const pad2 = n=>String(n).padStart(2,'0');
