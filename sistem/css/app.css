@@ -873,3 +873,10 @@ td{padding:13px 16px;border-bottom:1px solid var(--line-2);font-size:13px;}
 .dem-banner{background:var(--teal-lt2,#bfe0da);border-radius:12px;padding:10px 14px;font-size:13.5px;margin-bottom:12px;}
 .dem-banner button{border:0;background:none;font-weight:700;text-decoration:underline;cursor:pointer;margin-left:6px;font-family:inherit;}
 @media (max-width:640px){.dem-st,.dem-act{width:100%;}.dem-st{display:flex;}.dem-st button{flex:1;}.dem-act .btn-primary{flex:1;justify-content:center;}}
+.dem-head{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;cursor:pointer;padding:2px 0;}
+.dem-head h3{margin:0;font-size:16px;font-weight:700;}
+.dem-head:focus-visible{outline:2px solid var(--teal);outline-offset:4px;border-radius:8px;}
+.dem-chev{display:inline-flex;transition:transform .2s;transform:rotate(90deg);color:var(--muted);}
+.dem-wrap.collapsed .dem-chev{transform:rotate(0);}
+.dem-hint{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--muted);}
+.dem-wrap:not(.collapsed) .dem-head{margin-bottom:6px;}

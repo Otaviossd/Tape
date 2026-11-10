@@ -1,6 +1,9 @@
 /* Demandas de vídeo: o que o videomaker precisa gravar, editar e entregar, com prazo.
    Uma demanda é uma linha de video_tasks que ainda não está "entregue". */
 let delDemandId = null;
+let demCollapsed = false;
+try{ demCollapsed = localStorage.getItem('tape_dem_collapsed') === '1'; }catch(_){}
+window.demToggle = function(){ demCollapsed = !demCollapsed; try{ localStorage.setItem('tape_dem_collapsed', demCollapsed ? '1' : '0'); }catch(_){} renderDemands(); };
 const DEM_STEPS = [['pendente', 'A gravar'], ['gravado', 'Gravado'], ['editado', 'Editado']];
 const isAdminUser = ()=>!!(currentMember && currentMember.role === 'admin');
 
@@ -42,9 +45,13 @@ function renderDemands(){
       </div>
     </div>`;
   }).join('');
-  box.innerHTML = `<div class="dp dem-wrap">
-    <div class="dp-head"><h3>Demandas de edição</h3>${late ? badge(late + (late > 1 ? ' atrasadas' : ' atrasada'), 'danger') : (all.length ? badge(all.length + (all.length > 1 ? ' abertas' : ' aberta'), 'muted') : '')}</div>
-    ${all.length ? rows : `<div class="dem-empty">Nenhuma demanda aberta.${isAdminUser() ? ' Crie uma em “Nova demanda”, com o nome do vídeo do roteiro e o prazo.' : ''}</div>`}
+  const cnt = late ? badge(late + (late > 1 ? ' atrasadas' : ' atrasada'), 'danger') : (all.length ? badge(all.length + (all.length > 1 ? ' abertas' : ' aberta'), 'muted') : '');
+  box.innerHTML = `<div class="dp dem-wrap ${demCollapsed ? 'collapsed' : ''}">
+    <button type="button" class="dem-head" onclick="demToggle()" aria-expanded="${demCollapsed ? 'false' : 'true'}">
+      <span class="dem-chev">${icon('chevron-right', 16)}</span><h3>Demandas de edição</h3>${late && all.length > late ? badge(all.length + ' abertas', 'muted') : ''}${cnt}
+      <span class="dem-hint">${demCollapsed ? 'Mostrar' : 'Minimizar'}</span>
+    </button>
+    ${demCollapsed ? '' : (all.length ? rows : `<div class="dem-empty">Nenhuma demanda aberta.${isAdminUser() ? ' Crie uma em “Nova demanda”, com o nome do vídeo do roteiro e o prazo.' : ''}</div>`)}
   </div>`;
 }
 window.demSet = async function(id, st){
