@@ -32,7 +32,7 @@
       ]
     },
     {
-      "source": "/sistem-beta/(.*)",
+      "source": "/sistem/(.*)",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -49,19 +49,6 @@
         {
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob: https://dkpoqvggctglfjrhichs.supabase.co; connect-src 'self' https://dkpoqvggctglfjrhichs.supabase.co wss://dkpoqvggctglfjrhichs.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
-        }
-      ]
-    },
-    {
-      "source": "/sistem/(.*)",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
         }
       ]
     },
@@ -90,6 +77,18 @@
           "value": "no-store"
         }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/sistem-beta",
+      "destination": "/sistem/",
+      "permanent": false
+    },
+    {
+      "source": "/sistem-beta/:path*",
+      "destination": "/sistem/:path*",
+      "permanent": false
     }
   ]
 }
