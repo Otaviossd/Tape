@@ -36,14 +36,17 @@ function genNarrative(R){
   const m = R.m, cu = R.currency, f = n=>fmtCur(n, cu);
   const res = resEs(m), cpr = safeDiv(m.spend, res.n);
   const per = periodEs(R.since, R.until);
+  const range = /^del (.*) al (.*)$/.exec(per);
+  const perIn = range ? `entre el ${range[1]} y el ${range[2]}` : `en ${per}`;      // "en octubre de 2026" / "entre el 11 de octubre y el 9 de noviembre"
+  const perDur = range ? `Entre el ${range[1]} y el ${range[2]}` : `Durante ${per}`;
   const pm = R.prev; const pres = pm ? resEs(pm) : null; const pcpr = pm ? safeDiv(pm.spend, pres.n) : 0;
   const lc = m.linkClicks || m.clicks;
 
   const headline = res.n > 0
-    ? `${fmtNum(res.n)} ${res.es} nuevas para tu negocio en ${per}`
-    : `Tu marca llegó a ${fmtNum(m.reach)} personas en ${per}`;
+    ? `${fmtNum(res.n)} ${res.es} nuevas para tu negocio ${perIn}`
+    : `Tu marca llegó a ${fmtNum(m.reach)} personas ${perIn}`;
 
-  let summary = `Durante ${per} invertimos ${f(m.spend)} en anuncios y llegamos a ${fmtNum(m.reach)} personas distintas`;
+  let summary = `${perDur} invertimos ${f(m.spend)} en anuncios y llegamos a ${fmtNum(m.reach)} personas distintas`;
   if(m.impressions) summary += ` (${fmtNum(m.impressions)} impresiones)`;
   summary += '.';
   if(lc) summary += ` Recibimos ${fmtNum(lc)} clics hacia tu negocio, con un CTR de ${fmtPct(m.ctr, 2)}.`;

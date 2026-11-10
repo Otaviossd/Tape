@@ -13,8 +13,10 @@ function lanzaStats(l){
   const rows = S.lanzaEntries.filter(e=>String(e.launchId) === String(l.id));
   const sum = f=>rows.filter(f).reduce((a, e)=>a + (+e.amount || 0), 0);
   const income = sum(e=>e.type === 'income');
-  const ads = sum(e=>e.type === 'expense' && e.category === 'anuncios');
-  const other = sum(e=>e.type === 'expense' && e.category !== 'anuncios');
+  // Gastos antigos não tinham categoria: se o nome fala de anúncio/Meta/tráfego, conta como anúncio.
+  const isAd = e=>e.category ? String(e.category).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === 'anuncios' : /an[uú]ncio|\bads?\b|meta|facebook|instagram|tr[aá]fego|impulsion/i.test(String(e.name || ''));
+  const ads = sum(e=>e.type === 'expense' && isAd(e));
+  const other = sum(e=>e.type === 'expense' && !isAd(e));
   const t = termsOf(l.id);
   const profit = income - ads - other;
   const commission = profit > 0 ? profit * (+t.commissionPct || 0) / 100 : 0;
