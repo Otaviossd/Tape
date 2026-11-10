@@ -231,7 +231,11 @@ function shell(sub,inner){
 function banner(items,kind){
   if(!items.length) return '';
   const n=items.length, w=kind==='video'?(n===1?'video':'videos'):(n===1?'post':'posts');
-  return '<div class="banner"><div class="tx"><b>Tienes '+n+' '+w+' esperando tu aprobación.</b> Apruébalos aquí o cuéntanos qué cambiar, así no se atrasa la publicación.</div><button data-go="'+kind+'">Revisar ahora</button></div>';
+  const pub=flags().post;   // solo los clientes con social media tienen publicaciones que se pueden atrasar
+  const tx=pub
+    ? '<b>Tienes '+n+' '+w+' esperando tu aprobación.</b> Apruébalos aquí o cuéntanos qué cambiar, así no se atrasa la publicación.'
+    : '<b>Tienes '+n+' '+w+' para aprobar.</b> Míralos y apruébalos aquí, o cuéntanos qué te gustaría cambiar.';
+  return '<div class="banner"><div class="tx">'+tx+'</div><button data-go="'+kind+'">Revisar ahora</button></div>';
 }
 
 /* ---------- Videos ---------- */
