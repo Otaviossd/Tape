@@ -28,7 +28,7 @@ async function authAdmin(path, method, body) {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { error: 'Método não permitido.' });
   if (!originOk(req)) return send(res, 403, { error: 'Origem não permitida.' });
-  if (!SERVICE_KEY) return send(res, 500, { error: 'Servidor sem a chave secreta. Configure SUPABASE_SERVICE_ROLE_KEY na Vercel.' });
+  if (!SERVICE_KEY) return send(res, 500, { error: 'Servidor sem a chave secreta. Configure SUPABASE_SERVICE_ROLE_KEY na Vercel. (Variáveis vistas pelo servidor: ' + (Object.keys(process.env).filter(k => /supabase|service|meta_|vercel_env/i.test(k)).map(k => JSON.stringify(k)).join(', ') || 'nenhuma') + ')' });
 
   const me = await caller(req);
   if (!me) return send(res, 401, { error: 'Sessão inválida. Entre de novo.' });
