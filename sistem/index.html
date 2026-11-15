@@ -291,10 +291,10 @@
         <div class="field"><label>Prazo de entrega</label><input id="ptDue" type="date"></div>
       </div>
       <div class="field"><label>Status</label>
-        <select id="ptStatus"><option value="a_fazer">A fazer</option><option value="em_criacao">Em criação</option><option value="aprovacao">Em aprovação</option><option value="entregue">Entregue</option></select>
+        <select id="ptStatus"><option value="aprovacao">Para aprovar (aparece no link do cliente)</option><option value="entregue">Entregue</option></select>
       </div>
       <div class="field"><label>Arquivo editável (Drive)</label><input id="ptSource" type="url" placeholder="https://drive.google.com/..."></div>
-      <div class="field"><label>Arte final (Drive)</label><input id="ptFinal" type="url" placeholder="https://drive.google.com/..."></div>
+      <div class="field"><label>Arte final (link do arquivo no Drive)</label><input id="ptFinal" type="url" placeholder="https://drive.google.com/file/d/..."><small class="muted-s">No Drive: Compartilhar → Qualquer pessoa com o link. Assim a miniatura aparece aqui e no link do cliente.</small><div id="ptPreview" class="pt-preview"></div></div>
       <div class="field"><label>Notas / legenda</label><textarea id="ptNotes"></textarea></div>
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" onclick="closeModal('modalPostTask')">Cancelar</button>

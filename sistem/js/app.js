@@ -156,7 +156,7 @@ function fillPostRefSelect(clientId, selectedId){
   const sel = document.getElementById('pPostRef');
   const order = {entregue:0, aprovacao:1, em_criacao:2, a_fazer:3};
   const list = S.postTasks.filter(t=>t.clientId===clientId).sort((a,b)=>(order[a.status]??9)-(order[b.status]??9));
-  sel.innerHTML = '<option value="">Nenhum (preencher manualmente)</option>' + list.map(t=>`<option value="${t.id}">${escapeHtml(t.title||'Post')} · ${POST_FORMAT_LABEL[t.format]||'Post'} · ${POST_STATUS_LABEL[t.status]||t.status}</option>`).join('');
+  sel.innerHTML = '<option value="">Nenhum (preencher manualmente)</option>' + list.map(t=>`<option value="${t.id}">${escapeHtml(t.title||'Post')} · ${POST_FORMAT_LABEL[t.format]||'Post'} · ${POST_STATUS_LABEL[postCol(t)]}</option>`).join('');
   sel.value = selectedId || '';
 }
 function fillVideoRefSelect(clientId, selectedVideoId){
@@ -749,8 +749,25 @@ function renderKanban(){
 
 
 /* ---- Posts (artes): quadro por status, com Drive ---- */
-const POST_STATUSES = ['a_fazer','em_criacao','aprovacao','entregue'];
-const POST_STATUS_LABEL = {a_fazer:'A fazer', em_criacao:'Em criação', aprovacao:'Em aprovação', entregue:'Entregue'};
+// Posts entram direto para aprovação do cliente (sem "a fazer"/"em criação")
+const POST_STATUSES = ['aprovacao','entregue'];
+const POST_STATUS_LABEL = {aprovacao:'Para aprovar', entregue:'Entregue'};
+const postCol = t => (t.status === 'entregue' ? 'entregue' : 'aprovacao');
+function driveFileId(u){ const m = String(u||'').match(/\/d\/([\w-]{10,})/) || String(u||'').match(/[?&]id=([\w-]{10,})/); return m ? m[1] : ''; }
+function driveThumb(u, w){ const id = driveFileId(u); return id ? 'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w'+(w||400) : ''; }
+// posts antigos em "a fazer"/"em criação" passam uma vez para "aprovação", para aparecerem no link do cliente
+let _postsMigrating = false;
+async function migrateLegacyPosts(){
+  if(_postsMigrating) return;
+  const old = S.postTasks.filter(t => t.status === 'a_fazer' || t.status === 'em_criacao');
+  if(!old.length) return;
+  _postsMigrating = true;
+  for(const t of old){
+    const patch = Object.assign({status:'aprovacao'}, postApprovalPatch(t, 'aprovacao'));
+    try{ await db.collection('post_tasks').doc(t.id).update(patch); Object.assign(t, patch); }catch(err){ console.warn('migração do post', t.id, err); }
+  }
+  _postsMigrating = false; renderPostsBoard();
+}
 const POST_FORMAT_LABEL = {feed:'Feed', carrossel:'Carrossel', stories:'Stories', reels:'Capa de Reels', outro:'Outro'};
 let draggedPostTaskId = null;
 document.getElementById('postsClientFilter').addEventListener('change', renderPostsBoard);
@@ -761,6 +778,8 @@ document.getElementById('btnNewPostTask').addEventListener('click', ()=>{
   document.getElementById('ptId').value='';
   const filt = document.getElementById('postsClientFilter').value;
   if(filt) document.getElementById('ptClient').value = filt;
+  document.getElementById('ptStatus').value = 'aprovacao';
+  updatePtPreview();
   openModal('modalPostTask');
 });
 window.editPostTask = function(id){
@@ -771,12 +790,22 @@ window.editPostTask = function(id){
   document.getElementById('ptTitle').value = t.title||'';
   document.getElementById('ptFormat').value = t.format||'feed';
   document.getElementById('ptDue').value = t.dueDate||'';
-  document.getElementById('ptStatus').value = t.status||'a_fazer';
+  document.getElementById('ptStatus').value = postCol(t);
   document.getElementById('ptSource').value = t.sourceLink||'';
   document.getElementById('ptFinal').value = t.finalLink||'';
   document.getElementById('ptNotes').value = t.notes||'';
+  updatePtPreview();
   openModal('modalPostTask');
 };
+function updatePtPreview(){
+  const box = document.getElementById('ptPreview'); if(!box) return;
+  const u = document.getElementById('ptFinal').value.trim(), th = driveThumb(u, 600);
+  if(!u){ box.innerHTML = ''; return; }
+  box.innerHTML = th
+    ? `<img src="${th}" alt="" onerror="this.parentNode.innerHTML='<div class=&quot;pt-warn&quot;>Não consegui ver a miniatura. No Drive, deixe o arquivo como <b>Qualquer pessoa com o link</b> para o cliente conseguir ver.</div>'">`
+    : `<div class="pt-warn">Esse link não é de um arquivo do Drive (pasta ou outro site). O cliente vai ver só um botão para abrir o link.</div>`;
+}
+document.getElementById('ptFinal').addEventListener('input', updatePtPreview);
 window.deletePostTask = async function(id){
   if(!confirm('Remover este post?')) return;
   await db.collection('post_tasks').doc(id).delete();
@@ -803,17 +832,19 @@ document.getElementById('postTaskForm').addEventListener('submit', async e=>{
 });
 function renderPostsBoard(){
   renderPostsDemand();
+  migrateLegacyPosts();
   const filt = document.getElementById('postsClientFilter').value;
   let tasks = [...S.postTasks];
   if(filt) tasks = tasks.filter(t=>t.clientId===filt);
   const kb = document.getElementById('postsKanban');
   kb.innerHTML = POST_STATUSES.map(st=>{
-    const items = tasks.filter(t=>(t.status||'a_fazer')===st).sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+    const items = tasks.filter(t=>postCol(t)===st).sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
     return `<div class="kanban-col" data-status="${st}">
       <div class="kanban-col-head"><b>${POST_STATUS_LABEL[st]}</b><span class="kanban-count">${items.length}</span></div>
       <div class="kanban-col-body" style="min-height:60px;">
         ${items.map(t=>`<div class="kb-card" draggable="true" data-id="${t.id}" onclick="editPostTask('${t.id}')">
           <div class="kb-client"><span class="client-dot" style="background:${clientColor(t.clientId)}"></span>${escapeHtml(clientName(t.clientId))}</div>
+          ${driveThumb(t.finalLink) ? `<img class="kb-thumb" loading="lazy" alt="" src="${driveThumb(t.finalLink, 400)}" onerror="this.remove()">` : (t.finalLink ? '' : '<div class="kb-nolink">Falta o link da arte final</div>')}
           <div class="kb-title">${escapeHtml(t.title||'')}</div>
           ${approvalHtml(t)}
           <div class="kb-due">${POST_FORMAT_LABEL[t.format]||'Post'}${t.dueDate ? ' · Prazo: '+fmtDate(t.dueDate) : ''}</div>

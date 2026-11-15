@@ -93,6 +93,7 @@
   .vth .pl{position:relative;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center}
   .vth .pl:after{content:"";margin-left:4px;border-left:13px solid var(--ink);border-top:8px solid transparent;border-bottom:8px solid transparent}
   .pcard .vth .pl{display:none}
+  .pfb{position:relative;font-size:13px;font-weight:500;color:var(--mut,#6E7A78)}
   .vinfo{padding:10px 12px 12px;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.005em}
   .vinfo small{display:block;font-size:11.5px;color:var(--muted);font-weight:500;margin-top:2px}
   .vnum{position:absolute;left:9px;top:9px;z-index:2;background:rgba(5,8,8,.66);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
@@ -275,7 +276,7 @@ function renderPosts(){
   if(!list.length) h+='<div class="empty"><b>Aún no hay posts en '+MONTHS[+pmonth.split('-')[1]-1]+'</b>Cuando tengamos una arte lista para que la revises, aparecerá aquí.</div>';
   else h+='<div class="vgrid">'+list.map(a=>{
     const id=driveId(a.finalLink), ap=AP[a.approval];
-    const cover=id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w480" onerror="this.remove()">':'';
+    const cover='<span class="pfb">Toca para ver</span>'+(id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w600" onerror="this.remove()">':'');
     return '<div class="vcard pcard'+(a.approval==='aguardando'?' pend':'')+'" role="button" tabindex="0" data-k="post" data-i="'+esc(a.id)+'"><div class="vth">'+(ap?'<span class="vst '+ap[1]+'">'+ap[0]+'</span>':'')+cover+'</div><div class="vinfo">'+esc(a.title||'Post')+'<small>'+esc(FMT[String(a.format||'').toLowerCase()]||'Arte')+(a.dueDate?' · '+esc(a.dueDate.slice(8,10)+'/'+a.dueDate.slice(5,7)):'')+'</small></div></div>';
   }).join('')+'</div>';
   shell('Revisa las artes de tus publicaciones. Apruébalas o pídenos cambios antes de que salgan.',h);
