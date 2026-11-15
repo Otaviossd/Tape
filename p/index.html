@@ -211,6 +211,12 @@ function norm(d){
     if(!Array.isArray(d[k])) return;
     d[k].forEach((x,i)=>{ if(x&&(x.id==null||x.id==='')){ x.id='_'+k+i; x._legacy=true; } });
   });
+  // a partir de qual mês o cliente vê vídeos e posts (cronograma fica completo)
+  const from=d.plan&&/^\d{4}-\d{2}$/.test(d.plan.portalFrom||'')?d.plan.portalFrom:'';
+  if(from){
+    if(Array.isArray(d.videos)) d.videos=d.videos.filter(v=>!v.month||String(v.month).slice(0,7)>=from);
+    if(Array.isArray(d.arts)) d.arts=d.arts.filter(a=>!a.dueDate||String(a.dueDate).slice(0,7)>=from);
+  }
   return d;
 }
 

@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/sistem/css/app.css?v=22">
+<link rel="stylesheet" href="/sistem/css/app.css?v=4">
 <script src="/sistem/vendor/supabase.js"></script>
 </head>
 <body>
@@ -222,8 +222,9 @@
           <div class="planrow"><label class="checkchip"><input type="checkbox" value="branding">Branding</label><span class="qty"></span></div>
           <div class="planrow"><label class="checkchip"><input type="checkbox" value="web">Site/App</label><span class="qty"></span></div>
         </div>
-        <div class="hint">Só vídeo: marque apenas Vídeos. O link do cliente mostra só a área de entregas.</div>
+        <div class="hint">Só vídeo: marque apenas Vídeos. O link do cliente mostra só a área de entregas. Vídeos aprovados só vão para a fila de Social Media se marcar Social media.</div>
       </div>
+      <div class="field"><label>Link do cliente: mostrar vídeos e posts a partir de <span class="opt">opcional</span></label><input id="cPortalFrom" type="month"><div class="hint">Meses anteriores somem das abas Vídeos e Posts do link (o cronograma continua completo). Deixe vazio para mostrar tudo.</div></div>
       <div class="field"><label>Cor</label>
         <div class="colorpick" id="colorPick"></div>
         <input type="hidden" id="cColor" value="#2F8F82">
@@ -560,20 +561,20 @@
   <div class="modal modal-xl"><div id="reportRoot"></div></div>
 </div>
 
-<script src="/sistem/js/app.js?v=1"></script>
-<script src="/sistem/js/core.js?v=1"></script>
-<script src="/sistem/js/auth.js?v=1"></script>
-<script src="/sistem/js/nav.js?v=1"></script>
-<script src="/sistem/js/mod-review.js?v=1"></script>
-<script src="/sistem/js/mod-contract.js?v=1"></script>
-<script src="/sistem/js/mod-finance.js?v=1"></script>
-<script src="/sistem/js/mod-scripts.js?v=1"></script>
-<script src="/sistem/js/mod-client.js?v=1"></script>
-<script src="/sistem/js/mod-library.js?v=1"></script>
-<script src="/sistem/js/mod-traffic.js?v=1"></script>
-<script src="/sistem/js/mod-report.js?v=2"></script>
-<script src="/sistem/js/mod-lanza.js?v=2"></script>
-<script src="/sistem/js/mod-demands.js?v=2"></script>
-<script src="/sistem/js/boot.js?v=1"></script>
+<script src="/sistem/js/app.js?v=4"></script>
+<script src="/sistem/js/core.js?v=4"></script>
+<script src="/sistem/js/auth.js?v=4"></script>
+<script src="/sistem/js/nav.js?v=4"></script>
+<script src="/sistem/js/mod-review.js?v=4"></script>
+<script src="/sistem/js/mod-contract.js?v=4"></script>
+<script src="/sistem/js/mod-finance.js?v=4"></script>
+<script src="/sistem/js/mod-scripts.js?v=4"></script>
+<script src="/sistem/js/mod-client.js?v=4"></script>
+<script src="/sistem/js/mod-library.js?v=4"></script>
+<script src="/sistem/js/mod-traffic.js?v=4"></script>
+<script src="/sistem/js/mod-report.js?v=4"></script>
+<script src="/sistem/js/mod-lanza.js?v=4"></script>
+<script src="/sistem/js/mod-demands.js?v=4"></script>
+<script src="/sistem/js/boot.js?v=4"></script>
 </body>
 </html>

@@ -56,7 +56,7 @@ function videoThumb(v, h){
 function renderReadyPanel(){
   const box = document.getElementById('readyPanel'); if(!box) return;
   const filt = (document.getElementById('socialClientFilter') || {}).value;
-  const ready = S.videoTasks.filter(v=>v.approval === 'aprovado' && !v.postedAt && (!filt || v.clientId === filt))
+  const ready = S.videoTasks.filter(v=>v.approval === 'aprovado' && !v.postedAt && hasService(clientById(v.clientId), 'social') && (!filt || v.clientId === filt))
     .sort((a,b)=>String(a.approvalAt || '').localeCompare(String(b.approvalAt || '')));
   if(!ready.length){ box.innerHTML = ''; return; }
   box.innerHTML = `<div class="section-title" style="margin-top:0">Aprovados pelo cliente, prontos para postar <span class="count-pill ok">${ready.length}</span></div>

@@ -92,6 +92,7 @@ window.editClient = function(id){
   const pl = planOf(c);
   document.getElementById('cQtySocial').value = pl.qtySocial || '';
   document.getElementById('cQtyVideo').value = pl.qtyVideo || '';
+  document.getElementById('cPortalFrom').value = (c.plan && c.plan.portalFrom) || '';
   syncPlanRows();
   document.getElementById('cColor').value = c.color || COLORS[0];
   buildColorPicker(c.color || COLORS[0]);
@@ -117,6 +118,7 @@ document.getElementById('clientForm').addEventListener('submit', async e=>{
       social: { on: services.includes('social'), qty: parseInt(document.getElementById('cQtySocial').value, 10) || 0 },
       video: { on: services.includes('video'), qty: parseInt(document.getElementById('cQtyVideo').value, 10) || 0 },
       trafego: { on: services.includes('trafego') }, branding: { on: services.includes('branding') }, web: { on: services.includes('web') },
+      portalFrom: /^\d{4}-\d{2}$/.test(document.getElementById('cPortalFrom').value) ? document.getElementById('cPortalFrom').value : null,
     },
   };
   if(!data.name){ toast('Informe o nome do cliente.', 'error'); return; }

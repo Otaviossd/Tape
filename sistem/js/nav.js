@@ -56,7 +56,7 @@ function updateNavBadges(){
   if(!currentMember) return;
   const changes = S.videoTasks.filter(v=>v.approval === 'alteracao').length + S.postTasks.filter(t=>t.approval === 'alteracao').length;
   if(hasAccess('video')) setNavBadge('video', changes, 'warn');
-  const ready = S.videoTasks.filter(v=>v.approval === 'aprovado' && !v.postedAt).length;
+  const ready = S.videoTasks.filter(v=>v.approval === 'aprovado' && !v.postedAt && hasService(clientById(v.clientId), 'social')).length;
   if(hasAccess('social')) setNavBadge('social', ready, 'ok');
 }
 
@@ -121,7 +121,7 @@ function homeAlerts(){
       go:()=>goTab('posts', { client: t.clientId }) }));
   }
   if(hasAccess('social')){
-    const ready = S.videoTasks.filter(v=>v.approval === 'aprovado' && !v.postedAt);
+    const ready = S.videoTasks.filter(v=>v.approval === 'aprovado' && !v.postedAt && hasService(clientById(v.clientId), 'social'));
     if(ready.length) out.push({ lvl:'good', ic:'send', title:`${ready.length} vídeo${ready.length>1?'s':''} aprovado${ready.length>1?'s':''} pronto${ready.length>1?'s':''} para postar`, sub: ready.slice(0, 3).map(v=>escapeHtml(clientName(v.clientId))).filter((x,i,a)=>a.indexOf(x)===i).join(', '), go:()=>goTab('social') });
     const late = S.socialPosts.filter(p=>p.status !== 'feito' && p.date < today);
     if(late.length) out.push({ lvl:'urgent', ic:'cal', title:`${late.length} postagem${late.length>1?'ns':''} atrasada${late.length>1?'s':''}`, sub:'Marque como publicada ou reagende.', go:()=>goTab('social') });
