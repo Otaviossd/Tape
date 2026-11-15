@@ -106,6 +106,12 @@
   .lbstage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 12px}
   .lbbox{position:relative;width:100%;max-width:560px;height:100%;border-radius:16px;overflow:hidden;background:#000}
   .lbbox iframe,.lbbox video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;object-fit:contain}
+  .pgnav{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 12px 0}
+  .pgnav>button{width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:24px;line-height:1;cursor:pointer}
+  .pgdots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  .pgdots button{min-width:34px;height:34px;border-radius:17px;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+  .pgdots button.on{background:#3FAFA3}
+  .pglab{position:absolute;left:12px;top:12px;z-index:3;background:rgba(0,0,0,.55);color:#fff;font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:999px}
   .lbbox .lbimg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#0b0f0e}
   .lbposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(2px) brightness(.6)}
   .lbspin{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px 0 0 -19px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;z-index:2;pointer-events:none}
@@ -174,6 +180,8 @@ const nowYm=()=>todayISO().slice(0,7);
 const ytag=m=>{const p=m.split('-');return MONTHS[+p[1]-1]+' '+p[0]};
 const fileUrl=fp=>SB+'/storage/v1/object/public/entregas/'+String(fp).split('/').map(encodeURIComponent).join('/');
 function vN(v){const m=String(v.title||'').match(/^v[ií]deo\s*0*(\d+)\s*$/i);return m?+m[1]:(v.number||0)}
+// carrusel: varias páginas guardadas en el mismo campo, una URL por línea
+function pagesOf(u){return String(u||'').split(/\s+/).filter(x=>/^https?:\/\//.test(x))}
 function driveId(u){const m=String(u||'').match(/\/d\/([\w-]+)/)||String(u||'').match(/[?&]id=([\w-]+)/);return m?m[1]:''}
 function safeHref(u){return /^https?:\/\//i.test(String(u||''))?String(u):''}
 
@@ -275,9 +283,9 @@ function renderPosts(){
   h+='<h2>'+ytag(pmonth)+' · '+list.length+(list.length===1?' arte':' artes')+'</h2>';
   if(!list.length) h+='<div class="empty"><b>Aún no hay posts en '+MONTHS[+pmonth.split('-')[1]-1]+'</b>Cuando tengamos una arte lista para que la revises, aparecerá aquí.</div>';
   else h+='<div class="vgrid">'+list.map(a=>{
-    const id=driveId(a.finalLink), ap=AP[a.approval];
+    const id=driveId(a.finalLink), ap=AP[a.approval], np=pagesOf(a.finalLink).length;
     const cover='<span class="pfb">Toca para ver</span>'+(id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w600" onerror="this.remove()">':'');
-    return '<div class="vcard pcard'+(a.approval==='aguardando'?' pend':'')+'" role="button" tabindex="0" data-k="post" data-i="'+esc(a.id)+'"><div class="vth">'+(ap?'<span class="vst '+ap[1]+'">'+ap[0]+'</span>':'')+cover+'</div><div class="vinfo">'+esc(a.title||'Post')+'<small>'+esc(FMT[String(a.format||'').toLowerCase()]||'Arte')+(a.dueDate?' · '+esc(a.dueDate.slice(8,10)+'/'+a.dueDate.slice(5,7)):'')+'</small></div></div>';
+    return '<div class="vcard pcard'+(a.approval==='aguardando'?' pend':'')+'" role="button" tabindex="0" data-k="post" data-i="'+esc(a.id)+'"><div class="vth">'+(ap?'<span class="vst '+ap[1]+'">'+ap[0]+'</span>':'')+cover+'</div><div class="vinfo">'+esc(a.title||'Post')+'<small>'+esc(FMT[String(a.format||'').toLowerCase()]||'Arte')+(np>1?' · '+np+' páginas':'')+(a.dueDate?' · '+esc(a.dueDate.slice(8,10)+'/'+a.dueDate.slice(5,7)):'')+'</small></div></div>';
   }).join('')+'</div>';
   shell('Revisa las artes de tus publicaciones. Apruébalas o pídenos cambios antes de que salgan.',h);
   bindCommon('post');
@@ -410,7 +418,7 @@ function lightbox(kind,it){
   const prevFocus=document.activeElement;
   const close=()=>{el.remove();document.body.style.overflow='';document.removeEventListener('keydown',key); if(prevFocus&&prevFocus.focus) try{prevFocus.focus()}catch(_){} render();};
   const key=e=>{if(e.key==='Escape')close()};
-  el.addEventListener('click',e=>{const a=e.target.dataset&&e.target.dataset.a; if(a==='x') close(); if(a==='drive'&&hasLink) window.open(link,'_blank','noopener'); if(a==='dl'&&dlUrl) window.open(dlUrl,'_blank','noopener');});
+  el.addEventListener('click',e=>{const a=e.target.dataset&&e.target.dataset.a; if(a==='x') close(); if(a==='drive'&&hasLink) window.open(pagesOf(link)[0]||link,'_blank','noopener'); if(a==='dl'&&dlUrl) window.open(dlUrl,'_blank','noopener');});
   document.addEventListener('keydown',key);
   document.body.style.overflow='hidden';
   document.body.appendChild(el);
@@ -418,6 +426,24 @@ function lightbox(kind,it){
   const box=el.querySelector('.lbbox');
   const killSpin=()=>{const sp=box.querySelector('.lbspin'); if(sp) sp.remove()};
   if(kind==='post'){
+    const pages=pagesOf(link);
+    if(pages.length>1){
+      killSpin(); let cur=0;
+      const nav=document.createElement('div'); nav.className='pgnav';
+      nav.innerHTML='<button data-p="-1" aria-label="Anterior">&#8249;</button><div class="pgdots">'+pages.map((_,i)=>'<button data-pg="'+i+'">'+(i+1)+'</button>').join('')+'</div><button data-p="1" aria-label="Siguiente">&#8250;</button>';
+      const lab=document.createElement('div'); lab.className='pglab';
+      const show=i=>{ cur=(i+pages.length)%pages.length; box.querySelectorAll('.lbimg,iframe,.pgmsg').forEach(n=>n.remove());
+        const pid=driveId(pages[cur]); lab.textContent='Página '+(cur+1)+' de '+pages.length;
+        nav.querySelectorAll('[data-pg]').forEach((b,k)=>b.classList.toggle('on',k===cur));
+        if(!pid){ box.insertAdjacentHTML('beforeend','<div class="pgmsg" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;padding:24px;text-align:center;font-size:14px"><a style="color:#fff" target="_blank" rel="noopener" href="'+esc(safeHref(pages[cur])||'#')+'">Abrir página '+(cur+1)+'</a></div>'); return; }
+        const im=new Image(); im.className='lbimg'; im.alt=title+' · página '+(cur+1);
+        im.onerror=()=>{im.remove(); const f=document.createElement('iframe'); f.src='https://drive.google.com/file/d/'+pid+'/preview'; box.appendChild(f);};
+        im.src='https://drive.google.com/thumbnail?id='+pid+'&sz=w1600'; box.appendChild(im); };
+      nav.addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; if(b.dataset.p) show(cur+ +b.dataset.p); else show(+b.dataset.pg);});
+      let x0=null; box.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true}); box.addEventListener('touchend',e=>{if(x0==null)return; const dx=e.changedTouches[0].clientX-x0; if(Math.abs(dx)>40) show(cur+(dx<0?1:-1)); x0=null;});
+      box.appendChild(lab); el.querySelector('.lbstage').after(nav); show(0);
+      return;
+    }
     if(!id){ killSpin(); box.insertAdjacentHTML('beforeend','<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;padding:24px;text-align:center;font-size:14px">Abre el enlace para ver esta arte.</div>'); return; }
     const frame=()=>{ if(!el.isConnected||box.querySelector('iframe')) return; const f=document.createElement('iframe'); f.src='https://drive.google.com/file/d/'+id+'/preview'; f.allow='fullscreen'; f.onload=killSpin; box.appendChild(f); };
     const img=new Image(); img.className='lbimg'; img.alt=title;

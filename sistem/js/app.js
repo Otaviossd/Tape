@@ -768,7 +768,7 @@ async function migrateLegacyPosts(){
   }
   _postsMigrating = false; renderPostsBoard();
 }
-const POST_FORMAT_LABEL = {feed:'Feed', carrossel:'Carrossel', stories:'Stories', reels:'Capa de Reels', outro:'Outro'};
+const POST_FORMAT_LABEL = {feed:'Post estático', carrossel:'Carrossel', stories:'Stories', reels:'Capa de Reels', outro:'Outro'};
 let draggedPostTaskId = null;
 document.getElementById('postsClientFilter').addEventListener('change', renderPostsBoard);
 document.getElementById('btnNewPostTask').addEventListener('click', ()=>{
@@ -792,14 +792,41 @@ window.editPostTask = function(id){
   document.getElementById('ptDue').value = t.dueDate||'';
   document.getElementById('ptStatus').value = postCol(t);
   document.getElementById('ptSource').value = t.sourceLink||'';
-  document.getElementById('ptFinal').value = t.finalLink||'';
+  document.getElementById('ptFinal').value = linksOf(t.finalLink).join(' ') || (t.finalLink||'');
   document.getElementById('ptNotes').value = t.notes||'';
   updatePtPreview();
   openModal('modalPostTask');
 };
+/* carrossel: uma URL por página, guardadas juntas em finalLink (uma por linha) */
+const linksOf = u => String(u||'').split(/\s+/).filter(x=>/^https?:\/\//.test(x));
+const isCarousel = () => document.getElementById('ptFormat').value === 'carrossel';
+function buildPageInputs(vals){
+  const n = +document.getElementById('ptPages').value || 2, wrap = document.getElementById('ptPageInputs');
+  const prev = vals || [...wrap.querySelectorAll('input')].map(i=>i.value);
+  wrap.innerHTML = Array.from({length:n}, (_, i) => `<div class="pt-page"><span>Página ${i+1}</span><input type="url" data-pg="${i}" placeholder="Link do Drive da página ${i+1}" value="${escapeHtml(prev[i]||'')}"><img alt="" style="display:none"></div>`).join('');
+  wrap.querySelectorAll('input').forEach(inp => { inp.addEventListener('input', ()=>pagePreview(inp)); pagePreview(inp); });
+}
+function pagePreview(inp){
+  const img = inp.nextElementSibling, th = driveThumb(inp.value.trim(), 200);
+  if(th){ img.onerror = ()=>{ img.style.display='none'; }; img.src = th; img.style.display = ''; } else img.style.display = 'none';
+}
+function syncPtFormat(vals){
+  const car = isCarousel();
+  document.getElementById('ptPagesWrap').style.display = car ? '' : 'none';
+  document.getElementById('ptFinalWrap').style.display = car ? 'none' : '';
+  if(car) buildPageInputs(vals);
+}
+document.getElementById('ptFormat').addEventListener('change', ()=>{ const v = linksOf(document.getElementById('ptFinal').value); if(isCarousel() && v.length > 1) document.getElementById('ptPages').value = String(Math.min(10, v.length)); syncPtFormat(v); });
+document.getElementById('ptPages').addEventListener('change', ()=>buildPageInputs());
 function updatePtPreview(){
   const box = document.getElementById('ptPreview'); if(!box) return;
-  const u = document.getElementById('ptFinal').value.trim(), th = driveThumb(u, 600);
+  const all = linksOf(document.getElementById('ptFinal').value);
+  if(isCarousel()){
+    document.getElementById('ptPages').value = String(Math.min(10, Math.max(2, all.length || 3)));
+    syncPtFormat(all); box.innerHTML = ''; return;
+  }
+  syncPtFormat();
+  const u = all[0] || document.getElementById('ptFinal').value.trim(), th = driveThumb(u, 600);
   if(!u){ box.innerHTML = ''; return; }
   box.innerHTML = th
     ? `<img src="${th}" alt="" onerror="this.parentNode.innerHTML='<div class=&quot;pt-warn&quot;>Não consegui ver a miniatura. No Drive, deixe o arquivo como <b>Qualquer pessoa com o link</b> para o cliente conseguir ver.</div>'">`
@@ -820,7 +847,9 @@ document.getElementById('postTaskForm').addEventListener('submit', async e=>{
     dueDate: document.getElementById('ptDue').value || null,
     status: document.getElementById('ptStatus').value,
     sourceLink: document.getElementById('ptSource').value.trim(),
-    finalLink: document.getElementById('ptFinal').value.trim(),
+    finalLink: isCarousel()
+      ? [...document.querySelectorAll('#ptPageInputs input')].map(i=>i.value.trim()).filter(Boolean).join('\n')
+      : document.getElementById('ptFinal').value.trim(),
     notes: document.getElementById('ptNotes').value.trim(),
   };
   { const prev = id ? S.postTasks.find(x=>x.id===id) : null; Object.assign(data, postApprovalPatch(prev, data.status)); }
@@ -847,10 +876,10 @@ function renderPostsBoard(){
           ${driveThumb(t.finalLink) ? `<img class="kb-thumb" loading="lazy" alt="" src="${driveThumb(t.finalLink, 400)}" onerror="this.remove()">` : (t.finalLink ? '' : '<div class="kb-nolink">Falta o link da arte final</div>')}
           <div class="kb-title">${escapeHtml(t.title||'')}</div>
           ${approvalHtml(t)}
-          <div class="kb-due">${POST_FORMAT_LABEL[t.format]||'Post'}${t.dueDate ? ' · Prazo: '+fmtDate(t.dueDate) : ''}</div>
+          <div class="kb-due">${POST_FORMAT_LABEL[t.format]||'Post'}${linksOf(t.finalLink).length>1 ? ' · '+linksOf(t.finalLink).length+' páginas' : ''}${t.dueDate ? ' · Prazo: '+fmtDate(t.dueDate) : ''}</div>
           <div class="kb-links" onclick="event.stopPropagation()">
             ${t.sourceLink ? `<a href="${escapeHtml(t.sourceLink)}" target="_blank" rel="noopener" class="drivebtn"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-folder"/></svg>Editável</a>` : ''}
-            ${t.finalLink ? `<a href="${escapeHtml(t.finalLink)}" target="_blank" rel="noopener" class="drivebtn"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-check"/></svg>Final</a>` : ''}
+            ${t.finalLink ? `<a href="${escapeHtml(linksOf(t.finalLink)[0]||'')}" target="_blank" rel="noopener" class="drivebtn"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-check"/></svg>Final</a>` : ''}
             <button class="btn btn-ghost btn-sm" onclick="deletePostTask('${t.id}')" style="padding:4px 6px;"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-trash"/></svg></button>
           </div>
         </div>`).join('')}

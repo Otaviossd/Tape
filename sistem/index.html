@@ -286,7 +286,7 @@
       <div class="field"><label>Título / tema do post</label><input id="ptTitle" required placeholder="Ex: Carrossel 5 mitos sobre skincare"></div>
       <div class="field-row">
         <div class="field"><label>Formato</label>
-          <select id="ptFormat"><option value="feed">Feed</option><option value="carrossel">Carrossel</option><option value="stories">Stories</option><option value="reels">Capa de Reels</option><option value="outro">Outro</option></select>
+          <select id="ptFormat"><option value="feed">Post estático</option><option value="carrossel">Carrossel (várias páginas)</option><option value="stories">Stories</option><option value="reels">Capa de Reels</option><option value="outro">Outro</option></select>
         </div>
         <div class="field"><label>Prazo de entrega</label><input id="ptDue" type="date"></div>
       </div>
@@ -294,7 +294,8 @@
         <select id="ptStatus"><option value="aprovacao">Para aprovar (aparece no link do cliente)</option><option value="entregue">Entregue</option></select>
       </div>
       <div class="field"><label>Arquivo editável (Drive)</label><input id="ptSource" type="url" placeholder="https://drive.google.com/..."></div>
-      <div class="field"><label>Arte final (link do arquivo no Drive)</label><input id="ptFinal" type="url" placeholder="https://drive.google.com/file/d/..."><small class="muted-s">No Drive: Compartilhar → Qualquer pessoa com o link. Assim a miniatura aparece aqui e no link do cliente.</small><div id="ptPreview" class="pt-preview"></div></div>
+      <div class="field" id="ptPagesWrap" style="display:none"><label>Quantas páginas tem o carrossel?</label><select id="ptPages"><option value="2">2 páginas</option><option value="3">3 páginas</option><option value="4">4 páginas</option><option value="5">5 páginas</option><option value="6">6 páginas</option><option value="7">7 páginas</option><option value="8">8 páginas</option><option value="9">9 páginas</option><option value="10">10 páginas</option></select><div id="ptPageInputs"></div></div>
+      <div class="field" id="ptFinalWrap"><label>Arte final (link do arquivo no Drive)</label><input id="ptFinal" type="text" inputmode="url" autocomplete="off" placeholder="https://drive.google.com/file/d/..."><small class="muted-s">No Drive: Compartilhar → Qualquer pessoa com o link. Assim a miniatura aparece aqui e no link do cliente.</small><div id="ptPreview" class="pt-preview"></div></div>
       <div class="field"><label>Notas / legenda</label><textarea id="ptNotes"></textarea></div>
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" onclick="closeModal('modalPostTask')">Cancelar</button>
