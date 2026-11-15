@@ -293,7 +293,7 @@ function renderPosts(){
   else h+='<div class="vgrid">'+list.map(a=>{
     const id=driveId(a.finalLink), ap=AP[a.approval], np=pagesOf(a.finalLink).length;
     const cover='<span class="pfb">Toca para ver</span>'+(id?'<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id='+esc(id)+'&sz=w600" onerror="this.remove()">':'');
-    return '<div class="vcard pcard'+(a.approval==='aguardando'?' pend':'')+'" role="button" tabindex="0" data-k="post" data-i="'+esc(a.id)+'"><div class="vth">'+(ap?'<span class="vst '+ap[1]+'">'+ap[0]+'</span>':'')+cover+'</div><div class="vinfo">'+esc(a.title||'Post')+'<small>'+esc(FMT[String(a.format||'').toLowerCase()]||'Arte')+(np>1?' · '+np+' páginas':'')+(a.dueDate?' · '+esc(a.dueDate.slice(8,10)+'/'+a.dueDate.slice(5,7)):'')+'</small></div></div>';
+    return '<div class="vcard pcard'+(a.approval==='aguardando'?' pend':'')+'" role="button" tabindex="0" data-k="post" data-i="'+esc(a.id)+'"><div class="vth">'+(ap?'<span class="vst '+ap[1]+'">'+ap[0]+'</span>':'')+cover+'</div><div class="vinfo">'+esc(a.title||'Post')+'<small>'+esc(FMT[String(a.format||'').toLowerCase()]||'Arte')+(np>1?' · portada + '+(np-1)+(np>2?' páginas':' página'):'')+(a.dueDate?' · '+esc(a.dueDate.slice(8,10)+'/'+a.dueDate.slice(5,7)):'')+'</small></div></div>';
   }).join('')+'</div>';
   shell('Revisa las artes de tus publicaciones. Apruébalas o pídenos cambios antes de que salgan.',h);
   bindCommon('post');
@@ -438,10 +438,10 @@ function lightbox(kind,it){
     if(pages.length>1){
       killSpin(); let cur=0;
       const nav=document.createElement('div'); nav.className='pgnav';
-      nav.innerHTML='<button data-p="-1" aria-label="Anterior">&#8249;</button><div class="pgdots">'+pages.map((_,i)=>'<button data-pg="'+i+'">'+(i+1)+'</button>').join('')+'</div><button data-p="1" aria-label="Siguiente">&#8250;</button>';
+      nav.innerHTML='<button data-p="-1" aria-label="Anterior">&#8249;</button><div class="pgdots">'+pages.map((_,i)=>'<button data-pg="'+i+'">'+(i?i:'Portada')+'</button>').join('')+'</div><button data-p="1" aria-label="Siguiente">&#8250;</button>';
       const lab=document.createElement('div'); lab.className='pglab';
       const show=i=>{ cur=(i+pages.length)%pages.length; box.querySelectorAll('.lbimg,iframe,.pgmsg').forEach(n=>n.remove());
-        const pid=driveId(pages[cur]); lab.textContent='Página '+(cur+1)+' de '+pages.length;
+        const pid=driveId(pages[cur]); lab.textContent=cur?'Página '+cur+' de '+(pages.length-1):'Portada';
         nav.querySelectorAll('[data-pg]').forEach((b,k)=>b.classList.toggle('on',k===cur));
         if(!pid){ box.insertAdjacentHTML('beforeend','<div class="pgmsg" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;padding:24px;text-align:center;font-size:14px"><a style="color:#fff" target="_blank" rel="noopener" href="'+esc(safeHref(pages[cur])||'#')+'">Abrir página '+(cur+1)+'</a></div>'); return; }
         const im=new Image(); im.className='lbimg'; im.alt=title+' · página '+(cur+1);

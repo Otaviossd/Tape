@@ -818,7 +818,7 @@ const isCarousel = () => document.getElementById('ptFormat').value === 'carrosse
 function buildPageInputs(vals){
   const n = +document.getElementById('ptPages').value || 2, wrap = document.getElementById('ptPageInputs');
   const prev = vals || [...wrap.querySelectorAll('input')].map(i=>i.value);
-  wrap.innerHTML = Array.from({length:n}, (_, i) => `<div class="pt-page"><span>Página ${i+1}</span><input type="url" data-pg="${i}" placeholder="Link do Drive da página ${i+1}" value="${escapeHtml(prev[i]||'')}"><img alt="" style="display:none"></div>`).join('');
+  wrap.innerHTML = Array.from({length:n}, (_, i) => `<div class="pt-page"><span>${i ? 'Carrossel '+i : 'Capa'}</span><input type="url" data-pg="${i}" placeholder="Link do Drive ${i ? 'do carrossel '+i : 'da capa'}" value="${escapeHtml(prev[i]||'')}"><img alt="" style="display:none"></div>`).join('');
   wrap.querySelectorAll('input').forEach(inp => { inp.addEventListener('input', ()=>pagePreview(inp)); pagePreview(inp); });
 }
 function pagePreview(inp){
@@ -837,7 +837,7 @@ function updatePtPreview(){
   const box = document.getElementById('ptPreview'); if(!box) return;
   const all = linksOf(document.getElementById('ptFinal').value);
   if(isCarousel()){
-    document.getElementById('ptPages').value = String(Math.min(10, Math.max(2, all.length || 3)));
+    document.getElementById('ptPages').value = String(Math.min(10, Math.max(2, all.length || 4)));
     syncPtFormat(all); box.innerHTML = ''; return;
   }
   syncPtFormat();
