@@ -465,7 +465,7 @@ function monthInputHtml(fn){ return `<input type="month" class="mi" value="${del
 function renderDeliveryPanel(){
   const box = document.getElementById('deliveryPanel'); if(!box) return;
   const filt = document.getElementById('videoClientFilter').value;
-  const keep = {t:(document.getElementById('delTitle')||{}).value||'', l:(document.getElementById('delLink')||{}).value||''};
+  const keep = {t:(document.getElementById('delTitle')||{}).value||'', l:(document.getElementById('delLink')||{}).value||'', c:(document.getElementById('delCaption')||{}).value||''};
   const vcs = S.clients.filter(c=>(c.services||[]).includes('video') && c.status!=='encerrado');
   const countFor = id => S.videoTasks.filter(v=>v.clientId===id && vMonth(v)===delMonth && v.status==='entregue').length;
   if(!filt){
@@ -490,6 +490,7 @@ function renderDeliveryPanel(){
       <div class="field" style="margin:0;"><label>Nome (opcional)</label><input id="delTitle" placeholder="Vídeo"></div>
     </div>
     <div class="field" style="margin:10px 0 0;"><label>Link do Drive (original em alta qualidade)</label><input id="delLink" type="url" placeholder="https://drive.google.com/..."></div>
+    ${hasService(c,'social') ? `<div class="field" style="margin:10px 0 0;"><label>Legenda do vídeo <span class="opt">o cliente aprova vídeo e legenda juntos</span></label><textarea id="delCaption" rows="4" placeholder="Escreva a legenda que vai no post"></textarea></div>` : ''}
     <div class="field" style="margin:10px 0 0;"><label>Arquivo do vídeo (o sistema comprime sozinho para a prévia)</label>
       <label class="btn btn-outline" style="cursor:pointer;width:100%;justify-content:center;"><svg class="icon"><use href="#ic-folder"/></svg>Escolher arquivo<input type="file" accept="video/*" hidden onchange="delPickFile(this)"></label>
       <div id="delFileName" style="font-size:12px;color:var(--muted);margin-top:6px;word-break:break-all;">${delPickedFile?escapeHtml(delPickedFile.name):'Nenhum arquivo escolhido'}</div>
@@ -499,10 +500,11 @@ function renderDeliveryPanel(){
       <button class="btn btn-outline" onclick="openShare('${c.id}')"><svg class="icon"><use href="#ic-link"/></svg>Link para o cliente</button>
       <button class="btn btn-ghost" onclick="delPick('')">Voltar</button>
     </div>
-    ${list.length?`<div class="vgrid2">${list.map(v=>{const id=driveIdOf(v.finalLink);return `<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;"><a href="${escapeHtml(v.finalLink||'#')}" target="_blank" style="display:block;aspect-ratio:9/12;background:#10201d;position:relative;">${v.filePath?`<video muted playsinline preload="metadata" src="${fileUrlOf(v.filePath)}#t=0.1" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>`:(id?`<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id=${id}&sz=w320" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">`:'')}</a><div style="padding:8px 10px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(v.title)}</span><button class="btn btn-ghost btn-sm" onclick="deleteVideo('${v.id}')" style="padding:3px 5px;"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-trash"/></svg></button></div><div style="padding:0 10px 10px;">${v.filePath?'<span class="badge badge-ok">Prévia ok</span> ':''}${approvalBadge(v)} <button class="btn btn-outline btn-sm" style="width:100%;justify-content:center;margin-top:6px;" onclick="delEdit('${v.id}')"><svg class="icon"><use href="#ic-edit"/></svg>Editar</button>}</div></div>`;}).join('')}</div>`:''}
+    ${list.length?`<div class="vgrid2">${list.map(v=>{const id=driveIdOf(v.finalLink);return `<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;"><a href="${escapeHtml(v.finalLink||'#')}" target="_blank" style="display:block;aspect-ratio:9/12;background:#10201d;position:relative;">${v.filePath?`<video muted playsinline preload="metadata" src="${fileUrlOf(v.filePath)}#t=0.1" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>`:(id?`<img loading="lazy" alt="" src="https://drive.google.com/thumbnail?id=${id}&sz=w320" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">`:'')}</a><div style="padding:8px 10px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(v.title)}</span><button class="btn btn-ghost btn-sm" onclick="deleteVideo('${v.id}')" style="padding:3px 5px;"><svg class="icon" style="width:12px;height:12px;"><use href="#ic-trash"/></svg></button></div><div style="padding:0 10px 10px;">${v.filePath?'<span class="badge badge-ok">Prévia ok</span> ':''}${approvalBadge(v)}${hasService(c,'social') ? (v.caption ? ' <span class="badge badge-ok">Legenda</span>' : ' <span class="badge badge-warn">Sem legenda</span>') : ''} <button class="btn btn-outline btn-sm" style="width:100%;justify-content:center;margin-top:6px;" onclick="delEdit('${v.id}')"><svg class="icon"><use href="#ic-edit"/></svg>${hasService(c,'social') && !v.caption ? 'Editar / pôr legenda' : 'Editar'}</button></div></div>`;}).join('')}</div>`:''}
   </div>`;
   if(keep.t && document.getElementById('delTitle')) document.getElementById('delTitle').value=keep.t;
   if(keep.l && document.getElementById('delLink')) document.getElementById('delLink').value=keep.l;
+  if(keep.c && document.getElementById('delCaption')) document.getElementById('delCaption').value=keep.c;
 }
 function postMonthOf(t){ return String(t.dueDate||t.createdAt||'').slice(0,7); }
 window.postsPick = function(id){ document.getElementById('postsClientFilter').value=id; renderPostsBoard(); };
@@ -617,8 +619,10 @@ function numOptionsHtml(clientId, month, selected, excludeId){
   let h=''; for(let i=1;i<=N;i++){ h+=`<option value="${i}" ${i===sel?'selected':''}>Vídeo ${pad2(i)}${taken.has(i)?' (já enviado)':''}</option>`; }
   return h;
 }
-async function saveDelivery({clientId, month, number, title, link, file, existing}){
+async function saveDelivery({clientId, month, number, title, link, file, existing, caption}){
   const data = {clientId, month, number, title, status:'entregue'};
+  const capChanged = caption !== undefined && (caption || '') !== ((existing && existing.caption) || '');
+  if(caption !== undefined) data.caption = caption || null;
   let finalLink = link || (existing ? (existing.finalLink||'') : '');
   let oldPath = null;
   if(file){
@@ -641,12 +645,17 @@ async function saveDelivery({clientId, month, number, title, link, file, existin
   }
   data.finalLink = finalLink;
   if(!existing){ data.approval = 'aguardando'; }
-  else if((file || (finalLink && finalLink !== existing.finalLink)) && ['alteracao','aprovado'].includes(existing.approval)){
+  else if((file || capChanged || (finalLink && finalLink !== existing.finalLink)) && ['alteracao','aprovado'].includes(existing.approval)){
     data.approval = 'aguardando'; data.approvalNote = null; data.postedAt = null;
     data.approvalLog = [...(existing.approvalLog||[]), {at:new Date().toISOString(), action:'resubmitted', by:'staff'}];
   }
-  if(existing){ await db.collection('video_tasks').doc(existing.id).update(data); }
-  else { data.createdAt = new Date().toISOString(); await db.collection('video_tasks').add(data); }
+  const write = async d => { if(existing) await db.collection('video_tasks').doc(existing.id).update(d); else { d.createdAt = d.createdAt || new Date().toISOString(); await db.collection('video_tasks').add(d); } };
+  try{ await write(data); }
+  catch(err){
+    // banco ainda sem a coluna da legenda: salva o resto e avisa
+    if('caption' in data && /caption/i.test(String(err && (err.message || err)))){ delete data.caption; await write(data); alert('O vídeo foi salvo, mas a legenda não. Rode o arquivo 04_legenda_video.sql no Supabase e salve a legenda de novo.'); }
+    else throw err;
+  }
   if(oldPath){ try{ await sb.storage.from('entregas').remove([oldPath]); }catch(_){} }
 }
 window.delAddFull = async function(){
@@ -663,7 +672,9 @@ window.delAddFull = async function(){
   if(existing && !confirm('O Vídeo '+pad2(number)+' já foi enviado. Substituir pelo novo?')) return;
   delBusy = true; setBtnLabel('Iniciando...');
   try{
-    await saveDelivery({clientId, month:delMonth, number, title: typed || ('Vídeo '+pad2(number)), link, file, existing});
+    const capEl = document.getElementById('delCaption');
+    await saveDelivery({clientId, month:delMonth, number, title: typed || ('Vídeo '+pad2(number)), link, file, existing, caption: capEl ? capEl.value.trim() : undefined});
+    if(capEl) capEl.value = '';
     delPickedFile = null; delNumSel = null;
     document.getElementById('delTitle').value=''; document.getElementById('delLink').value='';
     const l=document.getElementById('delFileName'); if(l) l.textContent='Nenhum arquivo escolhido';
@@ -680,6 +691,9 @@ window.delEdit = function(id){
   document.getElementById('deTitle').value = v.title||'';
   document.getElementById('deLink').value = (v.filePath && v.finalLink===fileUrlOf(v.filePath)) ? '' : (v.finalLink||'');
   document.getElementById('deFile').value = '';
+  const soc = hasService(clientById(v.clientId), 'social');
+  document.getElementById('deCaptionWrap').style.display = soc ? '' : 'none';
+  document.getElementById('deCaption').value = v.caption || '';
   openModal('modalDelEdit');
 };
 document.getElementById('delEditForm').addEventListener('submit', async e=>{
@@ -700,7 +714,8 @@ document.getElementById('delEditForm').addEventListener('submit', async e=>{
   closeModal('modalDelEdit');
   delBusy = true;
   try{
-    await saveDelivery({clientId:v.clientId, month, number, title, link, file, existing:v});
+    const soc = hasService(clientById(v.clientId), 'social');
+    await saveDelivery({clientId:v.clientId, month, number, title, link, file, existing:v, caption: soc ? document.getElementById('deCaption').value.trim() : undefined});
     if(other){ await db.collection('video_tasks').doc(other.id).update({number:vNum(v), title: (other.title===('Vídeo '+pad2(vNum(other))))?('Vídeo '+pad2(vNum(v))):other.title}); }
     setUpStatus('<div style="color:#1f7a47;font-weight:700;font-size:13px;">Entrega atualizada.</div>'); setTimeout(()=>setUpStatus(''),3000);
   }catch(err){

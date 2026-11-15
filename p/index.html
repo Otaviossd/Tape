@@ -112,6 +112,8 @@
   .pgdots button{min-width:34px;height:34px;border-radius:17px;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:14px;font-weight:600;cursor:pointer}
   .pgdots button.on{background:#3FAFA3}
   .pglab{position:absolute;left:12px;top:12px;z-index:3;background:rgba(0,0,0,.55);color:#fff;font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:999px}
+  .lbcap{max-height:120px;overflow:auto;background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;margin:0 0 10px;color:#E8EEED;font-size:13.5px;line-height:1.45;white-space:pre-wrap}
+  .lbcap b{display:block;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:#7FD3C8;margin-bottom:4px}
   .lbbox .lbimg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#0b0f0e}
   .lbposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(2px) brightness(.6)}
   .lbspin{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px 0 0 -19px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;z-index:2;pointer-events:none}
@@ -393,7 +395,7 @@ function bindAct(kind,it,el,close){
     const a=ev.target.dataset&&ev.target.dataset.a; if(!a) return;
     if(a==='ok') doReview(kind,it,'approve',null,el);
     else if(a==='chg'){
-      act.innerHTML='<label for="lbnote">¿Qué quieres que cambiemos?</label><textarea id="lbnote" maxlength="1500" placeholder="Ej.: cambiar la música, cortar el final, corregir un texto…"></textarea><div class="lbrow"><button class="ok" data-a="send">Enviar cambios</button><button data-a="cancel">Cancelar</button></div>';
+      act.innerHTML='<label for="lbnote">'+(kind==='video'&&it.caption?'¿Qué quieres que cambiemos en el video o en la leyenda?':'¿Qué quieres que cambiemos?')+'</label><textarea id="lbnote" maxlength="1500" placeholder="Ej.: cambiar la música, cortar el final, corregir un texto de la leyenda…"></textarea><div class="lbrow"><button class="ok" data-a="send">Enviar cambios</button><button data-a="cancel">Cancelar</button></div>';
       const t=act.querySelector('textarea'); if(t) t.focus();
     }
     else if(a==='cancel') act.innerHTML=actHtml(kind,it,false);
@@ -420,7 +422,7 @@ function lightbox(kind,it){
   const hasLink=!!safeHref(link);
   el.innerHTML='<div class="lbtop"><b>'+esc(title)+'</b><button data-a="x" aria-label="Cerrar">&times;</button></div>'
    +'<div class="lbstage"><div class="lbbox">'+(thumb?'<img class="lbposter" alt="" src="'+thumb+'" onerror="this.remove()">':'')+'<div class="lbspin"></div></div></div>'
-   +'<div class="lbbot"><div class="lbact">'+actHtml(kind,it,false)+'</div><div class="lbsec">'+(id?'<button data-a="dl">Descargar</button>':'')+(hasLink?'<button data-a="drive">'+(id?'Abrir en Drive':'Abrir enlace')+'</button>':'')+'</div></div>';
+   +'<div class="lbbot">'+(kind==='video'&&it.caption?'<div class="lbcap"><b>Leyenda del post</b><div>'+esc(it.caption)+'</div></div>':'')+'<div class="lbact">'+actHtml(kind,it,false)+'</div><div class="lbsec">'+(id?'<button data-a="dl">Descargar</button>':'')+(hasLink?'<button data-a="drive">'+(id?'Abrir en Drive':'Abrir enlace')+'</button>':'')+'</div></div>';
   const prevFocus=document.activeElement;
   const close=()=>{el.remove();document.body.style.overflow='';document.removeEventListener('keydown',key); if(prevFocus&&prevFocus.focus) try{prevFocus.focus()}catch(_){} render();};
   const key=e=>{if(e.key==='Escape')close()};

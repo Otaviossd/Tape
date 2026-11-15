@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/sistem/css/app.css?v=4">
+<link rel="stylesheet" href="/sistem/css/app.css?v=5">
 <script src="/sistem/vendor/supabase.js"></script>
 </head>
 <body>
@@ -314,6 +314,7 @@
       <div class="field"><label>Qual vídeo é</label><select id="deNum"></select></div>
       <div class="field"><label>Nome (opcional)</label><input id="deTitle"></div>
       <div class="field"><label>Link do Drive (original em alta qualidade)</label><input id="deLink" type="url" placeholder="https://drive.google.com/..."></div>
+      <div class="field" id="deCaptionWrap" style="display:none"><label>Legenda do vídeo <span class="opt">o cliente aprova vídeo e legenda juntos</span></label><textarea id="deCaption" rows="5" placeholder="Escreva a legenda que vai no post"></textarea><div class="hint">Se o cliente já tinha aprovado e você mudar a legenda, volta para aprovação.</div></div>
       <div class="field"><label>Nova prévia (opcional)</label>
         <input id="deFile" type="file" accept="video/*">
         <div style="font-size:12px;color:var(--muted);margin-top:6px;">Deixe vazio para manter a prévia atual. Se escolher um arquivo, o sistema comprime e troca a prévia antiga.</div>
@@ -561,20 +562,20 @@
   <div class="modal modal-xl"><div id="reportRoot"></div></div>
 </div>
 
-<script src="/sistem/js/app.js?v=4"></script>
-<script src="/sistem/js/core.js?v=4"></script>
-<script src="/sistem/js/auth.js?v=4"></script>
-<script src="/sistem/js/nav.js?v=4"></script>
-<script src="/sistem/js/mod-review.js?v=4"></script>
-<script src="/sistem/js/mod-contract.js?v=4"></script>
-<script src="/sistem/js/mod-finance.js?v=4"></script>
-<script src="/sistem/js/mod-scripts.js?v=4"></script>
-<script src="/sistem/js/mod-client.js?v=4"></script>
-<script src="/sistem/js/mod-library.js?v=4"></script>
-<script src="/sistem/js/mod-traffic.js?v=4"></script>
-<script src="/sistem/js/mod-report.js?v=4"></script>
-<script src="/sistem/js/mod-lanza.js?v=4"></script>
-<script src="/sistem/js/mod-demands.js?v=4"></script>
-<script src="/sistem/js/boot.js?v=4"></script>
+<script src="/sistem/js/app.js?v=5"></script>
+<script src="/sistem/js/core.js?v=5"></script>
+<script src="/sistem/js/auth.js?v=5"></script>
+<script src="/sistem/js/nav.js?v=5"></script>
+<script src="/sistem/js/mod-review.js?v=5"></script>
+<script src="/sistem/js/mod-contract.js?v=5"></script>
+<script src="/sistem/js/mod-finance.js?v=5"></script>
+<script src="/sistem/js/mod-scripts.js?v=5"></script>
+<script src="/sistem/js/mod-client.js?v=5"></script>
+<script src="/sistem/js/mod-library.js?v=5"></script>
+<script src="/sistem/js/mod-traffic.js?v=5"></script>
+<script src="/sistem/js/mod-report.js?v=5"></script>
+<script src="/sistem/js/mod-lanza.js?v=5"></script>
+<script src="/sistem/js/mod-demands.js?v=5"></script>
+<script src="/sistem/js/boot.js?v=5"></script>
 </body>
 </html>
