@@ -101,7 +101,7 @@ function renderApprovalStrip(){
     ${changes.length ? `<div class="card appr-card danger"><div class="appr-head">${icon('edit')}<b>Alterações pedidas pelo cliente</b><span class="count-pill danger">${changes.length}</span></div>
       ${changes.map(v=>`<div class="appr-item"><div class="appr-item-main"><div class="kb-client"><span class="client-dot" style="background:${clientColor(v.clientId)}"></span>${escapeHtml(clientName(v.clientId))} · ${escapeHtml(v.title || '')}</div>
         <div class="appr-note">“${escapeHtml(v.approvalNote || '(sem texto)')}”</div></div>
-        <div class="appr-item-act"><button class="btn btn-primary btn-sm" onclick="delAttach('${v.id}')">${icon('film')}Enviar nova versão</button></div></div>`).join('')}</div>` : ''}
+        <div class="appr-item-act"><button class="btn btn-primary btn-sm" onclick="delNewVersion('${v.id}')">${icon('film')}Enviar nova versão</button></div></div>`).join('')}</div>` : ''}
     ${waiting.length ? `<div class="card appr-card"><div class="appr-head">${icon('clock')}<b>Aguardando aprovação do cliente</b><span class="count-pill">${waiting.length}</span></div>
       <div class="appr-chips">${waiting.slice(0, 18).map(v=>`<span class="chip"><i style="background:${clientColor(v.clientId)}"></i>${escapeHtml(clientName(v.clientId))} · ${escapeHtml(v.title || '')}</span>`).join('')}${waiting.length > 18 ? `<span class="chip">+${waiting.length - 18}</span>` : ''}</div></div>` : ''}
   </div>`;

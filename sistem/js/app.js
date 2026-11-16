@@ -619,11 +619,11 @@ function numOptionsHtml(clientId, month, selected, excludeId){
   let h=''; for(let i=1;i<=N;i++){ h+=`<option value="${i}" ${i===sel?'selected':''}>Vídeo ${pad2(i)}${taken.has(i)?' (já enviado)':''}</option>`; }
   return h;
 }
-async function saveDelivery({clientId, month, number, title, link, file, existing, caption}){
+async function saveDelivery({clientId, month, number, title, link, file, existing, caption, dropOldLink}){
   const data = {clientId, month, number, title, status:'entregue'};
   const capChanged = caption !== undefined && (caption || '') !== ((existing && existing.caption) || '');
   if(caption !== undefined) data.caption = caption || null;
-  let finalLink = link || (existing ? (existing.finalLink||'') : '');
+  let finalLink = link || (existing && !dropOldLink ? (existing.finalLink||'') : '');
   let oldPath = null;
   if(file){
     let blob = file;
@@ -684,7 +684,11 @@ window.delAddFull = async function(){
     setUpStatus(`<div style="color:#b3261e;font-weight:700;font-size:13px;">Falhou: ${escapeHtml(err.message||'erro')}</div>`);
   }finally{ delBusy=false; setBtnLabel(null); }
 };
+let deNewVersion = false;
+// "Enviar nova versão": mesmo formulário, pedindo o vídeo novo E o link novo do Drive
+window.delNewVersion = function(id){ delEdit(id); deNewVersion = true; document.getElementById('deModalTitle').textContent = 'Enviar nova versão'; document.getElementById('deNewVerNote').style.display = ''; document.getElementById('deLink').value = ''; document.getElementById('deLink').placeholder = 'Link NOVO do Drive (versão corrigida)'; };
 window.delEdit = function(id){
+  deNewVersion = false; document.getElementById('deModalTitle').textContent = 'Editar entrega'; document.getElementById('deNewVerNote').style.display = 'none'; document.getElementById('deLink').placeholder = 'https://drive.google.com/...';
   const v = S.videoTasks.find(x=>x.id===id); if(!v) return;
   document.getElementById('deId').value = id;
   document.getElementById('deNum').innerHTML = numOptionsHtml(v.clientId, vMonth(v), vNum(v)||1, null);
@@ -705,6 +709,11 @@ document.getElementById('delEditForm').addEventListener('submit', async e=>{
   if(link && !/^https?:\/\//i.test(link)){ alert('Cole o link completo do Drive (https://...).'); return; }
   const number = +document.getElementById('deNum').value;
   const file = document.getElementById('deFile').files[0] || null;
+  if(deNewVersion){
+    if(!file && !link){ alert('Escolha o vídeo corrigido e/ou cole o link novo do Drive.'); return; }
+    if(file && !link && !confirm('Você não colou o link novo do Drive. O cliente vai assistir a prévia nova, mas o botão de baixar sai do ar até você colar o link novo. Continuar?')) return;
+    if(link && !file && !confirm('Sem arquivo novo, a prévia continua sendo a antiga (o link do Drive muda). Continuar?')) return;
+  }
   const month = vMonth(v);
   const other = S.videoTasks.find(x=>x.id!==id && x.clientId===v.clientId && vMonth(x)===month && vNum(x)===number);
   if(other && !confirm('O Vídeo '+pad2(number)+' já existe. Trocar a posição dos dois?')) return;
@@ -715,7 +724,7 @@ document.getElementById('delEditForm').addEventListener('submit', async e=>{
   delBusy = true;
   try{
     const soc = hasService(clientById(v.clientId), 'social');
-    await saveDelivery({clientId:v.clientId, month, number, title, link, file, existing:v, caption: soc ? document.getElementById('deCaption').value.trim() : undefined});
+    await saveDelivery({clientId:v.clientId, month, number, title, link, file, existing:v, caption: soc ? document.getElementById('deCaption').value.trim() : undefined, dropOldLink: deNewVersion});
     if(other){ await db.collection('video_tasks').doc(other.id).update({number:vNum(v), title: (other.title===('Vídeo '+pad2(vNum(other))))?('Vídeo '+pad2(vNum(v))):other.title}); }
     setUpStatus('<div style="color:#1f7a47;font-weight:700;font-size:13px;">Entrega atualizada.</div>'); setTimeout(()=>setUpStatus(''),3000);
   }catch(err){
