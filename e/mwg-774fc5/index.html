@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MWG · Entregas | Tape</title>
+<title>MWG</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#f3f3ef">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,16 +14,16 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Inter,system-ui,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
-header{padding:28px 0 8px}
-.logo{display:inline-flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.16em;font-size:17px}
-.mk{position:relative;width:18px;height:18px}.mk:before,.mk:after{content:"";position:absolute;background:var(--teal);border-radius:1.5px}
-.mk:before{left:0;top:7.5px;width:18px;height:3px}.mk:after{left:7.5px;top:0;width:3px;height:18px}
+header{padding:30px 0 6px;display:flex;justify-content:center}
+.logo{display:inline-flex;align-items:center;gap:7px;font-weight:600;letter-spacing:.18em;font-size:11px;color:var(--muted);opacity:.8}
+.mk{position:relative;width:10px;height:10px}.mk:before,.mk:after{content:"";position:absolute;background:var(--teal);border-radius:1px}
+.mk:before{left:0;top:4px;width:10px;height:2px}.mk:after{left:4px;top:0;width:2px;height:10px}
 .hero{padding:48px 0 34px}
 .tg{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:14px}
 h1{font-weight:500;font-size:clamp(38px,7vw,64px);letter-spacing:-.045em;line-height:1}
 h1 em{font-style:normal;color:var(--teal)}
 .ld{margin-top:16px;color:var(--muted);font-size:16px;max-width:560px;line-height:1.5}
-h2{font-weight:600;font-size:22px;letter-spacing:-.02em;margin:44px 0 16px;display:flex;align-items:baseline;gap:10px}
+h2{font-weight:600;font-size:22px;letter-spacing:-.02em;margin:34px 0 16px;display:flex;align-items:baseline;gap:10px}
 h2 small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
 .vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
 .vc{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(7,11,10,.06),0 12px 32px rgba(7,11,10,.06)}
@@ -57,11 +57,6 @@ footer a{color:var(--ink);text-decoration:none;font-weight:500}
 <body>
 <div class="wrap">
   <header><span class="logo"><span class="mk"></span>TAPE</span></header>
-  <section class="hero">
-    <span class="tg">Entregas · MWG</span>
-    <h1>Tu material, <em>listo.</em></h1>
-    <p class="ld">Acá están los videos y fotos que hicimos para MWG. Tocá <b>Descargar</b> para bajar cada archivo en calidad original.</p>
-  </section>
 
   <h2>Comerciales</h2>
   <div class="vg" id="comerciales"></div>
@@ -75,8 +70,6 @@ footer a{color:var(--ink);text-decoration:none;font-weight:500}
     <h2>Fotos de la cobertura <small id="fotosN"></small></h2>
     <div class="pg" id="fotos"></div>
   </div>
-
-  <footer><span>Hecho por Tape · Growth &amp; Creative</span><a href="https://tapegrowth.agency" target="_blank" rel="noopener">tapegrowth.agency</a></footer>
 </div>
 
 <div class="lb" id="lb" role="dialog" aria-label="Foto">
@@ -130,5 +123,6 @@ lb.querySelector('.x').onclick = hide; lb.querySelector('.pv').onclick = () => s
 lb.addEventListener('click', e => { if(e.target === lb) hide(); });
 document.addEventListener('keydown', e => { if(!lb.classList.contains('on')) return; if(e.key === 'Escape') hide(); if(e.key === 'ArrowLeft') show(cur - 1); if(e.key === 'ArrowRight') show(cur + 1); });
 </script>
+<div style="height:48px"></div>
 </body>
 </html>
