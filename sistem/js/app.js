@@ -553,6 +553,7 @@ function setBtnLabel(t){
 }
 function setUpStatus(html){
   const b=document.getElementById('delUpStatus'); if(!b) return;
+  if(b.parentNode!==document.body) document.body.appendChild(b); // fora de qualquer painel com animação, senão a caixa fica cortada
   b.innerHTML = html ? `<div class="dp" style="margin-top:-6px;">${html}</div>` : '';
 }
 let delPickedFile = null, delBusy = false, ffmpegInst = null;
