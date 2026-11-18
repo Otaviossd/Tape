@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es-PY">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MWG · Entregas | Tape</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f3f3ef">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f3f3ef;--paper2:#eaeae4;--ink:#070b0a;--muted:#69706e;--teal:#3FAFA3;--deep:#0F2E2B;--line:rgba(7,11,10,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{padding:28px 0 8px}
+.logo{display:inline-flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.16em;font-size:17px}
+.mk{position:relative;width:18px;height:18px}.mk:before,.mk:after{content:"";position:absolute;background:var(--teal);border-radius:1.5px}
+.mk:before{left:0;top:7.5px;width:18px;height:3px}.mk:after{left:7.5px;top:0;width:3px;height:18px}
+.hero{padding:48px 0 34px}
+.tg{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:14px}
+h1{font-weight:500;font-size:clamp(38px,7vw,64px);letter-spacing:-.045em;line-height:1}
+h1 em{font-style:normal;color:var(--teal)}
+.ld{margin-top:16px;color:var(--muted);font-size:16px;max-width:560px;line-height:1.5}
+h2{font-weight:600;font-size:22px;letter-spacing:-.02em;margin:44px 0 16px;display:flex;align-items:baseline;gap:10px}
+h2 small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
+.vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.vc{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(7,11,10,.06),0 12px 32px rgba(7,11,10,.06)}
+.th{position:relative;aspect-ratio:9/16;background:linear-gradient(160deg,#16211f,#0F2E2B);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.th img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.th .ph{position:relative;color:rgba(255,255,255,.55);font-size:13px;font-weight:500;text-align:center;padding:16px}
+.th.land{aspect-ratio:16/10}
+.vb{padding:14px 16px 16px}
+.vb b{display:block;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.vb span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.dl{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:46px;border-radius:999px;border:0;background:var(--ink);color:#fff;font:600 14.5px Inter,sans-serif;text-decoration:none;cursor:pointer}
+.dl:hover{background:var(--deep)}
+.dl.off{background:var(--paper2);color:var(--muted);cursor:default}
+.dl svg{width:17px;height:17px}
+.pg{columns:4 220px;column-gap:12px}
+.pg button{display:block;width:100%;margin:0 0 12px;padding:0;border:0;border-radius:12px;overflow:hidden;background:var(--paper2);cursor:zoom-in;break-inside:avoid;position:relative}
+.pg img{display:block;width:100%;height:auto;transition:transform .8s cubic-bezier(.16,.8,.24,1)}
+.pg button:hover img{transform:scale(1.04)}
+.empty{background:#fff;border:1px dashed var(--line);border-radius:16px;padding:26px;color:var(--muted);font-size:14px;text-align:center}
+footer{padding:56px 0 40px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer a{color:var(--ink);text-decoration:none;font-weight:500}
+.lb{position:fixed;inset:0;background:rgba(7,11,10,.92);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.lb.on{display:flex}
+.lb img{max-width:100%;max-height:calc(100vh - 120px);border-radius:10px}
+.lb .x{position:absolute;top:16px;right:16px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:26px;cursor:pointer}
+.lb .nv{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:26px;cursor:pointer}
+.lb .pv{left:14px}.lb .nx{right:14px}
+.lb .lbdl{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:auto;padding:0 24px;background:#fff;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><span class="logo"><span class="mk"></span>TAPE</span></header>
+  <section class="hero">
+    <span class="tg">Entregas · MWG</span>
+    <h1>Tu material, <em>listo.</em></h1>
+    <p class="ld">Acá están los videos y fotos que hicimos para MWG. Tocá <b>Descargar</b> para bajar cada archivo en calidad original.</p>
+  </section>
+
+  <h2>Comerciales</h2>
+  <div class="vg" id="comerciales"></div>
+
+  <div id="coberturaSec" style="display:none">
+    <h2>Cobertura de la conferencia de prensa</h2>
+    <div class="vg" id="cobertura"></div>
+  </div>
+
+  <div id="fotosSec" style="display:none">
+    <h2>Fotos de la cobertura <small id="fotosN"></small></h2>
+    <div class="pg" id="fotos"></div>
+  </div>
+
+  <footer><span>Hecho por Tape · Growth &amp; Creative</span><a href="https://tapegrowth.agency" target="_blank" rel="noopener">tapegrowth.agency</a></footer>
+</div>
+
+<div class="lb" id="lb" role="dialog" aria-label="Foto">
+  <button class="x" aria-label="Cerrar">&times;</button>
+  <button class="nv pv" aria-label="Anterior">&#8249;</button>
+  <img alt="">
+  <button class="nv nx" aria-label="Siguiente">&#8250;</button>
+  <a class="dl lbdl" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Descargar foto</a>
+</div>
+
+<script>
+/* ====== CONTENIDO (editar acá) ======
+   drive: link del archivo en Google Drive (compartido como "Cualquier persona con el enlace").
+   Sin link = aparece como "Próximamente". */
+const COMERCIALES = [
+  { title: 'Comercial 01', sub: 'Video comercial', drive: '' },
+  { title: 'Comercial 02', sub: 'Video comercial', drive: '' },
+];
+const COBERTURA = [
+  // { title: 'Conferencia de prensa', sub: 'Video de cobertura', drive: '' },
+];
+// Fotos: un objeto por foto. src = imagen liviana para mostrar; drive = original para descargar (opcional)
+const FOTOS = [
+  // { src: '/media/mwg/f01.webp', drive: '' },
+];
+
+const idOf = u => { const m = String(u || '').match(/\/d\/([\w-]{10,})/) || String(u || '').match(/[?&]id=([\w-]{10,})/); return m ? m[1] : ''; };
+const dlOf = u => { const id = idOf(u); return id ? 'https://drive.usercontent.google.com/download?id=' + encodeURIComponent(id) + '&export=download&confirm=t' : ''; };
+const thumbOf = (u, w) => { const id = idOf(u); return id ? 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w' + (w || 720) : ''; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
+function card(v, land){
+  const dl = dlOf(v.drive), th = thumbOf(v.drive);
+  return `<div class="vc"><div class="th${land ? ' land' : ''}">${th ? `<img loading="lazy" alt="" src="${th}" onerror="this.remove()">` : `<span class="ph">${dl ? '' : 'Próximamente'}</span>`}</div>
+    <div class="vb"><b>${esc(v.title)}</b><span>${esc(v.sub || '')}</span>
+    ${dl ? `<a class="dl" href="${dl}" rel="noopener">${ICON}Descargar</a>` : '<span class="dl off">Próximamente</span>'}</div></div>`;
+}
+document.getElementById('comerciales').innerHTML = COMERCIALES.map(v => card(v)).join('');
+if(COBERTURA.length){ document.getElementById('coberturaSec').style.display = ''; document.getElementById('cobertura').innerHTML = COBERTURA.map(v => card(v, true)).join(''); }
+if(FOTOS.length){
+  document.getElementById('fotosSec').style.display = '';
+  document.getElementById('fotosN').textContent = FOTOS.length + ' fotos';
+  document.getElementById('fotos').innerHTML = FOTOS.map((f, i) => `<button data-i="${i}" aria-label="Ver foto ${i + 1}"><img loading="lazy" decoding="async" alt="Foto ${i + 1} de la cobertura" src="${esc(f.src)}"></button>`).join('');
+}
+// visor de fotos con descarga
+const lb = document.getElementById('lb'), lbImg = lb.querySelector('img'), lbDl = lb.querySelector('.lbdl'); let cur = 0;
+function show(i){ cur = (i + FOTOS.length) % FOTOS.length; const f = FOTOS[cur]; lbImg.src = f.src; lbDl.href = dlOf(f.drive) || f.src; lb.classList.add('on'); document.body.style.overflow = 'hidden'; }
+function hide(){ lb.classList.remove('on'); document.body.style.overflow = ''; }
+document.getElementById('fotos').addEventListener('click', e => { const b = e.target.closest('button[data-i]'); if(b) show(+b.dataset.i); });
+lb.querySelector('.x').onclick = hide; lb.querySelector('.pv').onclick = () => show(cur - 1); lb.querySelector('.nx').onclick = () => show(cur + 1);
+lb.addEventListener('click', e => { if(e.target === lb) hide(); });
+document.addEventListener('keydown', e => { if(!lb.classList.contains('on')) return; if(e.key === 'Escape') hide(); if(e.key === 'ArrowLeft') show(cur - 1); if(e.key === 'ArrowRight') show(cur + 1); });
+</script>
+</body>
+</html>
