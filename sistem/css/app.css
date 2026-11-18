@@ -209,7 +209,7 @@
   .dc-foot{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-top:8px;font-weight:600;}
   .dc.full{border-color:#bfe3cf;background:#f4fbf7;}
   .dc.full .dc-foot b{color:#1f7a47;}
-  #delUpStatus .dp{position:fixed;left:16px;right:16px;bottom:96px;z-index:70;margin:0!important;box-shadow:0 12px 40px rgba(0,0,0,.18);max-width:520px}
+  #delUpStatus .dp{position:fixed;left:auto;right:24px;bottom:24px;width:min(420px,calc(100vw - 32px));z-index:9999;margin:0!important;box-shadow:0 12px 40px rgba(0,0,0,.22);background:#fff;color:#0E1A18;overflow:visible}
   .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spn .7s linear infinite;margin-right:8px;vertical-align:-2px}
   @keyframes spn{to{transform:rotate(360deg)}}
   .dp-form{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:4px;}
@@ -889,3 +889,8 @@ td{padding:13px 16px;border-bottom:1px solid var(--line-2);font-size:13px;}
 .pt-page span{flex:none;width:96px;font-size:12.5px;font-weight:600;color:#55615F}
 .pt-page input{flex:1;min-width:0}
 .pt-page img{width:34px;height:42px;object-fit:cover;border-radius:5px;background:#EEF1F0;flex:none}
+
+/* barra de progresso do envio sempre visível e inteira */
+#delUpStatus .pbar{height:8px;border-radius:99px;background:#E3EDEA;overflow:hidden;margin-top:6px}
+#delUpStatus .pbar i{display:block;height:100%;background:#3FAFA3;border-radius:99px}
+@media (max-width:760px){#delUpStatus .dp{right:16px;bottom:96px}}
