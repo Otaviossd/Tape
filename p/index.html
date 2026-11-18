@@ -395,7 +395,7 @@ function bindAct(kind,it,el,close){
     const a=ev.target.dataset&&ev.target.dataset.a; if(!a) return;
     if(a==='ok') doReview(kind,it,'approve',null,el);
     else if(a==='chg'){
-      act.innerHTML='<label for="lbnote">'+(kind==='video'&&it.caption?'¿Qué quieres que cambiemos en el video o en la leyenda?':'¿Qué quieres que cambiemos?')+'</label><textarea id="lbnote" maxlength="1500" placeholder="Ej.: cambiar la música, cortar el final, corregir un texto de la leyenda…"></textarea><div class="lbrow"><button class="ok" data-a="send">Enviar cambios</button><button data-a="cancel">Cancelar</button></div>';
+      act.innerHTML='<label for="lbnote">'+(it.caption?'¿Qué quieres que cambiemos en el video o en la leyenda?':'¿Qué quieres que cambiemos?')+'</label><textarea id="lbnote" maxlength="1500" placeholder="Ej.: cambiar la música, cortar el final, corregir un texto de la leyenda…"></textarea><div class="lbrow"><button class="ok" data-a="send">Enviar cambios</button><button data-a="cancel">Cancelar</button></div>';
       const t=act.querySelector('textarea'); if(t) t.focus();
     }
     else if(a==='cancel') act.innerHTML=actHtml(kind,it,false);
@@ -422,7 +422,7 @@ function lightbox(kind,it){
   const hasLink=!!safeHref(link);
   el.innerHTML='<div class="lbtop"><b>'+esc(title)+'</b><button data-a="x" aria-label="Cerrar">&times;</button></div>'
    +'<div class="lbstage"><div class="lbbox">'+(thumb?'<img class="lbposter" alt="" src="'+thumb+'" onerror="this.remove()">':'')+'<div class="lbspin"></div></div></div>'
-   +'<div class="lbbot">'+(kind==='video'&&it.caption?'<div class="lbcap"><b>Leyenda del post</b><div>'+esc(it.caption)+'</div></div>':'')+'<div class="lbact">'+actHtml(kind,it,false)+'</div><div class="lbsec">'+(id?'<button data-a="dl">Descargar</button>':'')+(hasLink?'<button data-a="drive">'+(id?'Abrir en Drive':'Abrir enlace')+'</button>':'')+'</div></div>';
+   +'<div class="lbbot">'+(it.caption?'<div class="lbcap"><b>Leyenda del post</b><div>'+esc(it.caption)+'</div></div>':'')+'<div class="lbact">'+actHtml(kind,it,false)+'</div><div class="lbsec">'+(id?'<button data-a="dl">Descargar</button>':'')+(hasLink?'<button data-a="drive">'+(id?'Abrir en Drive':'Abrir enlace')+'</button>':'')+'</div></div>';
   const prevFocus=document.activeElement;
   const close=()=>{el.remove();document.body.style.overflow='';document.removeEventListener('keydown',key); if(prevFocus&&prevFocus.focus) try{prevFocus.focus()}catch(_){} render();};
   const key=e=>{if(e.key==='Escape')close()};
