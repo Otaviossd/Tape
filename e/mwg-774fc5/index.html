@@ -85,7 +85,7 @@ footer a{color:var(--ink);text-decoration:none;font-weight:500}
    drive: link del archivo en Google Drive (compartido como "Cualquier persona con el enlace").
    Sin link = aparece como "Próximamente". */
 const COMERCIALES = [
-  { title: 'Comercial 01', sub: 'Video comercial', drive: '' },
+  { title: 'Comercial 01', sub: 'Video comercial', drive: 'https://drive.google.com/file/d/1NJyuTnSf3wRUXGxFtyS3Ww_ww8cEsFxi/view?usp=drivesdk', poster: 'c01.jpg' },
   { title: 'Comercial 02', sub: 'Video comercial', drive: '' },
 ];
 const COBERTURA = [
@@ -102,7 +102,7 @@ const thumbOf = (u, w) => { const id = idOf(u); return id ? 'https://drive.googl
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
 function card(v, land){
-  const dl = dlOf(v.drive), th = thumbOf(v.drive);
+  const dl = dlOf(v.drive), th = v.poster || thumbOf(v.drive);
   return `<div class="vc"><div class="th${land ? ' land' : ''}">${th ? `<img loading="lazy" alt="" src="${th}" onerror="this.remove()">` : `<span class="ph">${dl ? '' : 'Próximamente'}</span>`}</div>
     <div class="vb"><b>${esc(v.title)}</b><span>${esc(v.sub || '')}</span>
     ${dl ? `<a class="dl" href="${dl}" rel="noopener">${ICON}Descargar</a>` : '<span class="dl off">Próximamente</span>'}</div></div>`;
