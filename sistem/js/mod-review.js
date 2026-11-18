@@ -82,7 +82,7 @@ window.scheduleFromVideo = function(id){
   fillVideoRefSelect(v.clientId, v.id); fillPostRefSelect(v.clientId);
   document.getElementById('pVideoRef').value = v.id;
   document.getElementById('pLink').value = v.finalLink || '';
-  document.getElementById('pCaption').value = v.title || '';
+  document.getElementById('pCaption').value = v.caption || v.title || '';
   const sc = S.scripts.find(s=>s.videoTaskId === v.id);
   if(sc && sc.publishDate) document.getElementById('pDate').value = sc.publishDate;
 };

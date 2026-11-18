@@ -187,7 +187,7 @@ function renderFichaResumo(c){
   const ym = ymNow(); const pl = planOf(c);
   const vids = S.videoTasks.filter(v=>String(v.clientId) === String(c.id));
   const delivered = vids.filter(v=>v.status === 'entregue' && vMonth(v) === ym).length;
-  const posts = S.postTasks.filter(t=>String(t.clientId) === String(c.id) && t.status === 'entregue' && postMonthOf(t) === ym).length;
+  const posts = S.postTasks.filter(t=>String(t.clientId) === String(c.id) && (t.status === 'entregue' || t.approval === 'aprovado') && postMonthOf(t) === ym).length;
   const bar = (n, q)=>`<div class="pbar"><i style="width:${q ? Math.min(100, Math.round(n / q * 100)) : 0}%"></i></div>`;
   const appr = {
     wait: vids.filter(v=>v.approval === 'aguardando'), change: vids.filter(v=>v.approval === 'alteracao'),

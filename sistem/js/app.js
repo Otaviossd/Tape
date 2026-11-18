@@ -182,7 +182,7 @@ document.getElementById('pVideoRef').addEventListener('change', ()=>{
   if(!vid) return;
   document.getElementById('pLink').value = vid.finalLink || vid.rawLink || '';
   const capField = document.getElementById('pCaption');
-  if(!capField.value.trim()){ capField.value = vid.title; }
+  if(!capField.value.trim() || capField.value === vid.title){ capField.value = vid.caption || vid.title; }
 });
 document.getElementById('btnNewPost').addEventListener('click', ()=>{
   if(S.clients.length===0){ alert('Cadastre um cliente antes de criar uma postagem.'); return; }
@@ -515,7 +515,7 @@ function renderPostsDemand(){
   let cs = S.clients.filter(c=>c.status!=='encerrado' && (c.services||[]).includes('social'));
   if(filt) cs = cs.filter(c=>c.id===filt);
   if(!cs.length){ box.innerHTML=''; return; }
-  const countFor = id => S.postTasks.filter(t=>t.clientId===id && t.status==='entregue' && postMonthOf(t)===delMonth).length;
+  const countFor = id => S.postTasks.filter(t=>t.clientId===id && (t.status==='entregue' || t.approval==='aprovado') && postMonthOf(t)===delMonth).length;
   let tq=0,td=0; cs.forEach(c=>{ const q=planOf(c).qtySocial; tq+=q; td+=Math.min(countFor(c.id),q||countFor(c.id)); });
   box.innerHTML = `<div class="dp"><div class="dp-head"><h3>Demanda do mês</h3>${monthInputHtml('postsMonthChange')}</div>
     <div class="dp-sub">${tq?`${Math.max(0,tq-td)} posts para entregar em ${monthLabel(delMonth)}`:monthLabel(delMonth)}</div>
@@ -777,7 +777,7 @@ function renderKanban(){
 // Posts entram direto para aprovação do cliente (sem "a fazer"/"em criação")
 const POST_STATUSES = ['aprovacao','entregue'];
 const POST_STATUS_LABEL = {aprovacao:'Para aprovar', entregue:'Entregue'};
-const postCol = t => (t.status === 'entregue' ? 'entregue' : 'aprovacao');
+const postCol = t => ((t.status === 'entregue' || t.approval === 'aprovado') ? 'entregue' : 'aprovacao');
 function driveFileId(u){ const m = String(u||'').match(/\/d\/([\w-]{10,})/) || String(u||'').match(/[?&]id=([\w-]{10,})/); return m ? m[1] : ''; }
 function driveThumb(u, w){ const id = driveFileId(u); return id ? 'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w'+(w||400) : ''; }
 // posts antigos em "a fazer"/"em criação" passam uma vez para "aprovação", para aparecerem no link do cliente
