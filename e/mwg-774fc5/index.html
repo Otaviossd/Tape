@@ -38,7 +38,7 @@ h2 small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
 .dl:hover{background:var(--deep)}
 .dl.off{background:var(--paper2);color:var(--muted);cursor:default}
 .dl svg{width:17px;height:17px}
-.pg{columns:4 220px;column-gap:12px}
+.pg{columns:4 150px;column-gap:10px}
 .pg button{display:block;width:100%;margin:0 0 12px;padding:0;border:0;border-radius:12px;overflow:hidden;background:var(--paper2);cursor:zoom-in;break-inside:avoid;position:relative}
 .pg img{display:block;width:100%;height:auto;transition:transform .8s cubic-bezier(.16,.8,.24,1)}
 .pg button:hover img{transform:scale(1.04)}
@@ -90,6 +90,7 @@ footer a{color:var(--ink);text-decoration:none;font-weight:500}
     <div class="vg" id="cobertura"></div>
     <div id="fotosSec" style="display:none">
       <h2>Fotos <small id="fotosN"></small></h2>
+      <div style="display:flex;justify-content:center;margin:-4px 0 16px"><a class="dl" style="width:auto;padding:0 22px;margin:0" href="fotos-comitiva-mwg.zip" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Descargar todas las fotos</a></div>
       <div id="fotoMain"></div>
       <div class="pg" id="fotos"></div>
     </div>
@@ -117,7 +118,57 @@ const COBERTURA = [
 ];
 // Fotos: un objeto por foto. src = imagen liviana para mostrar; drive = original para descargar (opcional)
 const FOTOS = [
-  // { src: '/media/mwg/f01.webp', drive: '' },
+  { src: 't/mwg-01.webp', file: 'f/mwg-01.jpg' },
+  { src: 't/mwg-02.webp', file: 'f/mwg-02.jpg' },
+  { src: 't/mwg-03.webp', file: 'f/mwg-03.jpg' },
+  { src: 't/mwg-04.webp', file: 'f/mwg-04.jpg' },
+  { src: 't/mwg-05.webp', file: 'f/mwg-05.jpg' },
+  { src: 't/mwg-06.webp', file: 'f/mwg-06.jpg' },
+  { src: 't/mwg-07.webp', file: 'f/mwg-07.jpg' },
+  { src: 't/mwg-08.webp', file: 'f/mwg-08.jpg' },
+  { src: 't/mwg-09.webp', file: 'f/mwg-09.jpg' },
+  { src: 't/mwg-10.webp', file: 'f/mwg-10.jpg' },
+  { src: 't/mwg-11.webp', file: 'f/mwg-11.jpg' },
+  { src: 't/mwg-12.webp', file: 'f/mwg-12.jpg' },
+  { src: 't/mwg-13.webp', file: 'f/mwg-13.jpg' },
+  { src: 't/mwg-14.webp', file: 'f/mwg-14.jpg' },
+  { src: 't/mwg-15.webp', file: 'f/mwg-15.jpg' },
+  { src: 't/mwg-16.webp', file: 'f/mwg-16.jpg' },
+  { src: 't/mwg-17.webp', file: 'f/mwg-17.jpg' },
+  { src: 't/mwg-18.webp', file: 'f/mwg-18.jpg' },
+  { src: 't/mwg-19.webp', file: 'f/mwg-19.jpg' },
+  { src: 't/mwg-20.webp', file: 'f/mwg-20.jpg' },
+  { src: 't/mwg-21.webp', file: 'f/mwg-21.jpg' },
+  { src: 't/mwg-22.webp', file: 'f/mwg-22.jpg' },
+  { src: 't/mwg-23.webp', file: 'f/mwg-23.jpg' },
+  { src: 't/mwg-24.webp', file: 'f/mwg-24.jpg' },
+  { src: 't/mwg-25.webp', file: 'f/mwg-25.jpg' },
+  { src: 't/mwg-26.webp', file: 'f/mwg-26.jpg' },
+  { src: 't/mwg-27.webp', file: 'f/mwg-27.jpg' },
+  { src: 't/mwg-28.webp', file: 'f/mwg-28.jpg' },
+  { src: 't/mwg-29.webp', file: 'f/mwg-29.jpg' },
+  { src: 't/mwg-30.webp', file: 'f/mwg-30.jpg' },
+  { src: 't/mwg-31.webp', file: 'f/mwg-31.jpg' },
+  { src: 't/mwg-32.webp', file: 'f/mwg-32.jpg' },
+  { src: 't/mwg-33.webp', file: 'f/mwg-33.jpg' },
+  { src: 't/mwg-34.webp', file: 'f/mwg-34.jpg' },
+  { src: 't/mwg-35.webp', file: 'f/mwg-35.jpg' },
+  { src: 't/mwg-36.webp', file: 'f/mwg-36.jpg' },
+  { src: 't/mwg-37.webp', file: 'f/mwg-37.jpg' },
+  { src: 't/mwg-38.webp', file: 'f/mwg-38.jpg' },
+  { src: 't/mwg-39.webp', file: 'f/mwg-39.jpg' },
+  { src: 't/mwg-40.webp', file: 'f/mwg-40.jpg' },
+  { src: 't/mwg-41.webp', file: 'f/mwg-41.jpg' },
+  { src: 't/mwg-42.webp', file: 'f/mwg-42.jpg' },
+  { src: 't/mwg-43.webp', file: 'f/mwg-43.jpg' },
+  { src: 't/mwg-44.webp', file: 'f/mwg-44.jpg' },
+  { src: 't/mwg-45.webp', file: 'f/mwg-45.jpg' },
+  { src: 't/mwg-46.webp', file: 'f/mwg-46.jpg' },
+  { src: 't/mwg-47.webp', file: 'f/mwg-47.jpg' },
+  { src: 't/mwg-48.webp', file: 'f/mwg-48.jpg' },
+  { src: 't/mwg-49.webp', file: 'f/mwg-49.jpg' },
+  { src: 't/mwg-50.webp', file: 'f/mwg-50.jpg' },
+  { src: 't/mwg-51.webp', file: 'f/mwg-51.jpg' },
 ];
 
 const idOf = u => { const m = String(u || '').match(/\/d\/([\w-]{10,})/) || String(u || '').match(/[?&]id=([\w-]{10,})/); return m ? m[1] : ''; };
@@ -145,7 +196,7 @@ if(FOTOS.length){
 }
 // visor de fotos con descarga
 const lb = document.getElementById('lb'), lbImg = lb.querySelector('img'), lbDl = lb.querySelector('.lbdl'); let cur = 0;
-function show(i){ cur = (i + FOTOS.length) % FOTOS.length; const f = FOTOS[cur]; lbImg.src = f.src; lbDl.href = dlOf(f.drive) || f.src; lb.classList.add('on'); document.body.style.overflow = 'hidden'; }
+function show(i){ cur = (i + FOTOS.length) % FOTOS.length; const f = FOTOS[cur]; lbImg.src = f.src; lbDl.href = dlOf(f.drive) || f.file || f.src; lbDl.setAttribute('download', (f.file || f.src).split('/').pop()); lb.classList.add('on'); document.body.style.overflow = 'hidden'; }
 function hide(){ lb.classList.remove('on'); document.body.style.overflow = ''; }
 document.getElementById('fotoMain').addEventListener('click', e => { const b = e.target.closest('button[data-i]'); if(b) show(+b.dataset.i); });
 document.getElementById('fotos').addEventListener('click', e => { const b = e.target.closest('button[data-i]'); if(b) show(+b.dataset.i); });
